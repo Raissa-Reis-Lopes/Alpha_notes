@@ -1,0 +1,51 @@
+# AS SENHAS E DADOS DO BANCO SERÃO ACESSADAS ATRAVÉS DO .ENV, REFATORAR
+
+version: '3.8'
+
+services:
+  frontend:
+    build:
+      context: ./frontend
+    container_name: alpha_keep_frontend
+    ports:
+      - "3000:3000"
+    networks:
+      - alpha_keep-network
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+
+  backend:
+    build:
+      context: ./backend
+    container_name: alpha_keep_backend
+    ports:
+      - "3001:3001"
+    depends_on:
+      - db
+    networks:
+      - alpha_keep-network
+    environment:
+      - DATABASE_URL=postgres://alpha_keep:alpha_keep_senha_provisoria@db:5432/alpha_keep_db
+      - JWT_SECRET=my_secret_jwt_key
+
+  db:
+    image: postgres:latest
+    container_name: alpha_keep_db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: alpha_keep_db
+      POSTGRES_PASSWORD: alpha_keep_senha_provisoria
+      POSTGRES_DB: alpha_keep_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - alpha_keep-network
+    command: [ "postgres", "-c", "shared_preload_libraries=pgvector" ]
+
+networks:
+  alpha_keep-network:
+
+
+volumes:
+  pgdata:
