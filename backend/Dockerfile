@@ -10,4 +10,4 @@ COPY . .
 RUN npm run build
 
 EXPOSE 3001
-CMD ["node", "dist/index.js"]
+CMD ["sh", "-c", "until nc -z db 5432; do echo waiting for db; sleep 2; done; node dist/index.js"]

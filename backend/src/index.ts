@@ -4,6 +4,8 @@ import cookieParser from "cookie-parser";
 import routes from "./routes/routes";
 import { pool } from "./database/connection";
 
+const PORT = process.env.PORT;
+
 dotenv.config();
 
 const app: Express = express();
@@ -11,8 +13,6 @@ const app: Express = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use("/api", routes);
-
-const PORT = Number(process.env.PORT) || 3000;
 
 pool
     .connect()
@@ -27,4 +27,5 @@ pool
         } else {
             console.error("Error connecting to database:", error);
         }
+        console.error("Failed to connect to the database with URL:", process.env.DATABASE_URL);
     });
