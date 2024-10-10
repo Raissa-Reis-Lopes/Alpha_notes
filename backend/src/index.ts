@@ -13,6 +13,9 @@ const app: Express = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use("/api", routes);
+app.get("/", (req, res) => {
+    res.send("Olá, mundo, estou funcionando")
+})
 
 pool
     .connect()
