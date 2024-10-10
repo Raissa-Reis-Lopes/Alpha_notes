@@ -1,4 +1,4 @@
-const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 // Função para criar um hash seguro para a senha
 export async function hashPassword(password: string): Promise<string | null> {

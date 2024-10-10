@@ -1,0 +1,26 @@
+# Usar uma imagem base do Node.js
+FROM node:18
+
+# Criar um diretório para a aplicação
+WORKDIR /usr/src/app
+
+# Copiar os arquivos de package.json e package-lock.json
+COPY package*.json ./
+
+# Instalar as dependências
+RUN npm install
+
+# Copiar todo o código da aplicação para o diretório de trabalho
+COPY . .
+
+# Rodar o build do React (gera arquivos estáticos na pasta 'build')
+RUN npm run build
+
+# Instalar o 'serve' globalmente para servir os arquivos estáticos
+RUN npm install -g serve
+
+# Expor a porta em que o app irá rodar
+EXPOSE 3000
+
+# Definir o comando que será executado ao iniciar o container
+CMD ["serve", "-s", "build"]
