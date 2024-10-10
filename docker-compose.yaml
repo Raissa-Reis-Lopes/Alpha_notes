@@ -1,12 +1,11 @@
-version: '3.8'
-
 services:
   frontend:
     build:
       context: ./frontend
     container_name: alpha_keep_frontend
     ports:
-      - "3000:3000"
+    #  - "3000:3000"
+        - "80:80" # Nginx
     restart: unless-stopped
     depends_on:
       - backend
