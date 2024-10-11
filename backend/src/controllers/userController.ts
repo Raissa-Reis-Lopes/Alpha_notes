@@ -27,6 +27,8 @@ export const getUserById = async (
     const response: IAPIResponse<IUser> = { success: false };
     try {
         const userId = req.params.userId;
+        console.log("id dentro do Controller no getUserById")
+        console.log(userId)
         const user: IUser = await userServices.getUserById(userId);
         response.data = user;
         response.success = true;

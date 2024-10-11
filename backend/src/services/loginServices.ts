@@ -24,12 +24,15 @@ export const authenticateUser = async (email: string, password: string) => {
             const matchPassword = await comparePassword(password, user[0].password);
 
             if (matchPassword) {
-                const token = jwt.sign({ id: user[0].id }, SECRET_KEY, { expiresIn: "10d" });
-                return { auth: true, token }
+                const token = jwt.sign({ id: user[0].id }, SECRET_KEY, {
+                    expiresIn: "5d",
+                });
+                return { auth: true, token };
             }
         }
-        return { auth: false, error: "Invalid username and/or password." }
+        return { auth: false, error: "Invalid username and/or password." };
     } catch (error) {
-        throw new Error("User authentication failed")
+        console.log(error);
+        throw new Error("User authentication failed.");
     }
-}
+};

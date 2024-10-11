@@ -4,7 +4,11 @@ import { Request, Response } from "express"
 export const authenticate = async (req: Request, res: Response) => {
     const { email, password } = req.body;
     try {
+        console.log(email)
         const user = await loginServices.getUser(email);
+        
+        console.log("user no controller")
+        console.log(user)
 
         if (!user) {
             return res.status(400).json({ error: "User not found" });
