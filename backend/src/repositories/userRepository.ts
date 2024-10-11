@@ -4,18 +4,14 @@ import { IUser } from "../interfaces/user";
 export const createUser = async (
     username: string,
     email: string,
-    first_name: string,
-    last_name: string,
     password: string,
 ) => {
     const query =
-        "INSERT INTO users (username, email, first_name, last_name, password) VALUES ($1, $2, $3, $4, $5) RETURNING *";
+        "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *";
     try {
         const result = await pool.query(query, [
             username,
             email,
-            first_name,
-            last_name,
             password,
         ]);
         return result.rows[0];
