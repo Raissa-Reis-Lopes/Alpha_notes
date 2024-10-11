@@ -6,6 +6,26 @@ import {
 } from "../utils/validation";
 import { hashPassword } from "../utils/hashPassword";
 
+
+export const getAllUsers = async (): Promise<IUser[]> => {
+    try {
+        const users = await userRepository.getAllUsers();
+        return users;
+    } catch (error) {
+        throw error;
+    }
+};
+
+
+export const getUserById = async (id: string) => {
+    try {
+        const user = await userRepository.getUserById(id);
+        return user;
+    } catch (error) {
+        throw error;
+    }
+};
+
 export const createUser = async (
     username: string,
     email: string,
@@ -16,18 +36,8 @@ export const createUser = async (
             throw new Error("The username cannot be empty.");
         }
 
-        if (typeof username !== "string") {
-            throw new Error(
-                "Invalid data type in the username, it must be a string."
-            );
-        }
-
         if (!email) {
             throw new Error("Email cannot be empty.");
-        }
-
-        if (typeof email !== "string") {
-            throw new Error("Invalid data types in the email, it must be a string.");
         }
 
         if (!validateEmail(email)) {
@@ -36,18 +46,6 @@ export const createUser = async (
 
         if (!password) {
             throw new Error("Password cannot be empty.");
-        }
-
-        if (!validatePassword(password)) {
-            throw new Error(
-                "Password must have at least 8 characters with at least 1 uppercase letter and 1 number."
-            );
-        }
-
-        if (typeof username !== "string") {
-            throw new Error(
-                "Invalid data types in the username, it must be a string."
-            );
         }
 
         const existingUser = await userRepository.getUserByUsername(username);
@@ -76,3 +74,43 @@ export const createUser = async (
         throw error;
     }
 };
+
+
+export const deleteUser = async (id: string): Promise<IUser> => {
+    try {
+
+        const currentUser: IUser | null = await userRepository.getUserById(id);
+
+        if (!currentUser) {
+            throw new Error("User not registered");
+        }
+
+        const user = await userRepository.deleteUserById(id);
+        return user;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const updateUser = async (id: string, fields: Partial<IUser>): Promise<IUser> => {
+    try {
+        const currentUser: IUser | null = await userRepository.getUserById(id);
+
+        if (!currentUser) {
+            throw new Error("User not registered");
+        }
+
+        const newUser: IUser = {
+            username: fields.username || currentUser.username,
+            email: fields.email || currentUser.email,
+            password: fields.password || currentUser.password,
+            id: currentUser.id,
+        };
+
+        const updatedUser = await userRepository.updateUser(id, newUser);
+        return updatedUser;
+    } catch (error: any) {
+        throw new Error(`Failed to update user data: ${error.message}`);
+    }
+};
+

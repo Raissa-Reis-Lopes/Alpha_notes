@@ -6,7 +6,11 @@ import * as userRepository from "../repositories/userRepository"
 export const getUser = async (email: string) => {
     try {
         const user = await userRepository.getUserByEmail(email);
-        return user;
+        if (user.length < 0) {
+            throw new Error("User not registered.");
+        }
+
+        return user[0];
     } catch (error) {
         throw error;
     }

@@ -1,6 +1,9 @@
 -- Habilita a extensão pgcrypto para gerar UUIDs
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
+-- Habilita a extensão pgvector para trabalhar com embeddings
+CREATE EXTENSION IF NOT EXISTS "vector";
+
 -- Cria a tabela de usuários com UUID
 CREATE TABLE IF NOT EXISTS users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -14,6 +17,9 @@ CREATE TABLE IF NOT EXISTS notes (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
+    -- type TEXT,
+    -- url TEXT,
+    embedding VECTOR(1536),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     update_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by UUID NOT NULL,
@@ -22,6 +28,14 @@ CREATE TABLE IF NOT EXISTS notes (
     CONSTRAINT fk_updated_by FOREIGN KEY (updated_by) REFERENCES users (id)
 );
 
+
+-- Cria a tabela de imagens associadas às notas
+CREATE TABLE IF NOT EXISTS images (
+    id SERIAL PRIMARY KEY,
+    note_id INTEGER NOT NULL,
+    image_path TEXT NOT NULL,
+    CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id)
+);
 
 -- REFACTOR, VAI MANTER ESSA PARTE DAS TAGS?
 -- -- Cria a tabela de tags
@@ -39,10 +53,3 @@ CREATE TABLE IF NOT EXISTS notes (
 --     CONSTRAINT fk_tag_id FOREIGN KEY (tag_id) REFERENCES tags (id)
 -- );
 
--- Cria a tabela de imagens associadas às notas
-CREATE TABLE IF NOT EXISTS images (
-    id SERIAL PRIMARY KEY,
-    note_id INTEGER NOT NULL,
-    image_path TEXT NOT NULL,
-    CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id)
-);
