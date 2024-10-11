@@ -9,8 +9,6 @@ import { hashPassword } from "../utils/hashPassword";
 export const createUser = async (
     username: string,
     email: string,
-    first_name: string,
-    last_name: string,
     password: string,
 ) => {
     try {
@@ -34,24 +32,6 @@ export const createUser = async (
 
         if (!validateEmail(email)) {
             throw new Error("Invalid email format. (example@example.com) ");
-        }
-
-        if (!first_name) {
-            throw new Error("Name cannot be empty.");
-        }
-
-        if (typeof first_name !== "string") {
-            throw new Error("Invalid data types in the name, it must be a string.");
-        }
-
-        if (!last_name) {
-            throw new Error("Last name cannot be empty.");
-        }
-
-        if (typeof last_name !== "string") {
-            throw new Error(
-                "Invalid data types in the last name, it must be a string."
-            );
         }
 
         if (!password) {
@@ -89,8 +69,6 @@ export const createUser = async (
         const user = await userRepository.createUser(
             username,
             email,
-            first_name,
-            last_name,
             hashedPassword,
         );
         return user;
