@@ -4,7 +4,7 @@ services:
       context: ./frontend
     container_name: alpha_keep_frontend
     ports:
-      - "80:80" # Nginx
+      - "3000:80" # Nginx
     restart: unless-stopped
     depends_on:
       - backend
