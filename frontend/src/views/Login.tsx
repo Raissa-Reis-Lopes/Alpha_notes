@@ -1,13 +1,14 @@
 import React, { useState, useRef, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { UserContext } from '../contexts/UserContext';
+import { UserContext, useUser } from '../contexts/UserContext';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const emailInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-  const userContext = useContext(UserContext);
+  //const userContext = useContext(UserContext);
+  const { user, setUser } = useUser();
 
   useEffect(() => {
     if (emailInputRef.current) {
@@ -15,32 +16,36 @@ const Login: React.FC = () => {
     }
   }, []);
 
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const userData = { email, password };
 
-    try {
-        const response = await fetch('http://localhost:3001/api/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(userData),
-        });
+    setUser(email);
+    navigate('/home');
+    return;
 
-        if (response.ok) {
-            const data = await response.json();
-            console.log(data);
-            navigate('/home'); // Redireciona para a página home
-        } else {
-            const errorData = await response.json();
-            console.error(errorData.error);
-            // Lógica para exibir erro ao usuário
-        }
+    try {
+      const response = await fetch('http://localhost:3001/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        console.log(data);
+        navigate('/home'); // Redireciona para a página home
+      } else {
+        const errorData = await response.json();
+        console.error(errorData.error);
+        // Lógica para exibir erro ao usuário
+      }
     } catch (error) {
-        console.error('Erro ao fazer login:', error);
+      console.error('Erro ao fazer login:', error);
     }
-};
+  };
 
 
   return (
