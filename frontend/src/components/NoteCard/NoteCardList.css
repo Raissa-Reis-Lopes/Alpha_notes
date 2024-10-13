@@ -1,0 +1,36 @@
+.NoteCardComponent {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-width: 400px;
+  max-width: 480px;
+  max-height: 480px;
+  /* 42 */
+  /* background-color: #371C44; */
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px;
+  gap: 8px;
+  transition: all .6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.NoteCardComponent:hover {
+  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
+  transition: all .6s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.base-input {
+  width: 100%;
+  border: none;
+  border-radius: 4px;
+
+}
+
+.title-input {
+  padding: 10px 14px;
+  /*   display: none; */
+}
+
+.NoteCardListComponent {
+  width: 100%;
+}

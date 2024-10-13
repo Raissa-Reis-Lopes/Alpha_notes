@@ -1,6 +1,7 @@
 import React from 'react';
 import { Drawer as MuiDrawer, List, ListItem, ListItemText, ListItemIcon, useTheme, useMediaQuery } from '@mui/material';
-import { Home, Mail } from '@mui/icons-material';
+import { Home, Mail, DescriptionOutlined, ArchiveOutlined, DeleteOutlined } from '@mui/icons-material';
+
 
 interface DrawerProps {
   drawerOpen: boolean;
@@ -38,12 +39,16 @@ const Drawer: React.FC<DrawerProps> = ({ drawerOpen }) => {
     >
       <List>
         <ListItem component="li">
-          <ListItemIcon><Home /></ListItemIcon>
-          {drawerOpen && <ListItemText sx={{ margin: 0, padding: 0 }} primary="Home" />}
+          <ListItemIcon><DescriptionOutlined /></ListItemIcon>
+          {drawerOpen && <ListItemText sx={{ margin: 0, padding: 0 }} primary="Notas" />}
         </ListItem>
         <ListItem component="li">
-          <ListItemIcon><Mail /></ListItemIcon>
-          {drawerOpen && <ListItemText sx={{ margin: 0, padding: 0 }} primary="Messages" />}
+          <ListItemIcon><ArchiveOutlined /></ListItemIcon>
+          {drawerOpen && <ListItemText sx={{ margin: 0, padding: 0 }} primary="Arquivo" />}
+        </ListItem>
+        <ListItem component="li">
+          <ListItemIcon><DeleteOutlined /></ListItemIcon>
+          {drawerOpen && <ListItemText sx={{ margin: 0, padding: 0 }} primary="Lixeira" />}
         </ListItem>
       </List>
     </MuiDrawer>
