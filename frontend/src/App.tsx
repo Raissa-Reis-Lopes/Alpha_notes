@@ -1,15 +1,16 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router } from 'react-router-dom';
+import { UserProvider } from './contexts/UserContext';
+import AppRoutes from './routes/Routes';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-    Teste
-      </header>
-    </div>
-  );
-}
+const App: React.FC = () => {
+    return (
+        <UserProvider>
+            <Router>
+                <AppRoutes />
+            </Router>
+        </UserProvider>
+    );
+};
 
 export default App;
