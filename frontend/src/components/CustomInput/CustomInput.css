@@ -1,0 +1,17 @@
+.custom-input {
+    width: 50%;
+    margin: 0.5rem;
+    padding: 0.7rem;
+    border: 1.5px solid black;
+    border-radius: 1.3rem;
+    color: #8f5bbd;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.1rem;
+  }
+  
+  .custom-input::placeholder {
+    color: #8f5bbd;
+    font-family: 'Fredoka', sans-serif;
+    font-size: 1.1rem;
+  }
+  
