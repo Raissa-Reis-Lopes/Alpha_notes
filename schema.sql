@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
 
 -- Cria a tabela de notas
 CREATE TABLE IF NOT EXISTS notes (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     embedding VECTOR(1536),
