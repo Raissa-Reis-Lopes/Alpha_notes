@@ -93,15 +93,22 @@ export const updateNote = async (
             throw new Error("Note not found");
         }
 
+        let newEmbedding = currentNote.embedding;
+
+        if (fields.content && fields.content !== currentNote.content) {
+            const embedding = await generateEmbedding(fields.content);
+            newEmbedding = JSON.stringify(embedding);
+        }
+
         const updatedNote: INote = {
             ...currentNote,
             title: fields.title || currentNote.title,
             content: fields.content || currentNote.content,
-            embedding: fields.embedding || currentNote.embedding,
+            embedding: newEmbedding,
             updated_at: new Date(),
         };
 
-        const note = await noteRepository.updateNote(noteId, updatedNote);
+        const note = await noteRepository.updateNote(noteId, updatedNote, userId);
         return note;
     } catch (error: any) {
         throw new Error(`Failed to update note: ${error.message}`);

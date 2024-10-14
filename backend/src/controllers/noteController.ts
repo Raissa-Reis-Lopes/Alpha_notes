@@ -120,7 +120,7 @@ export const updateNote = async (req: Request, res: Response): Promise<void> => 
         const noteId = req.params.noteId;
         const fields: Partial<INote> = req.body;
 
-        const userId = req.user as string;
+        const userId = req.user!;
 
         if (!userId) {
             res.status(400).json({ message: "User ID is missing" });

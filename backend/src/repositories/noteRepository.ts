@@ -73,7 +73,8 @@ export const createNote = async (
 
 export const updateNote = async (
     noteId: string,
-    updatedNote: INote
+    updatedNote: INote,
+    userId: string
 ): Promise<INote> => {
     const query = `
         UPDATE notes 
@@ -81,8 +82,8 @@ export const updateNote = async (
             title = $1, 
             content = $2, 
             embedding = $3, 
-            updated_at = $4, 
-        WHERE id = $5
+            updated_at = $4
+        WHERE id = $5 AND created_by = $6
         RETURNING *;
     `;
     try {
@@ -91,7 +92,8 @@ export const updateNote = async (
             updatedNote.content,
             updatedNote.embedding,
             updatedNote.updated_at,
-            noteId
+            noteId,
+            userId
         ]);
 
         if (result.rows.length === 0) {
