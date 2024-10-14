@@ -1,12 +1,29 @@
 import { pool } from "../database/connection";
 import { INote } from "../interfaces/note";
 
+
+// O postgres usa o <-> para dustancia euclidiana e o <=> para distância de cosseno, o openai usa a de cosseno, então usaremos a mesma
+// export const getNotesByEmbedding = async (embedding: string): Promise<INote[]> => {
+//     try {
+//         const result = await pool.query(
+//             `
+//             SELECT * FROM notes
+//             ORDER BY embedding <=> $1
+//             LIMIT 10;
+//             `,
+//             [embedding]
+//         );
+
+//         return result.rows;
+//     } catch (error: any) {
+//         throw new Error(`Error retrieving notes by embedding: ${error.message}`);
+//     }
+// };
+
 export const getAllNotes = async (): Promise<INote[]> => {
     try {
         const { rows } = await pool.query(`
-            SELECT 
-                id, title, content, embedding, created_at, updated_at, created_by, updated_by
-            FROM notes
+            SELECT * FROM notes
         `);
         return rows;
     } catch (error) {
@@ -15,14 +32,11 @@ export const getAllNotes = async (): Promise<INote[]> => {
     }
 };
 
-export const getNoteById = async (noteId: string): Promise<INote> => {
+export const getNoteById = async (noteId: string, userId: string): Promise<INote> => {
     try {
         const result = await pool.query(`
-            SELECT 
-                id, title, content, embedding, created_at, updated_at, created_by, updated_by
-            FROM notes 
-            WHERE id = $1
-        `, [noteId]);
+            SELECT * FROM notes WHERE id = $1 AND created_by = $2
+        `, [noteId, userId]);
 
         if (result.rows.length === 0) {
             throw new Error(`Note with ID ${noteId} not found.`);
@@ -37,13 +51,13 @@ export const getNoteById = async (noteId: string): Promise<INote> => {
 export const createNote = async (
     title: string,
     content: string,
-    embedding: number[],
-    created_by: string,
-    updated_by: string
+    embedding: string,
+    created_by: string
 ): Promise<INote> => {
+    console.log("Embedding dentro do repository sendo enviado ao pgvector", embedding)
     const query = `
-        INSERT INTO notes (title, content, embedding, created_by, updated_by) 
-        VALUES ($1, $2, $3, $4, $5) 
+        INSERT INTO notes (title, content, embedding, created_by) 
+        VALUES ($1, $2, $3, $4) 
         RETURNING *;
     `;
     try {
@@ -51,8 +65,7 @@ export const createNote = async (
             title,
             content,
             embedding,
-            created_by,
-            updated_by
+            created_by
         ]);
         return result.rows[0] as INote;
     } catch (error) {
@@ -72,8 +85,7 @@ export const updateNote = async (
             content = $2, 
             embedding = $3, 
             updated_at = $4, 
-            updated_by = $5
-        WHERE id = $6
+        WHERE id = $5
         RETURNING *;
     `;
     try {
@@ -82,7 +94,6 @@ export const updateNote = async (
             updatedNote.content,
             updatedNote.embedding,
             updatedNote.updated_at,
-            updatedNote.updated_by,
             noteId
         ]);
 
@@ -100,7 +111,7 @@ export const deleteNoteById = async (noteId: string): Promise<INote> => {
     try {
         const result = await pool.query(`
             SELECT 
-                id, title, content, embedding, created_at, updated_at, created_by, updated_by
+                id, title, content, embedding, created_at, updated_at, created_by
             FROM notes 
             WHERE id = $1
         `, [noteId]);
