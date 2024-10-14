@@ -1,0 +1,13 @@
+.custom-button {
+    color: white; 
+    border: none;
+    border-radius: 1.3rem; 
+    padding: 0.7rem;
+    cursor: pointer;
+    transition: background-color 0.3s; 
+    width: 30%;
+    font-size: 1.2rem;
+    margin-top: 1.2rem;
+    font-weight: 600;
+    font-family: 'Fredoka', sans-serif;
+}
