@@ -19,8 +19,6 @@ export const getAllUsers = async (): Promise<IUser[]> => {
 
 export const getUserById = async (userId: string) => {
     try {
-        console.log("id dentro do getUserbyId")
-        console.log(userId)
         const user = await userRepository.getUserById(userId);
         return user;
     } catch (error) {

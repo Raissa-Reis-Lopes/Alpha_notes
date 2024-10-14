@@ -5,16 +5,17 @@ import routes from "./routes/routes";
 import { pool } from "./database/connection";
 import cors from 'cors';
 
+dotenv.config();
+
+
 const PORT = process.env.PORT;
 
-dotenv.config();
 
 const app: Express = express();
 
 const corsOptions = {
-    origin: 'http://localhost:3000', // Altere para o endereço do seu frontend
-    methods: ['GET', 'POST'], // Métodos permitidos
-    credentials: true, // Permite o envio de cookies
+    origin: 'http://localhost:3000',
+    credentials: true,
 };
 
 app.use(cors(corsOptions));
