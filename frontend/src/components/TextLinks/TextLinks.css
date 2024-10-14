@@ -1,0 +1,10 @@
+.text-link {
+    color: #00bf74;
+    text-decoration: none;
+    font-weight: bold; 
+  }
+  
+  .text-link:hover {
+    text-decoration: underline; 
+  }
+  
