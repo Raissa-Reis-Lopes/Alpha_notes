@@ -1,24 +1,22 @@
 import { pool } from "../database/connection";
 import { INote } from "../interfaces/note";
 
-
-// O postgres usa o <-> para dustancia euclidiana e o <=> para distância de cosseno, o openai usa a de cosseno, então usaremos a mesma
-// export const getNotesByEmbedding = async (embedding: string): Promise<INote[]> => {
-//     try {
-//         const result = await pool.query(
-//             `
-//             SELECT * FROM notes
-//             ORDER BY embedding <=> $1
-//             LIMIT 10;
-//             `,
-//             [embedding]
-//         );
-
-//         return result.rows;
-//     } catch (error: any) {
-//         throw new Error(`Error retrieving notes by embedding: ${error.message}`);
-//     }
-// };
+export const getNotesByEmbedding = async (
+    embedding: string,
+    matchThreshold: number,
+    matchCount: number
+): Promise<INote[]> => {
+    try {
+        const query = `
+            SELECT * FROM match_notes($1, $2, $3);
+        `;
+        const values = [embedding, matchThreshold, matchCount];
+        const { rows } = await pool.query(query, values);
+        return rows;
+    } catch (error: any) {
+        throw new Error(`Error retrieving notes by embedding: ${error.message}`);
+    }
+};
 
 export const getAllNotes = async (): Promise<INote[]> => {
     try {
@@ -54,10 +52,9 @@ export const createNote = async (
     embedding: string,
     created_by: string
 ): Promise<INote> => {
-    console.log("Embedding dentro do repository sendo enviado ao pgvector", embedding)
     const query = `
         INSERT INTO notes (title, content, embedding, created_by) 
-        VALUES ($1, $2, $3, $4) 
+        VALUES ($1, $2, $3::vector, $4) 
         RETURNING *;
     `;
     try {
@@ -76,7 +73,8 @@ export const createNote = async (
 
 export const updateNote = async (
     noteId: string,
-    updatedNote: INote
+    updatedNote: INote,
+    userId: string
 ): Promise<INote> => {
     const query = `
         UPDATE notes 
@@ -84,8 +82,8 @@ export const updateNote = async (
             title = $1, 
             content = $2, 
             embedding = $3, 
-            updated_at = $4, 
-        WHERE id = $5
+            updated_at = $4
+        WHERE id = $5 AND created_by = $6
         RETURNING *;
     `;
     try {
@@ -94,7 +92,8 @@ export const updateNote = async (
             updatedNote.content,
             updatedNote.embedding,
             updatedNote.updated_at,
-            noteId
+            noteId,
+            userId
         ]);
 
         if (result.rows.length === 0) {
