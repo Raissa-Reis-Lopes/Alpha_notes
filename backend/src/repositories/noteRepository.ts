@@ -3,22 +3,22 @@ import { INote } from "../interfaces/note";
 
 
 // O postgres usa o <-> para dustancia euclidiana e o <=> para distância de cosseno, o openai usa a de cosseno, então usaremos a mesma
-export const getNotesByEmbedding = async (embedding: number[]): Promise<INote[]> => {
-    try {
-        const result = await pool.query(
-            `
-            SELECT * FROM notes
-            ORDER BY embedding <=> $1
-            LIMIT 10;
-            `,
-            [embedding]
-        );
+// export const getNotesByEmbedding = async (embedding: string): Promise<INote[]> => {
+//     try {
+//         const result = await pool.query(
+//             `
+//             SELECT * FROM notes
+//             ORDER BY embedding <=> $1
+//             LIMIT 10;
+//             `,
+//             [embedding]
+//         );
 
-        return result.rows;
-    } catch (error: any) {
-        throw new Error(`Error retrieving notes by embedding: ${error.message}`);
-    }
-};
+//         return result.rows;
+//     } catch (error: any) {
+//         throw new Error(`Error retrieving notes by embedding: ${error.message}`);
+//     }
+// };
 
 export const getAllNotes = async (): Promise<INote[]> => {
     try {

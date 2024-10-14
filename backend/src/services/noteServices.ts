@@ -16,19 +16,21 @@ const generateEmbedding = async (text: string): Promise<number[]> => {
 };
 
 
-export const searchNotesByQuery = async (query: string): Promise<INote[]> => {
-    try {
-        // Gerar o embedding da query
-        const queryEmbedding = await generateEmbedding(query);
+// export const searchNotesByQuery = async (query: string): Promise<INote[]> => {
+//     try {
+//         // Gerar o embedding da query
+//         const queryEmbedding = await generateEmbedding(query);
 
-        // Buscar notas similares no repositório
-        const notes = await noteRepository.getNotesByEmbedding(queryEmbedding);
+//         const queryEmbeddingAsString = JSON.stringify(queryEmbedding);
 
-        return notes;  // Retornar as notas ordenadas por relevância
-    } catch (error: any) {
-        throw new Error(`Failed to search notes: ${error.message}`);
-    }
-};
+//         // Buscar notas similares no repositório
+//         const notes = await noteRepository.getNotesByEmbedding(queryEmbeddingAsString);
+
+//         return notes;  // Retornar as notas ordenadas por relevância
+//     } catch (error: any) {
+//         throw new Error(`Failed to search notes: ${error.message}`);
+//     }
+// };
 
 export const createNote = async (
     title: string,

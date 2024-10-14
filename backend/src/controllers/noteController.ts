@@ -6,26 +6,26 @@ import { IAPIResponse } from "../interfaces/api";
 // refactor, as notas devem ser acessadas pelo id do usuário (user nos cookies) e da nota (se for no caso de pegar por id)
 
 
-export const searchNotesByQuery = async (req: Request, res: Response): Promise<void> => {
-    const response: IAPIResponse<INote[]> = { success: false };
-    try {
-        const { query } = req.body;
+// export const searchNotesByQuery = async (req: Request, res: Response): Promise<void> => {
+//     const response: IAPIResponse<INote[]> = { success: false };
+//     try {
+//         const { query } = req.body;
 
-        if (!query) {
-            res.status(400).json({ message: "Query cannot be empty" });
-            return;
-        }
-        // Chama o serviço que realiza a busca
-        const notes = await noteServices.searchNotesByQuery(query);
-        response.data = notes;
-        response.success = true;
-        response.message = "Notes retrieved successfully";
-        res.status(200).json(response);
-    } catch (error: any) {
-        console.error(error);
-        res.status(500).json({ data: null, error: "Internal server error" });
-    }
-};
+//         if (!query) {
+//             res.status(400).json({ message: "Query cannot be empty" });
+//             return;
+//         }
+//         // Chama o serviço que realiza a busca
+//         const notes = await noteServices.searchNotesByQuery(query);
+//         response.data = notes;
+//         response.success = true;
+//         response.message = "Notes retrieved successfully";
+//         res.status(200).json(response);
+//     } catch (error: any) {
+//         console.error(error);
+//         res.status(500).json({ data: null, error: "Internal server error" });
+//     }
+// };
 
 export const getAllNotes = async (
     req: Request,
