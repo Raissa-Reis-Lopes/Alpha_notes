@@ -1,6 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Login from '../views/Login';
-import Home from '../views/Home';
+import Dashboard from '../views/Dashboard';
 import Register from '../views/Register';
 import ProtectedRoute from '../components/ProtectedRoutes';
 
@@ -9,13 +9,13 @@ const AppRoutes = () => {
         <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route 
-                path="/home" 
+            <Route
+                path="/dashboard"
                 element={
                     <ProtectedRoute>
-                        <Home />
+                        <Dashboard />
                     </ProtectedRoute>
-                } 
+                }
             />
         </Routes>
     );

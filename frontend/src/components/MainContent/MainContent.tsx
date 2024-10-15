@@ -1,10 +1,11 @@
-import React, { useContext } from 'react';
-import { Box, useMediaQuery, useTheme } from '@mui/material';
 import './MainContent.css';
-import { UserContext, useUser } from '../../contexts/UserContext';
+import React from 'react';
+import { Box, useMediaQuery, useTheme } from '@mui/material';
+import { useUser } from '../../contexts/UserContext';
 import NoteInput from '../NoteInput/NoteInput';
 import NoteCardList from '../NoteCard/NoteCardList';
 import { useNotes } from '../../contexts/NotesContext';
+import { CssBaseline } from '@mui/joy';
 
 interface MainContentProps {
   drawerOpen: boolean;
@@ -33,15 +34,14 @@ const MainContent: React.FC<MainContentProps> = ({ drawerOpen, drawerWidth, mini
         alignItems: 'center',
         flexGrow: 1,
         p: 3,
-        marginTop: `${currentAppBarHeight}px`,
+        marginTop: `${currentAppBarHeight + 10}px`,
         marginLeft: `${calculatedMarginLeft}px`,
+        /* marginLeft: "60px", */
         transition: 'margin-left 0.3s ease, margin-top 0.3s ease',
         gap: "32px"
       }}
     >
-      {/* Seu conteúdo principal aqui */}
-      <span>Bem-vindo, {user ? user : "N/A"}!</span>
-      <NoteInput any={undefined} />
+      <NoteInput />
       <Box sx={{ display: "flex", alignItems: "start", width: "100%" }}>
         <NoteCardList notes={notes} />
       </Box>

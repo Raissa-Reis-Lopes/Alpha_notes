@@ -13,7 +13,9 @@ interface NotesContextType {
     //createNote: (note: Partial<Note>) => void;
     createNote: (note: Note) => void;
     updateNote: (id: string, updatedNoteData: Partial<Note>) => void;
-    removeNote: (id: string) => void;
+    archiveNote: (id: string) => void;
+    softDeleteNote: (id: string) => void;
+    deleteNote: (id: string) => void;
 
 }
 
@@ -43,12 +45,30 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         }));
     };
 
-    const removeNote = (id: string) => {
+    const archiveNote = (id: string) => {
+        setNotes(notes.map(note => {
+            if (note.id === id) {
+                return { ...note, archived: !note.archived };
+            }
+            return note;
+        }));
+    };
+
+    const softDeleteNote = (id: string) => {
+        /* setNotes(notes.map(note => {
+            if (note.id === id) {
+                return {...note, deleted: true };
+            }
+            return note;
+        })); */
+    };
+
+    const deleteNote = (id: string) => {
         setNotes(notes.filter(note => note.id !== id));
     };
 
     return (
-        <NotesContext.Provider value={{ notes, createNote, updateNote, removeNote }}>
+        <NotesContext.Provider value={{ notes, createNote, updateNote, archiveNote, softDeleteNote, deleteNote }}>
             {children}
         </NotesContext.Provider>
     );

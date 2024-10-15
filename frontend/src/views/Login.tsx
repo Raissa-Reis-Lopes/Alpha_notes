@@ -6,7 +6,7 @@ import { styled } from '@mui/material/styles';
 import LoginPage from '../components/LoginPage/LoginPage';
 import CustomInput from '../components/CustomInput/CustomInput';
 import CustomButton from '../components/CustomButton/CustomButton';
-import TextLink from '../components/TextLinks/TextLinks'; 
+import TextLink from '../components/TextLinks/TextLinks';
 
 const Logo = styled('img')(({ theme }) => ({
   width: '10rem',
@@ -41,7 +41,7 @@ const Login: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        navigate('/home');
+        navigate('/dashboard');
       } else {
         const errorData = await response.json();
         setErrorMessage(errorData.error || 'Erro ao fazer login.');

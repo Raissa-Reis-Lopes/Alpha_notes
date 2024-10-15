@@ -11,7 +11,7 @@ const miniDrawerWidth = 60;
 const appBarHeight = 64;
 const miniAppBarHeight = 56;
 
-const Home: React.FC = () => {
+const Dashboard: React.FC = () => {
   //const userContext = useContext(UserContext);
   const { user } = useUser();
 
@@ -34,7 +34,7 @@ const Home: React.FC = () => {
     <div>
       {user ? (
         <>
-          <CssBaseline />
+          {/* <CssBaseline /> */}
           <AppBar
             handleDrawerToggle={handleDrawerToggle}
             handleProfileMenuOpen={handleProfileMenuOpen}
@@ -66,4 +66,4 @@ const Home: React.FC = () => {
   );
 };
 
-export default Home;
+export default Dashboard;
