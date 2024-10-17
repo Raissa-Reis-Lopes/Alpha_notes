@@ -17,13 +17,26 @@ CREATE TABLE IF NOT EXISTS notes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
-    embedding VECTOR(1536),
     metadata JSONB, 
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by UUID NOT NULL,
     CONSTRAINT fk_created_by FOREIGN KEY (created_by) REFERENCES users (id)
 );
+
+-- Cria a tabela de chunks associados às notas
+CREATE TABLE IF NOT EXISTS chunks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    note_id UUID NOT NULL,
+    chunk_index INT NOT NULL,
+    text TEXT NOT NULL,
+    embedding VECTOR(1536),
+    CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id)
+);
+
+-- Indexação para otimizar buscas vetoriais nos chunks
+CREATE INDEX ON chunks USING ivfflat (embedding VECTOR_COSINE_OPS)
+WITH (lists = 100);
 
 -- Cria a tabela de imagens associadas às notas
 CREATE TABLE IF NOT EXISTS images (
@@ -33,11 +46,7 @@ CREATE TABLE IF NOT EXISTS images (
     CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id)
 );
 
--- A indexação vai ajudar a otimizar as buscas, pois pode chegar em um ponto que existe muitas notas para serem analisadas
-CREATE INDEX ON notes USING ivfflat (embedding VECTOR_COSINE_OPS)
-WITH (lists = 100);
-
-CREATE OR REPLACE FUNCTION match_notes (
+CREATE OR REPLACE FUNCTION match_chunks(
   query_embedding vector(1536),
   match_threshold float,
   match_count int
@@ -46,17 +55,29 @@ RETURNS TABLE (
   id UUID,
   title VARCHAR(255),
   content TEXT,
+  chunk_text TEXT,
   similarity float
 )
 LANGUAGE sql STABLE
 AS $$
   SELECT
-    notes.id,
-    notes.title,
-    notes.content,
-    1 - (notes.embedding <=> query_embedding) AS similarity
-  FROM notes
-  WHERE notes.embedding <=> query_embedding < 1 - match_threshold
-  ORDER BY notes.embedding <=> query_embedding
+    id,
+    title,
+    content,
+    chunk_text,
+    similarity
+  FROM (
+    SELECT DISTINCT ON (notes.id)  -- Garante que cada nota seja única
+      notes.id,
+      notes.title,
+      notes.content,
+      chunks.text AS chunk_text,
+      1 - (chunks.embedding <=> query_embedding) AS similarity
+    FROM chunks
+    JOIN notes ON chunks.note_id = notes.id
+    WHERE chunks.embedding <=> query_embedding < 1 - match_threshold
+    ORDER BY notes.id, similarity DESC  -- Primeiro pelo ID da nota para DISTINCT ON, depois pela similaridade
+  ) AS unique_notes
+  ORDER BY similarity DESC  -- Ordena o resultado final apenas pela similaridade
   LIMIT match_count;
 $$;
