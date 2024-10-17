@@ -25,7 +25,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived 
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 
-  const handleSaveNote = (updatedNote: Note) => updateNote(updatedNote.id, updatedNote);
+  const handleUpdateNote = (updatedNote: Note) => updateNote(updatedNote.id, updatedNote);
   //const handleArchiveNote = (noteToArchive: Note) => archiveNote(noteToArchive.id);
   //const handleSoftDeleteNote = (noteToSoftDelete: Note) => softDeleteNote(noteToSoftDelete.id);
   const handleDeleteNote = (noteToDelete: Note) => deleteNote(noteToDelete.id);
@@ -81,7 +81,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived 
         open={isModalOpen}
         onClose={handleCloseModal}
         note={{ id, title, content, date, archived }}
-        onSave={handleSaveNote}
+        onSave={handleUpdateNote}
         onDelete={handleDeleteNote}
       />
     </>
@@ -94,7 +94,6 @@ interface NoteCardListProps {
 
 const NoteCardList: React.FC<NoteCardListProps> = ({ notes }) => {
 
-  // Ordena o array por data (mais recente para o mais antigo)
   const sortedNoteList = notes.sort((a, b) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });

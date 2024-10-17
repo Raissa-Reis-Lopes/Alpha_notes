@@ -29,8 +29,8 @@ const Register: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
-        console.log(data);
         navigate('/login');
+
       } else {
         const errorData = await response.json();
         console.error(errorData.error);

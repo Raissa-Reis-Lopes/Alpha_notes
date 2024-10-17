@@ -18,7 +18,6 @@ const NoteInput: React.FC = () => {
 
   const handleFocus = () => {
     setIsExpanded(true); // Expande ao focar no textarea
-    console.log('click hadle', isExpanded);
   };
 
   const handleClose = () => {
@@ -30,11 +29,8 @@ const NoteInput: React.FC = () => {
   const handleSave = () => {
     if (title.trim() || content.trim()) {
       createNote({
-        id: uuidv4(),
         title: title.trim(),
         content: content.trim(),
-        date: new Date().toISOString(),
-        archived: false,
       });
 
       setTitle('');

@@ -1,5 +1,5 @@
 import './MainContent.css';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Box, useMediaQuery, useTheme } from '@mui/material';
 import { useUser } from '../../contexts/UserContext';
 import NoteInput from '../NoteInput/NoteInput';
@@ -23,7 +23,20 @@ const MainContent: React.FC<MainContentProps> = ({ drawerOpen, drawerWidth, mini
   const calculatedMarginLeft = drawerOpen ? drawerWidth : miniDrawerWidth;
 
   const { user } = useUser();
-  const { notes } = useNotes();
+  const { notes, getAllNotes } = useNotes();
+
+  useEffect(() => {
+    if (!user) return;
+
+    (async function fetchNotes() {
+      try {
+        const notes = await getAllNotes();
+      } catch (error) {
+        console.error('Erro ao buscar notas:', error);
+      }
+    }());
+  }, [user]);
+
   return (
     <Box
       className='MainContent'
