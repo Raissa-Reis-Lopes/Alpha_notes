@@ -2,21 +2,29 @@ import { pool } from "../database/connection";
 import { INote } from "../interfaces/note";
 
 export const getNotesByEmbedding = async (
-    embedding: string,
+    embedding: number[],
     matchThreshold: number,
     matchCount: number
 ): Promise<INote[]> => {
     try {
+        // Query que chama a função SQL match_chunks
         const query = `
-            SELECT * FROM match_notes($1, $2, $3);
+            SELECT * 
+            FROM match_chunks($1, $2, $3);
         `;
-        const values = [embedding, matchThreshold, matchCount];
+
+        // Definindo os parâmetros
+        const values = [JSON.stringify(embedding), matchThreshold, matchCount];
+
+        // Executando a query
         const { rows } = await pool.query(query, values);
+
         return rows;
     } catch (error: any) {
-        throw new Error(`Error retrieving notes by embedding: ${error.message}`);
+        throw error;
     }
 };
+
 
 export const getAllNotes = async (): Promise<INote[]> => {
     try {
@@ -42,34 +50,53 @@ export const getNoteById = async (noteId: string, userId: string): Promise<INote
         return result.rows[0] as INote;
     } catch (error) {
         console.error(error);
-        throw new Error("Failed to retrieve note by ID.");
+        throw error;
     }
 };
 
 export const createNote = async (
     title: string,
     content: string,
-    embedding: string,
-    created_by: string
+    created_by: string,
+    metadata: object
 ): Promise<INote> => {
-    const query = `
-        INSERT INTO notes (title, content, embedding, created_by) 
-        VALUES ($1, $2, $3::vector, $4) 
+    const noteQuery = `
+        INSERT INTO notes (title, content, metadata, created_by) 
+        VALUES ($1, $2, $3, $4) 
         RETURNING *;
     `;
     try {
-        const result = await pool.query(query, [
+        const noteResult = await pool.query(noteQuery, [
             title,
             content,
-            embedding,
+            metadata,
             created_by
         ]);
-        return result.rows[0] as INote;
+        const note = noteResult.rows[0] as INote;
+
+        // Inserir os chunks
+        const chunks: { text: string; embedding: number[]; index: number }[] = (metadata as any).chunks;
+        for (const chunk of chunks) {
+            const chunkQuery = `
+                INSERT INTO chunks (note_id, chunk_index, text, embedding)
+                VALUES ($1, $2, $3, $4::vector)
+                RETURNING *;
+            `;
+            await pool.query(chunkQuery, [
+                note.id,
+                chunk.index,
+                chunk.text,
+                JSON.stringify(chunk.embedding)
+            ]);
+        }
+
+        return note;
     } catch (error) {
         console.error(error);
-        throw new Error("Failed to create note.");
+        throw error;
     }
 };
+
 
 export const updateNote = async (
     noteId: string,
@@ -81,7 +108,7 @@ export const updateNote = async (
         SET 
             title = $1, 
             content = $2, 
-            embedding = $3, 
+            metadata = $3,
             updated_at = $4
         WHERE id = $5 AND created_by = $6
         RETURNING *;
@@ -90,7 +117,7 @@ export const updateNote = async (
         const result = await pool.query(query, [
             updatedNote.title,
             updatedNote.content,
-            updatedNote.embedding,
+            updatedNote.metadata,
             updatedNote.updated_at,
             noteId,
             userId
@@ -106,12 +133,13 @@ export const updateNote = async (
     }
 };
 
+
 export const deleteNoteById = async (noteId: string): Promise<INote> => {
     try {
         const result = await pool.query(`
-            SELECT 
-                id, title, content, embedding, created_at, updated_at, created_by
-            FROM notes 
+            SELECT
+                id, title, content, metadata, created_at, updated_at, created_by
+            FROM notes
             WHERE id = $1
         `, [noteId]);
 
@@ -121,10 +149,16 @@ export const deleteNoteById = async (noteId: string): Promise<INote> => {
 
         const note = result.rows[0] as INote;
 
+        const deleteChunksQuery = `
+        DELETE FROM chunks WHERE note_id = $1;
+        `;
+        await pool.query(deleteChunksQuery, [noteId]);
+
         const deleteResult = await pool.query(`
-            DELETE FROM notes 
+            DELETE FROM notes
             WHERE id = $1;
         `, [noteId]);
+
 
         if (deleteResult.rowCount === 0) {
             throw new Error(`Failed to delete note with ID ${noteId}.`);
@@ -133,6 +167,6 @@ export const deleteNoteById = async (noteId: string): Promise<INote> => {
         return note;
     } catch (error) {
         console.error(error);
-        throw new Error("Failed to delete note.");
+        throw error;
     }
 };

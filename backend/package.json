@@ -33,6 +33,7 @@
     "youtubei.js": "^9.4.0"
   },
   "devDependencies": {
+    "@langchain/textsplitters": "^0.1.0",
     "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.7",
     "@types/cors": "^2.8.17",

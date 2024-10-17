@@ -3,6 +3,7 @@ export interface INote {
     title: string;
     content: string;
     embedding: string;
+    metadata?: object;
     created_at: Date;
     updated_at: Date;
     created_by: string;
