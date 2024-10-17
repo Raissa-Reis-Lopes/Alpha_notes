@@ -7,6 +7,7 @@ import LoginPage from '../components/LoginPage/LoginPage';
 import CustomInput from '../components/CustomInput/CustomInput';
 import CustomButton from '../components/CustomButton/CustomButton';
 import TextLink from '../components/TextLinks/TextLinks';
+import { useUser } from '../contexts/UserContext';
 
 const Logo = styled('img')(({ theme }) => ({
   width: '10rem',
@@ -18,6 +19,7 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const emailInputRef = useRef<HTMLInputElement>(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const { setUser } = useUser();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -42,6 +44,8 @@ const Login: React.FC = () => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log("Logado com sucesso:", data);
+        setUser(data.data);
         navigate('/dashboard');
       } else {
         const errorData = await response.json();

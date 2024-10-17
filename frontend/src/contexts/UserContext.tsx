@@ -9,13 +9,15 @@ interface User {
 }
 interface UserContextType {
     user: User | null;
-    setUser: (user: User) => void;
+    setUser: React.Dispatch<React.SetStateAction<User | null>>;
+    loading: boolean;
 }
 
 export const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const validateAuth = async () => {
@@ -25,21 +27,23 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
                 if (error) {
                     setUser(null);
                     console.log(error);
-                    return error;
+                    return
                 }
-                if (data) setUser(data as User);
+                setUser(data as User);
 
             } catch (error) {
+                console.error("Unexpected error:", error);
                 setUser(null);
-                return { data: null as null, error: "validateAuth : Um erro inesperado aconteceu" };
+            } finally {
+                setLoading(false);
             }
         }
         validateAuth();
     }, []);
 
     return (
-        <UserContext.Provider value={{ user, setUser }}>
-            {children}
+        <UserContext.Provider value={{ user, setUser, loading }}>
+            {!loading && children}
         </UserContext.Provider>
     );
 };
