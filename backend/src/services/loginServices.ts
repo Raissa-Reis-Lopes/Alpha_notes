@@ -24,7 +24,12 @@ export const authenticateUser = async (email: string, password: string) => {
             const matchPassword = await comparePassword(password, user[0].password);
 
             if (matchPassword) {
-                const token = jwt.sign({ id: user[0].id }, SECRET_KEY, {
+                const token = jwt.sign({
+                    id: user[0].id,
+                    username: user[0].username,
+                    email: user[0].email,
+
+                }, SECRET_KEY, {
                     expiresIn: "5d",
                 });
                 return { auth: true, token };

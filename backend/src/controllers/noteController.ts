@@ -56,7 +56,7 @@ export const getNoteById = async (
     const response: IAPIResponse<INote> = { success: false };
     try {
         const noteId = req.params.noteId;
-        const userId = req.user!;
+        const userId = req.user!.id;
 
         if (!userId) {
             res.status(400).json({ message: "User ID is missing" });
@@ -82,7 +82,10 @@ export const createNote = async (req: Request, res: Response) => {
     try {
         const { title, content, metadata } = req.body;
 
-        const userId = req.user!;
+
+        const userId = req.user!.id;
+
+
         if (!userId) {
             res.status(400).json({ message: "User ID is missing" });
             return;
@@ -135,7 +138,7 @@ export const updateNote = async (req: Request, res: Response): Promise<void> => 
         const noteId = req.params.noteId;
         const fields: Partial<INote> = req.body;
 
-        const userId = req.user!;
+        const userId = req.user!.id;
 
         if (!userId) {
             res.status(400).json({ message: "User ID is missing" });

@@ -1,8 +1,7 @@
 .NoteCardComponent {
   display: flex;
   flex-direction: column;
-  width: 100%;
-  min-width: 400px;
+  min-width: 240px;
   max-width: 480px;
   max-height: 480px;
   /* 42 */

@@ -9,11 +9,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNotes } from '../../contexts/NotesContext';
 import { v4 as uuidv4 } from 'uuid';
 
-interface NoteInputProps {
-  any: any;
-}
-
-const NoteInput: React.FC<NoteInputProps> = ({ any }) => {
+const NoteInput: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [title, setTitle] = useState('');
@@ -22,7 +18,6 @@ const NoteInput: React.FC<NoteInputProps> = ({ any }) => {
 
   const handleFocus = () => {
     setIsExpanded(true); // Expande ao focar no textarea
-    console.log('click hadle', isExpanded);
   };
 
   const handleClose = () => {
@@ -31,60 +26,37 @@ const NoteInput: React.FC<NoteInputProps> = ({ any }) => {
     setIsExpanded(false); // Esconde os elementos adicionais
   };
 
-  const handleClickOutside = (event: MouseEvent) => {
-    console.log("0");
-    if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
-      console.log("1");
-      if (isExpanded) {
-        console.log("2");
-        if (title.trim() || content.trim()) { // Verifica se há conteúdo na nota
-          console.log("3");
-          createNote({
-            id: uuidv4(),
-            title: title.trim(),
-            content: content.trim(),
-            //date: (new Date().getTime()).toString(),
-            date: new Date().toISOString(),
-            archived: false,
-          });
-        }
-      }
-
-
-
+  const handleSave = () => {
+    if (title.trim() || content.trim()) {
+      createNote({
+        title: title.trim(),
+        content: content.trim(),
+      });
 
       setTitle('');
       setContent('');
-      setIsExpanded(false); // Fecha se clicar fora da Box principal
+      setIsExpanded(false);
+    }
+  }
+
+  const handleClickOutside = (event: MouseEvent) => {
+    if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (isExpanded) {
+        handleSave();
+      }
+
+      setTitle('');
+      setContent('');
+      setIsExpanded(false);
     }
   };
 
   useEffect(() => {
-    // Adiciona o listener para detectar cliques fora
     document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      // Remove o listener ao desmontar o componente
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isExpanded, title, content]);
-
-  /*   useEffect(() => {
-      if (isExpanded) {
-        console.log("cria");
-        createNote({
-          id: uuidv4(),
-          title,
-          content,
-          date: (new Date().getTime()).toString(),
-          archived: false,
-        })
-        console.log("notes", notes);
-      }
-      console.log('Click outside', isExpanded);
-  
-  
-    }, [isExpanded]); */
-
 
   return (
     <Box className="NoteInputComponent" ref={containerRef}>
@@ -119,7 +91,7 @@ const NoteInput: React.FC<NoteInputProps> = ({ any }) => {
             <PaletteOutlinedIcon fontSize="small" sx={{ color: 'white' }} />
             <VideoCallOutlinedIcon fontSize="small" sx={{ color: 'white' }} />
           </Box>
-          <Box>
+          <Box sx={{ display: "flex", gap: "8px" }}>
             <Button
               color="neutral"
               onClick={handleClose}
@@ -130,6 +102,16 @@ const NoteInput: React.FC<NoteInputProps> = ({ any }) => {
                 fontSize: "13px"
               }}
             >Fechar</Button>
+            <Button
+              key="save"
+              color="neutral"
+              onClick={handleSave}
+              size="sm"
+              variant="soft"
+              sx={{
+                fontSize: "13px"
+              }}
+            >Salvar</Button>
           </Box>
         </Box>
       )}

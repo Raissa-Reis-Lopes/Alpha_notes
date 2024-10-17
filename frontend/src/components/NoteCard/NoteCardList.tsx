@@ -1,12 +1,11 @@
 import './NoteCardList.css';
 import { Box } from "@mui/material";
-import { Input, Textarea, Button, Typography } from '@mui/joy';
-import PhotoOutlinedIcon from '@mui/icons-material/PhotoOutlined';
-import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
-import VideoCallOutlinedIcon from '@mui/icons-material/VideoCallOutlined';
-import { DeleteOutlineOutlined, DescriptionOutlined } from '@mui/icons-material';
-import { useEffect, useRef, useState } from 'react';
+import { Typography } from '@mui/joy';
+import { DescriptionOutlined } from '@mui/icons-material';
+import { useRef, useState } from 'react';
 import { Note, useNotes } from '../../contexts/NotesContext';
+import ToolbarCard from '../ToolbarCard/ToolbarCard';
+import NoteModal from '../NoteModal/NoteModal';
 
 interface NoteCardProps {
   id: string;
@@ -18,44 +17,74 @@ interface NoteCardProps {
 const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived }) => {
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const { notes, updateNote, archiveNote, softDeleteNote, deleteNote } = useNotes();
 
-  const toggleHover = () => {
-    setIsHovered(!isHovered); // Expande ao focar no textarea
-  };
+  const toggleHover = () => setIsHovered(!isHovered);
+
+  const handleOpenModal = () => setIsModalOpen(true);
+  const handleCloseModal = () => setIsModalOpen(false);
+
+  const handleUpdateNote = (updatedNote: Note) => updateNote(updatedNote.id, updatedNote);
+  //const handleArchiveNote = (noteToArchive: Note) => archiveNote(noteToArchive.id);
+  //const handleSoftDeleteNote = (noteToSoftDelete: Note) => softDeleteNote(noteToSoftDelete.id);
+  const handleDeleteNote = (noteToDelete: Note) => deleteNote(noteToDelete.id);
+
+
+
 
   return (
-    <Box className="NoteCardComponent"
-      onMouseEnter={toggleHover}
-      onMouseLeave={toggleHover}>
+    <>
+      <Box className="NoteCardComponent"
+        onMouseEnter={toggleHover}
+        onMouseLeave={toggleHover}
+        onClick={handleOpenModal}
+      >
 
-      <Box>
-        <Typography level="title-md" padding={"12px 12px 0 12px"}>{title}</Typography>
-      </Box>
-
-      <Box>
-        <Typography level="body-md" padding={"12px 12px"}>{content}</Typography>
-      </Box>
-      {true && (
-        <Box className="note-toolbar"
-          sx={{
-            padding: "0 12px",
-            display: "flex",
-            justifyContent: "space-between",
-            visibility: isHovered ? "visible" : "hidden",
-          }}>
-          <Box sx={{ display: "flex", gap: "8px", alignItems: "end" }}>
-            <PhotoOutlinedIcon fontSize="small" sx={{ color: '#0000008a' }} />
-            <PaletteOutlinedIcon fontSize="small" sx={{ color: '#0000008a' }} />
-            <VideoCallOutlinedIcon fontSize="small" sx={{ color: '#0000008a' }} />
-            <span>{date}</span> {/* temporário */}
-            <span>{`Arquivado: ${archived}`}</span> {/* temporário */}
-          </Box>
-          <Box>
-
-          </Box>
+        <Box>
+          <Typography level="title-md" padding={"12px 12px 0 12px"}
+            sx={{
+              outline: "none",
+              whiteSpace: "pre-wrap",
+              wordWrap: "break-word"
+            }}
+          >{title}</Typography>
         </Box>
-      )}
-    </Box>
+
+        <Box>
+          <Typography level="body-md" padding={"12px 12px"}
+            sx={{
+              outline: "none",
+              whiteSpace: "pre-wrap",
+              wordWrap: "break-word"
+            }}
+          >{content}</Typography>
+        </Box>
+        {true && (
+          <Box className="note-toolbar"
+            sx={{
+              padding: "0 12px",
+              display: "flex",
+              justifyContent: "space-between",
+              visibility: isHovered ? "visible" : "hidden",
+            }}>
+            <ToolbarCard note={{ id, title, content, date, archived }} onDelete={handleDeleteNote} />
+            <Box>
+
+            </Box>
+          </Box>
+        )}
+      </Box>
+
+      {/* Modal de Edição */}
+      <NoteModal
+        open={isModalOpen}
+        onClose={handleCloseModal}
+        note={{ id, title, content, date, archived }}
+        onSave={handleUpdateNote}
+        onDelete={handleDeleteNote}
+      />
+    </>
   );
 };
 
@@ -65,7 +94,6 @@ interface NoteCardListProps {
 
 const NoteCardList: React.FC<NoteCardListProps> = ({ notes }) => {
 
-  // Ordena o array por data (mais recente para o mais antigo)
   const sortedNoteList = notes.sort((a, b) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });

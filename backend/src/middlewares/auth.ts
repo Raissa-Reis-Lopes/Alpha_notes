@@ -16,7 +16,7 @@ export const auth = (
         }
 
         //Só para anotar uma expicação aqui, como o user não é padrão do req, tive que criar uma tipagem para ele, que está lá na pasta types
-        req.user = decoded.id;
+        req.user = { id: decoded.id, username: decoded.username, email: decoded.email };
         next();
     })
 

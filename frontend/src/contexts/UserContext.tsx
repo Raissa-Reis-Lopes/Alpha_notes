@@ -1,18 +1,49 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { validateAuthApi } from '../api/authApi';
 
+
+interface User {
+    id: string;
+    username: string;
+    email: string;
+}
 interface UserContextType {
-    user: any;
-    setUser: (user: any) => void;
+    user: User | null;
+    setUser: React.Dispatch<React.SetStateAction<User | null>>;
+    loading: boolean;
 }
 
 export const UserContext = createContext<UserContextType | undefined>(undefined);
 
 export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const [user, setUser] = useState("teste");
+    const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const validateAuth = async () => {
+            try {
+                const { data, error } = await validateAuthApi();
+
+                if (error) {
+                    setUser(null);
+                    console.log(error);
+                    return
+                }
+                setUser(data as User);
+
+            } catch (error) {
+                console.error("Unexpected error:", error);
+                setUser(null);
+            } finally {
+                setLoading(false);
+            }
+        }
+        validateAuth();
+    }, []);
 
     return (
-        <UserContext.Provider value={{ user, setUser }}>
-            {children}
+        <UserContext.Provider value={{ user, setUser, loading }}>
+            {!loading && children}
         </UserContext.Provider>
     );
 };
