@@ -12,20 +12,6 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255) NOT NULL
 );
 
--- -- Cria a tabela de notas
--- CREATE TABLE IF NOT EXISTS notes (
---     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
---     title VARCHAR(255) NOT NULL,
---     content TEXT NOT NULL,
---     embedding VECTOR(1536),
---     metadata JSONB SET DEFAULT '{}', 
---     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
---     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
---     created_by UUID NOT NULL,
---     CONSTRAINT fk_created_by FOREIGN KEY (created_by) REFERENCES users (id)
--- );
-
-
 -- Cria a tabela de notas
 CREATE TABLE IF NOT EXISTS notes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -95,27 +81,3 @@ AS $$
   ORDER BY similarity DESC  -- Ordena o resultado final apenas pela similaridade
   LIMIT match_count;
 $$;
-
--- CREATE OR REPLACE FUNCTION match_notes (
---   query_embedding vector(1536),
---   match_threshold float,
---   match_count int
--- )
--- RETURNS TABLE (
---   id UUID,
---   title VARCHAR(255),
---   content TEXT,
---   similarity float
--- )
--- LANGUAGE sql STABLE
--- AS $$
---   SELECT
---     notes.id,
---     notes.title,
---     notes.content,
---     1 - (notes.embedding <=> query_embedding) AS similarity
---   FROM notes
---   WHERE notes.embedding <=> query_embedding < 1 - match_threshold
---   ORDER BY notes.embedding <=> query_embedding
---   LIMIT match_count;
--- $$;
