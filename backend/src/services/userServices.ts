@@ -19,6 +19,9 @@ export const getAllUsers = async (): Promise<IUser[]> => {
 
 export const getUserById = async (userId: string) => {
     try {
+        if (!userId) {
+            throw new Error("User not registered")
+        }
         const user = await userRepository.getUserById(userId);
         return user;
     } catch (error) {
@@ -76,25 +79,25 @@ export const createUser = async (
 };
 
 
-export const deleteUser = async (id: string): Promise<IUser> => {
+export const deleteUser = async (userId: string): Promise<IUser> => {
     try {
 
-        const currentUser: IUser | null = await userRepository.getUserById(id);
+        const currentUser: IUser | null = await userRepository.getUserById(userId);
 
         if (!currentUser) {
             throw new Error("User not registered");
         }
 
-        const user = await userRepository.deleteUserById(id);
+        const user = await userRepository.deleteUserById(userId);
         return user;
     } catch (error) {
         throw error;
     }
 };
 
-export const updateUser = async (id: string, fields: Partial<IUser>): Promise<IUser> => {
+export const updateUser = async (userId: string, fields: Partial<IUser>): Promise<IUser> => {
     try {
-        const currentUser: IUser | null = await userRepository.getUserById(id);
+        const currentUser: IUser | null = await userRepository.getUserById(userId);
 
         if (!currentUser) {
             throw new Error("User not registered");
@@ -107,7 +110,7 @@ export const updateUser = async (id: string, fields: Partial<IUser>): Promise<IU
             id: currentUser.id,
         };
 
-        const updatedUser = await userRepository.updateUser(id, newUser);
+        const updatedUser = await userRepository.updateUser(userId, newUser);
         return updatedUser;
     } catch (error: any) {
         throw new Error(`Failed to update user data: ${error.message}`);
