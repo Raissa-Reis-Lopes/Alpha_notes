@@ -1,51 +1,71 @@
+// services/noteServices.ts
 import * as noteRepository from "../repositories/noteRepository";
 import { INote } from "../interfaces/note";
 import { OpenAIEmbeddings } from "@langchain/openai";
+import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 
 const openAIEmbeddings = new OpenAIEmbeddings({
     openAIApiKey: process.env.OPENAI_KEY,
 });
 
-const generateEmbedding = async (text: string): Promise<number[]> => {
-    const formattedText = text.replace(/\n/g, ' ');
+// Função para dividir o texto em chunks usando o RecursiveCharacterTextSplitter
+const splitTextIntoChunks = async (text: string, chunkSize: number, chunkOverlap: number = 0): Promise<string[]> => {
+    const textSplitter = new RecursiveCharacterTextSplitter({
+        chunkSize: chunkSize,
+        chunkOverlap: chunkOverlap,
+    });
 
-    const embedding = await openAIEmbeddings.embedDocuments([formattedText]);
-    return embedding[0];
+    // O método createDocuments espera um array de textos
+    const documents = await textSplitter.createDocuments([text]);
+
+    // Extrair o texto dos documentos resultantes
+    return documents.map(doc => doc.pageContent);
 };
 
-export const searchNotesByQuery = async (query: string, matchThreshold = 0.7, matchCount = 10): Promise<INote[]> => {
-    try {
-        const queryEmbedding = await generateEmbedding(query);
-
-        const queryEmbeddingAsString = JSON.stringify(queryEmbedding)
-
-        const notes = await noteRepository.getNotesByEmbedding(queryEmbeddingAsString, matchThreshold, matchCount);
-
-        return notes;
-    } catch (error: any) {
-        throw new Error(`Failed to search notes: ${error.message}`);
-    }
+// Função para gerar embeddings para cada chunk
+const generateEmbeddingsForChunks = async (chunks: string[]): Promise<number[][]> => {
+    const embeddings = await openAIEmbeddings.embedDocuments(chunks);
+    return embeddings;
 };
+
 
 export const createNote = async (
     title: string,
     content: string,
     created_by: string,
+    metadata: object = {}
 ): Promise<INote> => {
     try {
         if (!title || !content) {
             throw new Error("Title and content cannot be empty.");
         }
 
-        const embedding = await generateEmbedding(content);
+        // Dividir o conteúdo em chunks
+        const chunkSize = 200; // Número de caracteres por chunk 
+        const chunks = await splitTextIntoChunks(content, chunkSize);
 
-        const embeddingAsString = JSON.stringify(embedding);
+        // Gerar embeddings para cada chunk
+        const embeddings = await generateEmbeddingsForChunks(chunks);
 
+        // Preparar os chunks com seus embeddings e índices
+        const chunkData = chunks.map((chunk, index) => ({
+            text: chunk,
+            embedding: embeddings[index],
+            index: index
+        }));
+
+        // Enriquecer os metadados com os chunks
+        const enrichedMetadata = {
+            ...metadata,
+            chunks: chunkData
+        };
+
+        // Criar a nota no repositório
         const note = await noteRepository.createNote(
             title,
             content,
-            embeddingAsString,
-            created_by
+            created_by,
+            enrichedMetadata
         );
         return note;
     } catch (error) {
@@ -53,6 +73,30 @@ export const createNote = async (
     }
 };
 
+const generateEmbedding = async (text: string): Promise<number[]> => {
+    const formattedText = text.replace(/\n/g, ' ');
+    const embedding = await openAIEmbeddings.embedDocuments([formattedText]);
+    return embedding[0];
+};
+
+export const searchNotesByQuery = async (query: string, matchThreshold = 0.2, matchCount = 10): Promise<INote[]> => {
+    try {
+        if (!query) {
+            throw new Error("Query cannot be empty.");
+        }
+
+        const queryEmbedding = await generateEmbedding(query);
+        const notes = await noteRepository.getNotesByEmbedding(queryEmbedding, matchThreshold, matchCount);
+
+        if (!notes) {
+            throw new Error("No notes were found for this query")
+        }
+
+        return notes;
+    } catch (error: any) {
+        throw new Error(`Failed to search notes: ${error.message}`);
+    }
+};
 
 export const getAllNotes = async (): Promise<INote[]> => {
     try {
@@ -65,17 +109,40 @@ export const getAllNotes = async (): Promise<INote[]> => {
 
 export const getNoteById = async (noteId: string, userId: string): Promise<INote> => {
     try {
+
+        if (!userId) {
+            throw new Error("User not logged in. This action is forbidden");
+        }
+
+        if (!noteId) {
+            throw new Error("Note ID is required");
+        }
+
         const note = await noteRepository.getNoteById(noteId, userId);
+
+        if (!note) {
+            throw new Error(`Note with id ${noteId} not found`);
+        }
+
         return note;
     } catch (error) {
         throw error;
     }
 };
 
-
 export const deleteNote = async (noteId: string): Promise<INote> => {
     try {
+
+        if (!noteId) {
+            throw new Error("Note ID is required");
+        }
+
         const note = await noteRepository.deleteNoteById(noteId);
+
+        if (!note) {
+            throw new Error(`Note with id ${noteId} not found`);
+        }
+
         return note;
     } catch (error) {
         throw error;
@@ -93,18 +160,35 @@ export const updateNote = async (
             throw new Error("Note not found");
         }
 
-        let newEmbedding = currentNote.embedding;
+        let updatedMetadata = currentNote.metadata;
 
         if (fields.content && fields.content !== currentNote.content) {
-            const embedding = await generateEmbedding(fields.content);
-            newEmbedding = JSON.stringify(embedding);
+            // Dividir o novo conteúdo em chunks
+            const chunkSize = 200;
+            const newChunks = await splitTextIntoChunks(fields.content, chunkSize);
+
+            // Gerar embeddings para os novos chunks
+            const newEmbeddings = await generateEmbeddingsForChunks(newChunks);
+
+            // Preparar os chunks com seus embeddings e índices
+            const newChunkData = newChunks.map((chunk, index) => ({
+                text: chunk,
+                embedding: newEmbeddings[index],
+                index: index
+            }));
+
+            // Atualizar os metadados com os novos chunks
+            updatedMetadata = {
+                ...updatedMetadata,
+                chunks: newChunkData
+            };
         }
 
         const updatedNote: INote = {
             ...currentNote,
             title: fields.title || currentNote.title,
             content: fields.content || currentNote.content,
-            embedding: newEmbedding,
+            metadata: updatedMetadata,
             updated_at: new Date(),
         };
 

@@ -1,3 +1,4 @@
+// controllers/noteController.ts
 import { Request, Response } from "express";
 import * as noteServices from "../services/noteServices";
 import { INote } from "../interfaces/note";
@@ -12,7 +13,6 @@ export const searchNotesByQuery = async (req: Request, res: Response): Promise<v
             res.status(400).json({ message: "Query cannot be empty" });
             return;
         }
-        // Chama o serviço que realiza a busca
         const notes = await noteServices.searchNotesByQuery(query);
         response.data = notes;
         response.success = true;
@@ -20,7 +20,11 @@ export const searchNotesByQuery = async (req: Request, res: Response): Promise<v
         res.status(200).json(response);
     } catch (error: any) {
         console.error(error);
-        res.status(500).json({ data: null, error: "Internal server error" });
+        console.error(error)
+        res.status(500).json({
+            data: null,
+            error: error.message || "Failed to search notes by query"
+        });
     }
 };
 
@@ -37,7 +41,11 @@ export const getAllNotes = async (
         res.status(200).json(response);
     } catch (error: any) {
         console.error(error);
-        res.status(500).json({ data: null, error: "Internal server error" });
+        console.error(error)
+        res.status(500).json({
+            data: null,
+            error: error.message || "Failed to retrieve all notes"
+        });
     }
 };
 
@@ -62,18 +70,19 @@ export const getNoteById = async (
         res.status(200).json(response);
     } catch (error: any) {
         console.error(error);
-        res.status(500).json({ data: null, error: "Internal server error" });
+        res.status(500).json({
+            data: null,
+            error: error.message || "An unexpected error occurred"
+        });
     }
 };
 
 export const createNote = async (req: Request, res: Response) => {
     const response: IAPIResponse<INote> = { success: false };
     try {
-        const { title, content } = req.body;
+        const { title, content, metadata } = req.body;
 
-        // O userId recuperado dos cookies vai ser o id identificador do created_by
         const userId = req.user!;
-
         if (!userId) {
             res.status(400).json({ message: "User ID is missing" });
             return;
@@ -82,16 +91,19 @@ export const createNote = async (req: Request, res: Response) => {
         const note = await noteServices.createNote(
             title,
             content,
-            userId
+            userId,
+            metadata
         );
+
         response.data = note;
         response.success = true;
         response.message = "Note successfully created!";
         res.status(201).json(response);
     } catch (error: any) {
-        response.error = error.message;
-        response.message = "Failed to create the note!";
-        return res.status(400).json(response);
+        res.status(500).json({
+            data: null,
+            error: error.message || "An unexpected error occurred"
+        });
     }
 };
 
@@ -108,9 +120,12 @@ export const deleteNote = async (
         response.message = "Note deleted successfully!";
         res.status(200).json(response);
     } catch (error: any) {
+
         console.error(error);
-        response.message = "Unable to delete note!";
-        res.status(500).json({ data: null, error: "Internal server error" });
+        res.status(500).json({
+            data: null,
+            error: error.message || "An unexpected error occurred"
+        });
     }
 };
 
@@ -134,7 +149,10 @@ export const updateNote = async (req: Request, res: Response): Promise<void> => 
         res.json(response);
 
     } catch (error: any) {
-        console.error(error);
-        res.status(500).json({ error: error.message || "Unable to complete the operation" });
+        console.error(error)
+        res.status(500).json({
+            data: null,
+            error: error.message || "An unexpected error occurred"
+        });
     }
 };
