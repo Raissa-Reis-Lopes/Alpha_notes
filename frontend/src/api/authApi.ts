@@ -3,7 +3,7 @@ import request, { requestOptions } from '../utils/request';
 export async function validateAuthApi() {
 
   const requestParams: requestOptions = {
-    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/auth/validate`,
+    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/api/auth/validate`,
     method: 'POST',
   };
 

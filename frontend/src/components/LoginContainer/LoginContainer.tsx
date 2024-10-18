@@ -1,7 +1,17 @@
 import React from 'react';
 import { Box } from '@mui/material';
 
-const LoginContainer: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+interface LoginContainerProps {
+  children: React.ReactNode;
+  width?: string; 
+  height?: string;
+}
+
+const LoginContainer: React.FC<LoginContainerProps> = ({ 
+  children, 
+  width = '30rem',
+  height = '20rem' 
+}) => {
   return (
     <Box
       display="flex"
@@ -11,9 +21,10 @@ const LoginContainer: React.FC<{ children: React.ReactNode }> = ({ children }) =
       height="100vh"
       sx={{
         backgroundColor: 'white',
-        width: '30rem',
-        height: '20rem',
-        borderRadius:'2rem'
+        width: width,
+        height: height,
+        borderRadius: '2rem',
+        boxShadow: 2, 
       }}
     >
       {children}

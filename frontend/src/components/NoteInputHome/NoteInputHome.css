@@ -1,0 +1,53 @@
+.note-container {
+    position: relative; 
+    margin: 20px; 
+    border: 4px solid #371c44;
+    border-radius: 2rem;
+    padding: 0.8rem;
+    background-color: #371c44; 
+  }
+  
+  .note-input {
+    width: 23rem;
+    height: 10rem; 
+    border: 2px solid #d0d0d0; /* Borda do input */
+    border-radius: 8px; /* Bordas arredondadas */
+    padding: 1rem; 
+    color: #00bf74;
+    font-size: 1.4rem; 
+    font-weight: 600;
+    font-family: 'Fredoka', sans-serif;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); 
+    outline: none; 
+    transition: border-color 0.3s ease;
+    resize: none;
+    background: white; 
+    margin-top: 20px;
+  }
+  
+  .note-input:focus {
+    border-color: #06bb74; 
+  }
+  
+  .note-input::placeholder {
+    color: #00bf74;
+    font-size: 1.4rem; 
+    font-weight: 600;
+    font-family: 'Fredoka', sans-serif;
+  }
+  
+  .note-bubbles {
+    position: absolute;
+    top: 15px;
+    left: 20px;
+    display: flex;
+    gap: 0.6rem;
+  }
+  
+  .bubble {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: #ffffff;
+  }
+  

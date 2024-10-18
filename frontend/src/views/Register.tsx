@@ -1,5 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import RegisterPage from '../components/RegisterPage/RegisterPage';
+import LoginContainer from '../components/LoginContainer/LoginContainer';
+import { styled } from '@mui/material/styles';
+import CustomInput from '../components/CustomInput/CustomInput';
+import CustomButton from '../components/CustomButton/CustomButton';
+import TextLink from '../components/TextLinks/TextLinks';
+
+
+const Logo = styled('img')(({ theme }) => ({
+  width: '10rem',
+  marginBottom: '2rem',
+}));
 
 const Register: React.FC = () => {
   const [username, setUsername] = useState('');
@@ -30,7 +42,6 @@ const Register: React.FC = () => {
       if (response.ok) {
         const data = await response.json();
         navigate('/login');
-
       } else {
         const errorData = await response.json();
         console.error(errorData.error);
@@ -41,34 +52,43 @@ const Register: React.FC = () => {
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', marginLeft: '11rem' }}>
-      <h2>Cadastro</h2>
-      <form onSubmit={handleSubmit}>
-        <input
+    
+      <RegisterPage>
+        <Logo src="/logo.svg" alt="Logo" />
+        <LoginContainer height="25rem" width='30rem'>
+        <h2 style={{ color: '#06bb74', margin: '0px', marginBottom: '0.5rem' , fontWeight: '600', fontSize: '1.5rem', textAlign:'center', fontFamily: 'Fredoka, sans-serif' }}>Faça seu cadastro</h2>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+        <CustomInput
           type="text"
           placeholder="Nome de usuário"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
-          required
         />
-        <input
+        <CustomInput
           ref={emailInputRef}
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          required
         />
-        <input
+        <CustomInput
           type="password"
           placeholder="Senha"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          required
         />
-        <button type="submit">Cadastrar</button>
+        <CustomButton type="submit" color="#00bf74" hoverColor="#009f64">Cadastrar</CustomButton>
       </form>
-    </div>
+      <TextLink
+          text="Já possui uma conta?"
+          linkText="Faça login!"
+          linkTo="/login"
+          textColor="#371c44"
+          linkColor="#00bf74"
+        />
+      
+      </LoginContainer>
+      </RegisterPage>
   );
 };
 
