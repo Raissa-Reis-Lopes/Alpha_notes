@@ -3,16 +3,19 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import { UserProvider } from './contexts/UserContext';
 import AppRoutes from './routes/Routes';
 import { NotesProvider } from './contexts/NotesContext';
+import { WebSocketProvider } from './contexts/WebSocketContext';
 
 const App: React.FC = () => {
     return (
-        <UserProvider>
-            <NotesProvider>
-                <Router>
-                    <AppRoutes />
-                </Router>
-            </NotesProvider>
-        </UserProvider>
+        <WebSocketProvider>
+            <UserProvider>
+                <NotesProvider>
+                    <Router>
+                        <AppRoutes />
+                    </Router>
+                </NotesProvider>
+            </UserProvider>
+        </WebSocketProvider>
     );
 };
 

@@ -1,7 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createNoteApi, deleteNoteApi, getAllNotesApi, updateNoteApi } from '../api/notesApi';
-import request, { requestOptions } from '../utils/request';
-import { webSocketService } from '../services/WebSocketService';
+import { useWebSocket } from './WebSocketContext';
 
 interface Note {
   id: string;
@@ -14,7 +13,6 @@ interface Note {
 
 interface NotesContextType {
   notes: Note[];
-  //createNote: (note: Partial<Note>) => void;
   getAllNotes: () => void;
   createNote: (note: Partial<Note>) => void;
   updateNote: (id: string, updatedNoteData: Partial<Note>) => void;
@@ -36,26 +34,34 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } */
   ]);
 
-
+  const { webSocketService, socketId } = useWebSocket();
 
   useEffect(() => {
-    // Conecta ao WebSocket ao montar o contexto
-    webSocketService.connect();
+    webSocketService.registerCallback('processing', (data) => {
+      console.log(`PROCESSANDO: ${JSON.stringify(data)}`);
 
-    // Callback para lidar com mensagens recebidas do WebSocket
-    webSocketService.registerCallback('note-status', (data) => {
+      /* const noteId = JSON.stringify(data.noteId);
+
       setNotes((prevNotes) =>
         prevNotes.map((note) =>
-          note.id === data.noteId ? { ...note, status: data.status } : note
+          note.id === noteId ? { ...note, status: 'processing' } : note
         )
-      );
+      ); */
     });
 
-    return () => {
-      // Desconecta do WebSocket ao desmontar o contexto
-      webSocketService.disconnect();
-    };
-  }, []);
+    webSocketService.registerCallback('completed', (data) => {
+      console.log(`COMPLETOU: ${JSON.stringify(data)}`);
+
+      /* const noteId = JSON.stringify(data.noteId);
+
+      setNotes((prevNotes) =>
+        prevNotes.map((note) =>
+          note.id === noteId ? { ...note, status: 'completed' } : note
+        )
+      ); */
+    });
+
+  }, [webSocketService]);
 
 
   const getAllNotes = async () => {
@@ -66,9 +72,9 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
 
     //Testando CSS
-    const nn = data as Note[];
+    const x = data as Note[];
 
-    nn.push({
+    x.push({
       id: '1',
       title: 'Teste 1',
       content: 'Conteúdo do teste 1',
@@ -84,15 +90,20 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const createNote = async (note: Partial<Note>) => {
-    const { data, error } = await createNoteApi({ title: note.title, content: note.content });
+    if (!socketId) {
+      console.log("Socket ID não encontrado, não posso enviar o createNote");
+      return;
+    }
+
+    const { data, error } = await createNoteApi({ title: note.title, content: note.content }, socketId);
     if (error) {
       console.log(error);
       return error;
     }
 
     if (data) {
-      const newNote: Note = { ...data, status: 'processing' }; // Define status inicial como 'processing'
-      setNotes([...notes, newNote]);
+      /* const newNote: Note = { ...data, status: 'processing' }; */ // Define status inicial como 'processing'
+      setNotes([...notes, data]);
       console.log("Successfully created", data);
     }
   };

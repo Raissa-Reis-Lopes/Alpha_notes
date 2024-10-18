@@ -28,8 +28,8 @@ const generateEmbeddingsForChunks = async (chunks: string[]): Promise<number[][]
     return embeddings;
 };
 
-
-export const createNote = async (
+// Função para criar a nota sem embeddings inicialmente
+export const createNoteWithoutEmbeddings = async (
     title: string,
     content: string,
     created_by: string,
@@ -40,38 +40,87 @@ export const createNote = async (
             throw new Error("Title and content cannot be empty.");
         }
 
-        // Dividir o conteúdo em chunks
-        const chunkSize = 200; // Número de caracteres por chunk 
-        const chunks = await splitTextIntoChunks(content, chunkSize);
-
-        // Gerar embeddings para cada chunk
-        const embeddings = await generateEmbeddingsForChunks(chunks);
-
-        // Preparar os chunks com seus embeddings e índices
-        const chunkData = chunks.map((chunk, index) => ({
-            text: chunk,
-            embedding: embeddings[index],
-            index: index
-        }));
-
-        // Enriquecer os metadados com os chunks
-        const enrichedMetadata = {
-            ...metadata,
-            chunks: chunkData
-        };
-
-        // Criar a nota no repositório
-        const note = await noteRepository.createNote(
-            title,
-            content,
-            created_by,
-            enrichedMetadata
-        );
+        // Criar a nota no repositório sem processar embeddings
+        const note = await noteRepository.createNote(title, content, created_by, metadata);
         return note;
     } catch (error) {
         throw error;
     }
 };
+
+// Função para processar embeddings e chunks em segundo plano
+export const processEmbeddingsForNote = async (noteId: string, userId: string): Promise<void> => {
+    try {
+        // Obter a nota sem os embeddings
+        const note = await noteRepository.getNoteById(noteId, userId);
+
+        // Dividir o conteúdo da nota em chunks
+        const chunkSize = 200;
+        const chunks = await splitTextIntoChunks(note.content, chunkSize);
+
+        // Gerar embeddings para cada chunk
+        const embeddings = await generateEmbeddingsForChunks(chunks);
+
+        // Preparar os dados dos chunks
+        const chunkData = chunks.map((chunk, index) => ({
+            text: chunk,
+            embedding: embeddings[index],
+            index
+        }));
+        console.log("noteservice embeding content", embeddings);
+        console.log("noteservice embeding antes de chamar repository", chunkData);
+        // Atualizar a nota com os chunks e embeddings
+        await noteRepository.updateNoteWithEmbeddings(noteId, chunkData);
+        console.log("noteservice embeding depois de chamar repository")
+    } catch (error) {
+        console.error("Error processing embeddings:", error);
+        throw error;
+    }
+};
+
+// export const createNote = async (
+//     title: string,
+//     content: string,
+//     created_by: string,
+//     metadata: object = {}
+// ): Promise<INote> => {
+//     try {
+//         if (!title || !content) {
+//             throw new Error("Title and content cannot be empty.");
+//         }
+
+//         // Dividir o conteúdo em chunks
+//         const chunkSize = 200; // Número de caracteres por chunk 
+//         const chunks = await splitTextIntoChunks(content, chunkSize);
+
+//         // Gerar embeddings para cada chunk
+//         const embeddings = await generateEmbeddingsForChunks(chunks);
+
+//         // Preparar os chunks com seus embeddings e índices
+//         const chunkData = chunks.map((chunk, index) => ({
+//             text: chunk,
+//             embedding: embeddings[index],
+//             index: index
+//         }));
+
+//         // Enriquecer os metadados com os chunks
+//         const enrichedMetadata = {
+//             ...metadata,
+//             chunks: chunkData
+//         };
+
+//         // Criar a nota no repositório
+//         const note = await noteRepository.createNote(
+//             title,
+//             content,
+//             created_by,
+//             enrichedMetadata
+//         );
+//         return note;
+//     } catch (error) {
+//         throw error;
+//     }
+// };
 
 const generateEmbedding = async (text: string): Promise<number[]> => {
     const formattedText = text.replace(/\n/g, ' ');

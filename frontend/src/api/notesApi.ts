@@ -59,7 +59,7 @@ export async function searchNotesByQueryApi({ query }: { query: string }) {
   }
 }
 
-export async function createNoteApi({ title, content }: Partial<Note>) {
+export async function createNoteApi({ title, content }: Partial<Note>, socketId: string) {
   const body = {
     title,
     content,
@@ -69,6 +69,7 @@ export async function createNoteApi({ title, content }: Partial<Note>) {
     url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes`,
     method: 'POST',
     body,
+    socketId: socketId
   };
 
   try {

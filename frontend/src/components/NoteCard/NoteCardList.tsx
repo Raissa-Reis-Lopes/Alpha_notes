@@ -7,6 +7,7 @@ import { Note, useNotes } from '../../contexts/NotesContext';
 import ToolbarCard from '../ToolbarCard/ToolbarCard';
 import NoteModal from '../NoteModal/NoteModal';
 import Loader from '../Loader/Loader';
+import Loader from '../Loader/Loader';
 
 interface NoteCardProps {
   id: string;
@@ -15,9 +16,9 @@ interface NoteCardProps {
   date: string;
   archived: boolean;
   status: 'processing' | 'completed' | 'failed';
+  status: 'processing' | 'completed' | 'failed';
 }
 const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived, status }) => {
-  console.log("stats", status);
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);

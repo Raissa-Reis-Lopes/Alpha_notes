@@ -4,6 +4,8 @@ import cookieParser from "cookie-parser";
 import routes from "./routes/routes";
 import { pool } from "./database/connection";
 import cors from 'cors';
+import { WebSocketServer } from "ws";
+import WebSocketService from "./services/webSocketServices";
 
 dotenv.config();
 
@@ -24,18 +26,20 @@ app.use(express.json());
 app.use(cookieParser());
 app.use("/api", routes);
 
-pool
-    .connect()
-    .then(() => {
-        app.listen(PORT, () => {
-            console.log(`Server running on: http://localhost:${PORT}`);
-        });
-    })
-    .catch((error: any) => {
-        if (error instanceof Error) {
-            console.error("Error connecting to database:", error.message);
-        } else {
-            console.error("Error connecting to database:", error);
-        }
-        console.error("Failed to connect to the database with URL:", process.env.DATABASE_URL);
+// Configuração do WebSocket Server
+const wss = new WebSocketServer({ noServer: true });
+const webSocketService = new WebSocketService(wss);
+
+// Integrando WebSocket com o servidor HTTP
+const server = app.listen(PORT, () => {
+    console.log(`Server running on: http://localhost:${PORT}`);
+});
+
+// Tratando upgrade de conexão para WebSocket
+server.on('upgrade', (request, socket, head) => {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+        wss.emit('connection', ws, request);
     });
+});
+
+export default webSocketService;
