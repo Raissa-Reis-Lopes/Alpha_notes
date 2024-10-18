@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS notes (
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     metadata JSONB, 
+    status TEXT DEFAULT 'pending',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by UUID NOT NULL,
@@ -31,7 +32,7 @@ CREATE TABLE IF NOT EXISTS chunks (
     chunk_index INT NOT NULL,
     text TEXT NOT NULL,
     embedding VECTOR(1536),
-    CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id)
+    CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id) ON DELETE CASCADE
 );
 
 -- Indexação para otimizar buscas vetoriais nos chunks
@@ -43,7 +44,7 @@ CREATE TABLE IF NOT EXISTS images (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     note_id UUID NOT NULL,
     image_path TEXT NOT NULL,
-    CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id)
+    CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id) ON DELETE CASCADE
 );
 
 CREATE OR REPLACE FUNCTION match_chunks(

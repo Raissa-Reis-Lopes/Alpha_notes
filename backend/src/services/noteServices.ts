@@ -51,6 +51,8 @@ export const processEmbeddingsForNote = async (noteId: string, userId: string): 
         // Obter a nota sem os embeddings
         const note = await noteRepository.getNoteById(noteId, userId);
 
+        console.log("Essa é a nota que está tendo um novo embedding", note)
+
         // Dividir o conteúdo da nota em chunks
         const chunkSize = 200;
         const chunks = await splitTextIntoChunks(note.content, chunkSize);
@@ -73,7 +75,7 @@ export const processEmbeddingsForNote = async (noteId: string, userId: string): 
 
         // Após a geração dos embeddings, atualiza o status para 'completed'
         await noteRepository.updateNoteStatus(noteId, 'completed');
-        
+
 // Atualizar a nota e salvar embeddings nos metadados
 await noteRepository.updateNoteWithEmbeddings(noteId, enrichedMetadata, chunkData);
 } catch (error) {
