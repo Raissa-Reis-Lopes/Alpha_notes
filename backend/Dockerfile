@@ -1,3 +1,4 @@
+
 # Use uma imagem base do Node.js
 FROM node:18
 
@@ -17,7 +18,7 @@ COPY . .
 RUN npm run build
 
 # Usa o nodemon para monitorar mudanças no código durante o desenvolvimento
-CMD ["nodemon", "--exec", "ts-node", "src/index.ts"]
+CMD ["npx", "nodemon", "--exec", "npx ts-node", "src/index.ts"]
 
 
 # # Use uma imagem base do Node.js
@@ -29,8 +30,8 @@ CMD ["nodemon", "--exec", "ts-node", "src/index.ts"]
 # # Copia o arquivo package.json e package-lock.json
 # COPY package*.json ./
 
-# # Instala apenas as dependências de produção
-# RUN npm install --production
+# # Instala todas as dependências, incluindo as de desenvolvimento
+# RUN npm install
 
 # # Copia o código da aplicação para dentro do contêiner
 # COPY . .
@@ -38,5 +39,5 @@ CMD ["nodemon", "--exec", "ts-node", "src/index.ts"]
 # # Executa o build do TypeScript
 # RUN npm run build
 
-# # Define o comando para iniciar o aplicativo
-# CMD ["node", "dist/index.js"]
+# # Usa o nodemon para monitorar mudanças no código durante o desenvolvimento
+# CMD ["nodemon", "--exec", "ts-node", "src/index.ts"]

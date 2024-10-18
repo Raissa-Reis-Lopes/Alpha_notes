@@ -29,16 +29,30 @@ export const createNote = async (req: Request, res: Response) => {
         response.message = "Note successfully created!";
         res.status(201).json(response);
 
-        const client = webSocketService.getClient(socketId);
-        const noteId = note.id;
-
-        if (client) {
-            client.send(JSON.stringify({ status: 'processing', noteId: note.id }));
-
-            await noteServices.processEmbeddingsForNote(noteId, userId);
-
-            client.send(JSON.stringify({ status: 'completed', noteId: note.id }));
+          // Notifica o cliente que o processamento dos embeddings começou, se o WebSocket estiver disponível
+          if (socketId) {
+            const client = webSocketService.getClient(socketId);
+            if (client) {
+                client.send(JSON.stringify({ status: 'pending', noteId: note.id }));
+            }
         }
+
+        // Processa os embeddings em segundo plano
+        noteServices.processEmbeddingsForNote(note.id, userId).then(async () => {
+            // Atualiza o status da nota para 'completed' quando os embeddings forem gerados
+            await noteServices.updateNoteStatus(note.id, 'completed');
+            
+            // Notifica o cliente via WebSocket (se existir)
+            if (socketId) {
+                const client = webSocketService.getClient(socketId);
+                if (client) {
+                    client.send(JSON.stringify({ status: 'completed', noteId: note.id }));
+                }
+            }
+        }).catch((error) => {
+            console.error('Erro ao processar embeddings:', error);
+        });
+
 
     } catch (error: any) {
         res.status(500).json({
@@ -148,8 +162,11 @@ export const updateNote = async (req: Request, res: Response): Promise<void> => 
     try {
         const noteId = req.params.noteId;
         const fields: Partial<INote> = req.body;
-
+        const socketId = req.headers['x-socket-id'] as string;
         const userId = req.user!.id;
+
+        // Pego a nota atual antes de atualizar pra ver se o conteúdo mudou, se ele não tiver mudado ele nem passa pelo embedding, pra melhorar a performance
+        const currentNote = await noteServices.getNoteById(noteId, userId);
 
         if (!userId) {
             res.status(400).json({ message: "User ID is missing" });
@@ -162,6 +179,33 @@ export const updateNote = async (req: Request, res: Response): Promise<void> => 
         response.message = "Note updated successfully!";
         res.json(response);
 
+        // Verifique se o conteúdo foi alterado
+        if (fields.content && fields.content !== currentNote.content) {
+            console.log("Chegou aqui onde vai ocorrer o embedidng")
+            // Notifica o cliente que o processamento dos embeddings começou, se o WebSocket estiver disponível
+            if (socketId) {
+                const client = webSocketService.getClient(socketId);
+                if (client) {
+                    client.send(JSON.stringify({ status: 'pending', noteId: updatedNote.id }));
+                }
+            }
+
+            // Processa os embeddings em segundo plano
+            noteServices.processEmbeddingsForNote(updatedNote.id, userId).then(async () => {
+                // Atualiza o status da nota para 'completed' quando os embeddings forem gerados
+                await noteServices.updateNoteStatus(updatedNote.id, 'completed');
+                
+                // Notifica o cliente via WebSocket (se existir)
+                if (socketId) {
+                    const client = webSocketService.getClient(socketId);
+                    if (client) {
+                        client.send(JSON.stringify({ status: 'completed', noteId: updatedNote.id }));
+                    }
+                }
+            }).catch((error) => {
+                console.error('Erro ao processar embeddings:', error);
+            });
+        }
     } catch (error: any) {
         console.error(error)
         res.status(500).json({
