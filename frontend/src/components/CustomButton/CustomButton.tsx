@@ -6,12 +6,16 @@ interface CustomButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   color?: string; 
   hoverColor?: string; 
+  margin?: string;
+  width?: string; 
 }
 
 const CustomButton: React.FC<CustomButtonProps> = ({ 
   children, 
   color = '#8f5bbd',
   hoverColor = '#7e4aad', 
+  margin, 
+  width,
   ...props 
 }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -19,7 +23,11 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   return (
     <button 
       className="custom-button" 
-      style={{ backgroundColor: isHovered ? hoverColor : color }}
+      style={{ 
+        backgroundColor: isHovered ? hoverColor : color,
+        margin,
+        width
+      }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       {...props}
