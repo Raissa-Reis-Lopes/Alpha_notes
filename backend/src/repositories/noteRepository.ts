@@ -60,37 +60,42 @@ export const createNote = async (
     created_by: string,
     metadata: object
 ): Promise<INote> => {
-    const noteQuery = `
+    const query = `
         INSERT INTO notes (title, content, metadata, created_by) 
         VALUES ($1, $2, $3, $4) 
         RETURNING *;
     `;
     try {
-        const noteResult = await pool.query(noteQuery, [
-            title,
-            content,
-            metadata,
-            created_by
-        ]);
-        const note = noteResult.rows[0] as INote;
+        const result = await pool.query(query, [title, content, metadata, created_by]);
+        return result.rows[0] as INote;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
 
-        // Inserir os chunks
-        const chunks: { text: string; embedding: number[]; index: number }[] = (metadata as any).chunks;
+// Atualizar a nota com os embeddings e chunks
+export const updateNoteWithEmbeddings = async (
+    noteId: string,
+    chunks: { text: string; embedding: number[]; index: number }[]
+): Promise<void> => {
+    const chunkQuery = `
+        INSERT INTO chunks (note_id, chunk_index, text, embedding)
+        VALUES ($1, $2, $3, $4::vector)
+        RETURNING *;
+    `;
+    const updateNoteQuery = `
+        UPDATE notes SET updated_at = NOW() WHERE id = $1
+    `;
+    try {
+        // Atualizar a nota
+        await pool.query(updateNoteQuery, [noteId]);
+
+        // Inserir os chunks no banco
         for (const chunk of chunks) {
-            const chunkQuery = `
-                INSERT INTO chunks (note_id, chunk_index, text, embedding)
-                VALUES ($1, $2, $3, $4::vector)
-                RETURNING *;
-            `;
-            await pool.query(chunkQuery, [
-                note.id,
-                chunk.index,
-                chunk.text,
-                JSON.stringify(chunk.embedding)
-            ]);
+            await pool.query(chunkQuery, [noteId, chunk.index, chunk.text, JSON.stringify(chunk.embedding)]);
         }
 
-        return note;
     } catch (error) {
         console.error(error);
         throw error;

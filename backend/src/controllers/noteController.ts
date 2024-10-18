@@ -3,6 +3,50 @@ import { Request, Response } from "express";
 import * as noteServices from "../services/noteServices";
 import { INote } from "../interfaces/note";
 import { IAPIResponse } from "../interfaces/api";
+import webSocketService from "..";
+
+export const createNote = async (req: Request, res: Response) => {
+    const response: IAPIResponse<INote> = { success: false };
+    try {
+        const { title, content, metadata } = req.body;
+        const socketId = req.headers['x-socket-id'] as string;
+        const userId = req.user!.id;
+
+        if (!userId) {
+            res.status(400).json({ message: "User ID is missing" });
+            return;
+        }
+
+        const note = await noteServices.createNoteWithoutEmbeddings(
+            title,
+            content,
+            userId,
+            metadata
+        );
+
+        response.data = note;
+        response.success = true;
+        response.message = "Note successfully created!";
+        res.status(201).json(response);
+
+        const client = webSocketService.getClient(socketId);
+        const noteId = note.id;
+
+        if (client) {
+            client.send(JSON.stringify({ status: 'processing', noteId: note.id }));
+
+            await noteServices.processEmbeddingsForNote(noteId, userId);
+
+            client.send(JSON.stringify({ status: 'completed', noteId: note.id }));
+        }
+
+    } catch (error: any) {
+        res.status(500).json({
+            data: null,
+            error: error.message || "An unexpected error occurred"
+        });
+    }
+};
 
 export const searchNotesByQuery = async (req: Request, res: Response): Promise<void> => {
     const response: IAPIResponse<INote[]> = { success: false };
@@ -70,39 +114,6 @@ export const getNoteById = async (
         res.status(200).json(response);
     } catch (error: any) {
         console.error(error);
-        res.status(500).json({
-            data: null,
-            error: error.message || "An unexpected error occurred"
-        });
-    }
-};
-
-export const createNote = async (req: Request, res: Response) => {
-    const response: IAPIResponse<INote> = { success: false };
-    try {
-        const { title, content, metadata } = req.body;
-
-
-        const userId = req.user!.id;
-
-
-        if (!userId) {
-            res.status(400).json({ message: "User ID is missing" });
-            return;
-        }
-
-        const note = await noteServices.createNote(
-            title,
-            content,
-            userId,
-            metadata
-        );
-
-        response.data = note;
-        response.success = true;
-        response.message = "Note successfully created!";
-        res.status(201).json(response);
-    } catch (error: any) {
         res.status(500).json({
             data: null,
             error: error.message || "An unexpected error occurred"

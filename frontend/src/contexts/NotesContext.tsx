@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createNoteApi, deleteNoteApi, getAllNotesApi, updateNoteApi } from '../api/notesApi';
-import request, { requestOptions } from '../utils/request';
+import { useWebSocket } from './WebSocketContext';
 
 interface Note {
   id: string;
@@ -8,11 +8,12 @@ interface Note {
   content: string;
   date: string;
   archived: boolean;
+  metadata: object;
+  status: 'processing' | 'completed' | 'failed';
 }
 
 interface NotesContextType {
   notes: Note[];
-  //createNote: (note: Partial<Note>) => void;
   getAllNotes: () => void;
   createNote: (note: Partial<Note>) => void;
   updateNote: (id: string, updatedNoteData: Partial<Note>) => void;
@@ -34,12 +35,55 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } */
   ]);
 
+  const { webSocketService, socketId } = useWebSocket();
+
+  useEffect(() => {
+    webSocketService.registerCallback('processing', (data) => {
+      console.log(`PROCESSANDO: ${JSON.stringify(data)}`);
+
+      /* const noteId = JSON.stringify(data.noteId);
+
+      setNotes((prevNotes) =>
+        prevNotes.map((note) =>
+          note.id === noteId ? { ...note, status: 'processing' } : note
+        )
+      ); */
+    });
+
+    webSocketService.registerCallback('completed', (data) => {
+      console.log(`COMPLETOU: ${JSON.stringify(data)}`);
+
+      /* const noteId = JSON.stringify(data.noteId);
+
+      setNotes((prevNotes) =>
+        prevNotes.map((note) =>
+          note.id === noteId ? { ...note, status: 'completed' } : note
+        )
+      ); */
+    });
+
+  }, [webSocketService]);
+
+
   const getAllNotes = async () => {
     const { data, error } = await getAllNotesApi();
     if (error) {
       console.log(error);
       return error;
     }
+
+    //Testando CSS
+    const x = data as Note[];
+
+    x.push({
+      id: '1',
+      title: 'Teste 1',
+      content: 'Conteúdo do teste 1',
+      date: new Date().toISOString(),
+      archived: false,
+      metadata: {},
+      status: 'processing'
+    })
 
     if (data) {
       setNotes(data as Note[]);
@@ -48,13 +92,19 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const createNote = async (note: Partial<Note>) => {
-    const { data, error } = await createNoteApi({ title: note.title, content: note.content });
+    if (!socketId) {
+      console.log("Socket ID não encontrado, não posso enviar o createNote");
+      return;
+    }
+
+    const { data, error } = await createNoteApi({ title: note.title, content: note.content, metadata: note.metadata }, socketId);
     if (error) {
       console.log(error);
       return error;
     }
 
     if (data) {
+      /* const newNote: Note = { ...data, status: 'processing' }; */ // Define status inicial como 'processing'
       setNotes([...notes, data]);
       console.log("Successfully created", data);
     }

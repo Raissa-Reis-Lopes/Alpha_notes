@@ -1,0 +1,36 @@
+.loader {
+  position: relative;
+  bottom: 92%;
+  margin-left: auto;
+
+
+
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  /* Cor do círculo externo */
+  /* border-left-color: #000; */
+  /* Cor da animação (círculo girando) */
+  border-radius: 50%;
+  width: 10px;
+  height: 10px;
+  animation: spin 1s linear infinite;
+  /* Animação de rotação */
+}
+
+.processing {
+  border-left-color: #009cff;
+}
+
+.completed {
+  border-left-color: #2bd800;
+}
+
+.failed {
+  border-left-color: #ff0000;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+    /* Roda o círculo em 360 graus */
+  }
+}

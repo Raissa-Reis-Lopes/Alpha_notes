@@ -6,6 +6,7 @@ export interface requestOptions {
   body?: object | FormData;
   formData?: boolean;
   auth?: boolean;
+  socketId?: string;
 }
 
 export default async function request<T>({
@@ -14,6 +15,7 @@ export default async function request<T>({
   body,
   formData,
   auth = true,
+  socketId,
 }: requestOptions): Promise<{
   data: T;
   error: boolean;
@@ -24,13 +26,13 @@ export default async function request<T>({
   const requestOptions: RequestInit = {
     method,
     body: !formData ? JSON.stringify(body) : (body as FormData),
-    headers: !formData
-      ? {
-        "Content-type": "application/json",
-      }
-      : {},
+    headers: {
+      ...(!formData ? { "Content-type": "application/json" } : {}),
+      ...(socketId ? { "x-socket-id": socketId } : {}), // Incluindo o socketId nos cabeçalhos
+    },
     cache: "no-store",
     credentials: 'include',
+
   };
 
   const response = await fetch(url, requestOptions);
