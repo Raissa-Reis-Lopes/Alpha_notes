@@ -74,9 +74,9 @@ export const createNote = async (
     }
 };
 
-// Atualizar a nota com os embeddings e chunks
 export const updateNoteWithEmbeddings = async (
     noteId: string,
+    enrichedMetadata: object, // Recebendo os metadados atualizados
     chunks: { text: string; embedding: number[]; index: number }[]
 ): Promise<void> => {
     const chunkQuery = `
@@ -85,22 +85,67 @@ export const updateNoteWithEmbeddings = async (
         RETURNING *;
     `;
     const updateNoteQuery = `
-        UPDATE notes SET updated_at = NOW() WHERE id = $1
+        UPDATE notes SET metadata = $2, updated_at = NOW() WHERE id = $1
     `;
     try {
-        // Atualizar a nota
-        await pool.query(updateNoteQuery, [noteId]);
+        // Atualizar a nota com os metadados e embeddings
+        await pool.query(updateNoteQuery, [noteId, enrichedMetadata]);
 
         // Inserir os chunks no banco
         for (const chunk of chunks) {
             await pool.query(chunkQuery, [noteId, chunk.index, chunk.text, JSON.stringify(chunk.embedding)]);
         }
-
     } catch (error) {
         console.error(error);
         throw error;
     }
 };
+
+export const updateNoteStatus = async (noteId: string, status: string) => {
+    const query = `
+      UPDATE notes
+      SET status = $1, updated_at = NOW()
+      WHERE id = $2
+    `;
+  
+    try {
+      await pool.query(query, [status, noteId]);
+      console.log(`Status da nota ${noteId} atualizado para '${status}'`);
+    } catch (error) {
+      console.error('Erro ao atualizar o status da nota:', error);
+      throw error;
+    }
+  };
+  
+
+
+// export const updateNoteWithEmbeddings = async (
+//     noteId: string,
+//     enrichedMetadata: object, // Recebendo os metadados atualizados
+//     chunks: { text: string; embedding: number[]; index: number }[]
+// ): Promise<void> => {
+//     const chunkQuery = `
+//         INSERT INTO chunks (note_id, chunk_index, text, embedding)
+//         VALUES ($1, $2, $3, $4::vector)
+//         RETURNING *;
+//     `;
+//     const updateNoteQuery = `
+//         UPDATE notes SET metadata = $2, updated_at = NOW() WHERE id = $1
+//     `;
+//     try {
+//         // Atualizar a nota com os metadados e embeddings
+//         await pool.query(updateNoteQuery, [noteId, enrichedMetadata]);
+
+//         // Inserir os chunks no banco
+//         for (const chunk of chunks) {
+//             await pool.query(chunkQuery, [noteId, chunk.index, chunk.text, JSON.stringify(chunk.embedding)]);
+//         }
+//     } catch (error) {
+//         console.error(error);
+//         throw error;
+//     }
+// };
+
 
 
 export const updateNote = async (

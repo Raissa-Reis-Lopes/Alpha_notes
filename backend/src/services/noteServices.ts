@@ -14,11 +14,7 @@ const splitTextIntoChunks = async (text: string, chunkSize: number, chunkOverlap
         chunkSize: chunkSize,
         chunkOverlap: chunkOverlap,
     });
-
-    // O método createDocuments espera um array de textos
     const documents = await textSplitter.createDocuments([text]);
-
-    // Extrair o texto dos documentos resultantes
     return documents.map(doc => doc.pageContent);
 };
 
@@ -27,6 +23,7 @@ const generateEmbeddingsForChunks = async (chunks: string[]): Promise<number[][]
     const embeddings = await openAIEmbeddings.embedDocuments(chunks);
     return embeddings;
 };
+
 
 // Função para criar a nota sem embeddings inicialmente
 export const createNoteWithoutEmbeddings = async (
@@ -68,18 +65,32 @@ export const processEmbeddingsForNote = async (noteId: string, userId: string): 
             index
         }));
 
-//VOu deixar essa parte aqui comentada, pq vamos precisar disso pra salvar o embedding no metadata, senão não vai vincular à nota
- // Enriquecer os metadados com os chunks
-        // const enrichedMetadata = {
-        //     ...metadata,
-        //     chunks: chunkData
-        // };
-        await noteRepository.updateNoteWithEmbeddings(noteId, chunkData);
-    } catch (error) {
+          // Atualizar a nota com os chunks e embeddings nos metadados
+          const enrichedMetadata = {
+            ...note.metadata,
+            chunks: chunkData
+        };
+
+        // Após a geração dos embeddings, atualiza o status para 'completed'
+        await noteRepository.updateNoteStatus(noteId, 'completed');
+        
+// Atualizar a nota e salvar embeddings nos metadados
+await noteRepository.updateNoteWithEmbeddings(noteId, enrichedMetadata, chunkData);
+} catch (error) {
         console.error("Error processing embeddings:", error);
         throw error;
     }
 };
+
+export const updateNoteStatus = async (noteId: string, status: string): Promise<void> => {
+    try {
+        await noteRepository.updateNoteStatus(noteId, status);
+    } catch (error) {
+        console.error('Erro ao atualizar o status da nota:', error);
+        throw error;
+    }
+};
+
 
 // export const createNote = async (
 //     title: string,
@@ -206,47 +217,71 @@ export const updateNote = async (
     fields: Partial<INote>,
     userId: string
 ): Promise<INote> => {
-    try {
-        const currentNote = await noteRepository.getNoteById(noteId, userId);
-        if (!currentNote) {
-            throw new Error("Note not found");
-        }
-
-        let updatedMetadata = currentNote.metadata;
-
-        if (fields.content && fields.content !== currentNote.content) {
-            // Dividir o novo conteúdo em chunks
-            const chunkSize = 200;
-            const newChunks = await splitTextIntoChunks(fields.content, chunkSize);
-
-            // Gerar embeddings para os novos chunks
-            const newEmbeddings = await generateEmbeddingsForChunks(newChunks);
-
-            // Preparar os chunks com seus embeddings e índices
-            const newChunkData = newChunks.map((chunk, index) => ({
-                text: chunk,
-                embedding: newEmbeddings[index],
-                index: index
-            }));
-
-            // Atualizar os metadados com os novos chunks
-            updatedMetadata = {
-                ...updatedMetadata,
-                chunks: newChunkData
-            };
-        }
-
-        const updatedNote: INote = {
-            ...currentNote,
-            title: fields.title || currentNote.title,
-            content: fields.content || currentNote.content,
-            metadata: updatedMetadata,
-            updated_at: new Date(),
-        };
-
-        const note = await noteRepository.updateNote(noteId, updatedNote, userId);
-        return note;
-    } catch (error: any) {
-        throw new Error(`Failed to update note: ${error.message}`);
+    const currentNote = await noteRepository.getNoteById(noteId, userId);
+    if (!currentNote) {
+        throw new Error("Note not found");
     }
+
+    // Atualizar a nota com os novos campos sem modificar os chunks
+    const updatedNote: INote = {
+        ...currentNote,
+        title: fields.title || currentNote.title,
+        content: fields.content || currentNote.content,
+        updated_at: new Date(),
+    };
+
+    // Atualizar a nota no repositório
+    await noteRepository.updateNote(noteId, updatedNote, userId);
+
+    return updatedNote; // Retornar a nota atualizada
 };
+
+// export const updateNote = async (
+//     noteId: string,
+//     fields: Partial<INote>,
+//     userId: string
+// ): Promise<INote> => {
+//     try {
+//         const currentNote = await noteRepository.getNoteById(noteId, userId);
+//         if (!currentNote) {
+//             throw new Error("Note not found");
+//         }
+
+//         let updatedMetadata = currentNote.metadata;
+
+//         if (fields.content && fields.content !== currentNote.content) {
+//             // Dividir o novo conteúdo em chunks
+//             const chunkSize = 200;
+//             const newChunks = await splitTextIntoChunks(fields.content, chunkSize);
+
+//             // Gerar embeddings para os novos chunks
+//             const newEmbeddings = await generateEmbeddingsForChunks(newChunks);
+
+//             // Preparar os chunks com seus embeddings e índices
+//             const newChunkData = newChunks.map((chunk, index) => ({
+//                 text: chunk,
+//                 embedding: newEmbeddings[index],
+//                 index: index
+//             }));
+
+//             // Atualizar os metadados com os novos chunks
+//             updatedMetadata = {
+//                 ...updatedMetadata,
+//                 chunks: newChunkData
+//             };
+//         }
+
+//         const updatedNote: INote = {
+//             ...currentNote,
+//             title: fields.title || currentNote.title,
+//             content: fields.content || currentNote.content,
+//             metadata: updatedMetadata,
+//             updated_at: new Date(),
+//         };
+
+//         const note = await noteRepository.updateNote(noteId, updatedNote, userId);
+//         return note;
+//     } catch (error: any) {
+//         throw new Error(`Failed to update note: ${error.message}`);
+//     }
+// };

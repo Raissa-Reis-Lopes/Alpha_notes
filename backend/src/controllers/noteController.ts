@@ -29,16 +29,30 @@ export const createNote = async (req: Request, res: Response) => {
         response.message = "Note successfully created!";
         res.status(201).json(response);
 
-        const client = webSocketService.getClient(socketId);
-        const noteId = note.id;
-
-        if (client) {
-            client.send(JSON.stringify({ status: 'processing', noteId: note.id }));
-
-            await noteServices.processEmbeddingsForNote(noteId, userId);
-
-            client.send(JSON.stringify({ status: 'completed', noteId: note.id }));
+          // Notifica o cliente que o processamento dos embeddings começou, se o WebSocket estiver disponível
+          if (socketId) {
+            const client = webSocketService.getClient(socketId);
+            if (client) {
+                client.send(JSON.stringify({ status: 'pending', noteId: note.id }));
+            }
         }
+
+        // Processa os embeddings em segundo plano
+        noteServices.processEmbeddingsForNote(note.id, userId).then(async () => {
+            // Atualiza o status da nota para 'completed' quando os embeddings forem gerados
+            await noteServices.updateNoteStatus(note.id, 'completed');
+            
+            // Notifica o cliente via WebSocket (se existir)
+            if (socketId) {
+                const client = webSocketService.getClient(socketId);
+                if (client) {
+                    client.send(JSON.stringify({ status: 'completed', noteId: note.id }));
+                }
+            }
+        }).catch((error) => {
+            console.error('Erro ao processar embeddings:', error);
+        });
+
 
     } catch (error: any) {
         res.status(500).json({
