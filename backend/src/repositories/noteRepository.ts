@@ -96,8 +96,6 @@ export const updateNoteWithEmbeddings = async (
             await pool.query(chunkQuery, [noteId, chunk.index, chunk.text, JSON.stringify(chunk.embedding)]);
         }
 
-        return note;
-        console.log("fim do repository")
     } catch (error) {
         console.error(error);
         throw error;

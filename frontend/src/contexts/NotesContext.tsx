@@ -8,6 +8,7 @@ interface Note {
   content: string;
   date: string;
   archived: boolean;
+  metadata: object;
   status: 'processing' | 'completed' | 'failed';
 }
 
@@ -80,6 +81,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       content: 'Conteúdo do teste 1',
       date: new Date().toISOString(),
       archived: false,
+      metadata: {},
       status: 'processing'
     })
 
@@ -95,7 +97,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       return;
     }
 
-    const { data, error } = await createNoteApi({ title: note.title, content: note.content }, socketId);
+    const { data, error } = await createNoteApi({ title: note.title, content: note.content, metadata: note.metadata }, socketId);
     if (error) {
       console.log(error);
       return error;

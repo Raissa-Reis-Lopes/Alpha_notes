@@ -1,29 +1,59 @@
-// services/websocketService.ts
 class WebSocketService {
   private socket: WebSocket | null = null;
   private callbacks: { [key: string]: (data: any) => void } = {};
 
   connect() {
-    this.socket = new WebSocket('ws://localhost:3001');
+    if (!this.socket || this.socket.readyState === WebSocket.CLOSED) {
+      this.socket = new WebSocket('ws://localhost:3001');
+      console.log("this socket", this.socket);
 
-    this.socket.onopen = () => {
-      console.log('Conectado ao WebSocket');
-    };
+      this.socket.onopen = () => {
+        console.log('Conectado ao WebSocket');
+      };
 
-    this.socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      const callback = this.callbacks[data.noteId];
-      if (callback) {
-        callback(data);
-      }
-    };
+      this.socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
 
-    this.socket.onclose = () => {
-      console.log('Conexão WebSocket fechada');
-    };
+        console.log("Event data", data);
+
+        if (data.type && data.type === 'uuid') {
+          console.log('SockeId received');
+          if (this.callbacks['uuid']) {
+            this.callbacks['uuid'](data);
+          }
+        }
+
+        if (data.status && data.status === 'processing') {
+          console.log('Embedding processing data');
+          if (this.callbacks['processing']) {
+            this.callbacks['processing'](data);
+          }
+        }
+
+        if (data.status && data.status === 'completed') {
+          console.log('Embedding Completed');
+          if (this.callbacks['completed']) {
+            this.callbacks['completed'](data);
+          }
+        }
+
+        const callback = this.callbacks[data.noteId];
+        if (callback) {
+          callback(data);
+        }
+      };
+
+      this.socket.onerror = (error) => {
+        console.error('Erro no WebSocket:', error);
+      };
+
+      this.socket.onclose = (event) => {
+        console.log('Conexão WebSocket fechada. Código:', event.code, 'Motivo:', event.reason);
+        this.socket = null; // Limpa o socket ao fechá-lo
+      };
+    }
   }
 
-  // Registra uma função de callback para um noteId específico
   registerCallback(noteId: string, callback: (data: any) => void) {
     this.callbacks[noteId] = callback;
   }
@@ -35,7 +65,11 @@ class WebSocketService {
   }
 
   disconnect() {
-    this.socket?.close();
+    if (this.socket) {
+      this.socket.close();
+      this.socket = null; // Limpa o socket ao desconectar
+      this.callbacks = {}; // Limpa os callbacks ao desconectar
+    }
   }
 }
 

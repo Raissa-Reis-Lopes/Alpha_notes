@@ -67,11 +67,7 @@ export const processEmbeddingsForNote = async (noteId: string, userId: string): 
             embedding: embeddings[index],
             index
         }));
-        console.log("noteservice embeding content", embeddings);
-        console.log("noteservice embeding antes de chamar repository", chunkData);
-        // Atualizar a nota com os chunks e embeddings
         await noteRepository.updateNoteWithEmbeddings(noteId, chunkData);
-        console.log("noteservice embeding depois de chamar repository")
     } catch (error) {
         console.error("Error processing embeddings:", error);
         throw error;

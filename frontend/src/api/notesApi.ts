@@ -59,10 +59,11 @@ export async function searchNotesByQueryApi({ query }: { query: string }) {
   }
 }
 
-export async function createNoteApi({ title, content }: Partial<Note>, socketId: string) {
+export async function createNoteApi({ title, content, metadata }: Partial<Note>, socketId: string) {
   const body = {
     title,
     content,
+    metadata,
   };
 
   const requestParams: requestOptions = {

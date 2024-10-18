@@ -121,39 +121,6 @@ export const getNoteById = async (
     }
 };
 
-export const createNote = async (req: Request, res: Response) => {
-    const response: IAPIResponse<INote> = { success: false };
-    try {
-        const { title, content, metadata } = req.body;
-
-
-        const userId = req.user!.id;
-
-
-        if (!userId) {
-            res.status(400).json({ message: "User ID is missing" });
-            return;
-        }
-
-        const note = await noteServices.createNote(
-            title,
-            content,
-            userId,
-            metadata
-        );
-
-        response.data = note;
-        response.success = true;
-        response.message = "Note successfully created!";
-        res.status(201).json(response);
-    } catch (error: any) {
-        res.status(500).json({
-            data: null,
-            error: error.message || "An unexpected error occurred"
-        });
-    }
-};
-
 export const deleteNote = async (
     req: Request,
     res: Response

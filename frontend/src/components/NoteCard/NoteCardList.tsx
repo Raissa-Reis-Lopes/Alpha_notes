@@ -7,7 +7,6 @@ import { Note, useNotes } from '../../contexts/NotesContext';
 import ToolbarCard from '../ToolbarCard/ToolbarCard';
 import NoteModal from '../NoteModal/NoteModal';
 import Loader from '../Loader/Loader';
-import Loader from '../Loader/Loader';
 
 interface NoteCardProps {
   id: string;
@@ -15,10 +14,10 @@ interface NoteCardProps {
   content: string;
   date: string;
   archived: boolean;
-  status: 'processing' | 'completed' | 'failed';
+  metadata: object;
   status: 'processing' | 'completed' | 'failed';
 }
-const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived, status }) => {
+const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived, metadata, status }) => {
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,9 +32,6 @@ const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived,
   //const handleArchiveNote = (noteToArchive: Note) => archiveNote(noteToArchive.id);
   //const handleSoftDeleteNote = (noteToSoftDelete: Note) => softDeleteNote(noteToSoftDelete.id);
   const handleDeleteNote = (noteToDelete: Note) => deleteNote(noteToDelete.id);
-
-
-
 
   return (
     <>
@@ -72,7 +68,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived,
               justifyContent: "space-between",
               visibility: isHovered ? "visible" : "hidden",
             }}>
-            <ToolbarCard note={{ id, title, content, date, archived, status }} onDelete={handleDeleteNote} />
+            <ToolbarCard note={{ id, title, content, date, archived, metadata, status }} onDelete={handleDeleteNote} />
             <Box>
 
             </Box>
@@ -85,7 +81,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived,
       <NoteModal
         open={isModalOpen}
         onClose={handleCloseModal}
-        note={{ id, title, content, date, archived, status }}
+        note={{ id, title, content, date, archived, metadata, status }}
         onSave={handleUpdateNote}
         onDelete={handleDeleteNote}
       />
@@ -142,6 +138,7 @@ const NoteCardList: React.FC<NoteCardListProps> = ({ notes }) => {
               content={item.content}
               date={(new Date(item.date).toLocaleString())}
               archived={item.archived}
+              metadata={item.metadata}
               status={item.status}
             />
           ))}
