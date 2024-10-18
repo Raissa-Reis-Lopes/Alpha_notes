@@ -1,6 +1,7 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createNoteApi, deleteNoteApi, getAllNotesApi, updateNoteApi } from '../api/notesApi';
 import request, { requestOptions } from '../utils/request';
+import { webSocketService } from '../services/WebSocketService';
 
 interface Note {
   id: string;
@@ -8,6 +9,7 @@ interface Note {
   content: string;
   date: string;
   archived: boolean;
+  status: 'processing' | 'completed' | 'failed';
 }
 
 interface NotesContextType {
@@ -34,12 +36,46 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } */
   ]);
 
+
+
+  useEffect(() => {
+    // Conecta ao WebSocket ao montar o contexto
+    webSocketService.connect();
+
+    // Callback para lidar com mensagens recebidas do WebSocket
+    webSocketService.registerCallback('note-status', (data) => {
+      setNotes((prevNotes) =>
+        prevNotes.map((note) =>
+          note.id === data.noteId ? { ...note, status: data.status } : note
+        )
+      );
+    });
+
+    return () => {
+      // Desconecta do WebSocket ao desmontar o contexto
+      webSocketService.disconnect();
+    };
+  }, []);
+
+
   const getAllNotes = async () => {
     const { data, error } = await getAllNotesApi();
     if (error) {
       console.log(error);
       return error;
     }
+
+    //Testando CSS
+    const nn = data as Note[];
+
+    nn.push({
+      id: '1',
+      title: 'Teste 1',
+      content: 'Conteúdo do teste 1',
+      date: new Date().toISOString(),
+      archived: false,
+      status: 'processing'
+    })
 
     if (data) {
       setNotes(data as Note[]);
@@ -55,7 +91,8 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
 
     if (data) {
-      setNotes([...notes, data]);
+      const newNote: Note = { ...data, status: 'processing' }; // Define status inicial como 'processing'
+      setNotes([...notes, newNote]);
       console.log("Successfully created", data);
     }
   };

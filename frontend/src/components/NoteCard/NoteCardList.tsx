@@ -6,6 +6,7 @@ import { useRef, useState } from 'react';
 import { Note, useNotes } from '../../contexts/NotesContext';
 import ToolbarCard from '../ToolbarCard/ToolbarCard';
 import NoteModal from '../NoteModal/NoteModal';
+import Loader from '../Loader/Loader';
 
 interface NoteCardProps {
   id: string;
@@ -13,8 +14,10 @@ interface NoteCardProps {
   content: string;
   date: string;
   archived: boolean;
+  status: 'processing' | 'completed' | 'failed';
 }
-const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived }) => {
+const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived, status }) => {
+  console.log("stats", status);
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -68,22 +71,24 @@ const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived 
               justifyContent: "space-between",
               visibility: isHovered ? "visible" : "hidden",
             }}>
-            <ToolbarCard note={{ id, title, content, date, archived }} onDelete={handleDeleteNote} />
+            <ToolbarCard note={{ id, title, content, date, archived, status }} onDelete={handleDeleteNote} />
             <Box>
 
             </Box>
           </Box>
         )}
+        <Loader className={status} title={status} />
       </Box>
 
       {/* Modal de Edição */}
       <NoteModal
         open={isModalOpen}
         onClose={handleCloseModal}
-        note={{ id, title, content, date, archived }}
+        note={{ id, title, content, date, archived, status }}
         onSave={handleUpdateNote}
         onDelete={handleDeleteNote}
       />
+
     </>
   );
 };
@@ -136,6 +141,7 @@ const NoteCardList: React.FC<NoteCardListProps> = ({ notes }) => {
               content={item.content}
               date={(new Date(item.date).toLocaleString())}
               archived={item.archived}
+              status={item.status}
             />
           ))}
         </Box>
