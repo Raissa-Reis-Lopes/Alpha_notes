@@ -67,6 +67,13 @@ export const processEmbeddingsForNote = async (noteId: string, userId: string): 
             embedding: embeddings[index],
             index
         }));
+
+//VOu deixar essa parte aqui comentada, pq vamos precisar disso pra salvar o embedding no metadata, senão não vai vincular à nota
+ // Enriquecer os metadados com os chunks
+        // const enrichedMetadata = {
+        //     ...metadata,
+        //     chunks: chunkData
+        // };
         await noteRepository.updateNoteWithEmbeddings(noteId, chunkData);
     } catch (error) {
         console.error("Error processing embeddings:", error);
