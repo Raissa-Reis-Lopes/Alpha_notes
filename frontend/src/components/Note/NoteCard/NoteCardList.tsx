@@ -3,10 +3,10 @@ import { Box } from "@mui/material";
 import { Typography } from '@mui/joy';
 import { DescriptionOutlined } from '@mui/icons-material';
 import { useRef, useState } from 'react';
-import { Note, useNotes } from '../../contexts/NotesContext';
-import ToolbarCard from '../ToolbarCard/ToolbarCard';
+import { Note, useNotes } from '../../../contexts/NotesContext';
+import ToolbarCard from '../../ToolbarCard/ToolbarCard';
 import NoteModal from '../NoteModal/NoteModal';
-import Loader from '../Loader/Loader';
+import Loader from '../../Loader/Loader';
 
 interface NoteCardProps {
   id: string;

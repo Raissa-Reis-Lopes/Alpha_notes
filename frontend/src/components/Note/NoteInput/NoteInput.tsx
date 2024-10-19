@@ -6,7 +6,7 @@ import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
 import VideoCallOutlinedIcon from '@mui/icons-material/VideoCallOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import { useEffect, useRef, useState } from 'react';
-import { useNotes } from '../../contexts/NotesContext';
+import { useNotes } from '../../../contexts/NotesContext';
 import { v4 as uuidv4 } from 'uuid';
 
 const NoteInput: React.FC = () => {

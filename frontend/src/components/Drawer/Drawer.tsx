@@ -2,6 +2,7 @@ import React from 'react';
 import { Drawer as MuiDrawer, List, ListItem, ListItemText, ListItemIcon, useTheme, useMediaQuery } from '@mui/material';
 import { Home, Mail, DescriptionOutlined, ArchiveOutlined, DeleteOutlined, Image, Videocam } from '@mui/icons-material';
 import { IconButton, ListItemButton, ListItemDecorator } from '@mui/joy';
+import { Link } from 'react-router-dom';
 
 
 interface DrawerProps {
@@ -38,38 +39,41 @@ const Drawer: React.FC<DrawerProps> = ({ drawerOpen }) => {
         },
       }}
     >
-      {drawerOpen ?
+
+      <List>
+        <ListItem component={Link} to="/dashboard/notes" >
+          <ListItemIcon ><DescriptionOutlined /></ListItemIcon>
+          {drawerOpen && <ListItemText sx={{ margin: 0, padding: 0 }} primary="Notas" />}
+        </ListItem>
+        <ListItem component={Link} to="/dashboard/archive">
+          <ListItemIcon><ArchiveOutlined /></ListItemIcon>
+          {drawerOpen && <ListItemText sx={{ margin: 0, padding: 0 }} primary="Arquivo" />}
+        </ListItem>
+        <ListItem component={Link} to="/dashboard/trash">
+          <ListItemIcon><DeleteOutlined /></ListItemIcon>
+          {drawerOpen && <ListItemText sx={{ margin: 0, padding: 0 }} primary="Lixeira" />}
+        </ListItem>
+      </List>
+      {/* {drawerOpen ?
 
 
         <List>
-          <ListItem component="li">
-            <ListItemIcon><DescriptionOutlined /></ListItemIcon>
+          <ListItem component={Link} to="/notes">
+            <ListItemIcon ><DescriptionOutlined /></ListItemIcon>
             {drawerOpen && <ListItemText sx={{ margin: 0, padding: 0 }} primary="Notas" />}
           </ListItem>
-          <ListItem component="li">
+          <ListItem component={Link} to="/archive">
             <ListItemIcon><ArchiveOutlined /></ListItemIcon>
             {drawerOpen && <ListItemText sx={{ margin: 0, padding: 0 }} primary="Arquivo" />}
           </ListItem>
-          <ListItem component="li">
+          <ListItem component={Link} to="/trash">
             <ListItemIcon><DeleteOutlined /></ListItemIcon>
             {drawerOpen && <ListItemText sx={{ margin: 0, padding: 0 }} primary="Lixeira" />}
           </ListItem>
         </List>
         :
         <List sx={{ display: "flex", flexDirection: "column" }}>
-          {/* <IconButton><DescriptionOutlined /></IconButton>
-          <IconButton><ArchiveOutlined /></IconButton>
-          <IconButton><DeleteOutlined /></IconButton> */}
-
-          {/* <ListItem >
-            <IconButton><DescriptionOutlined /></IconButton>
-          </ListItem>
-          <ListItem >
-            <IconButton><ArchiveOutlined /></IconButton>
-          </ListItem>
-          <ListItem >
-            <IconButton><DeleteOutlined /></IconButton>
-          </ListItem> */}
+         
 
           <ListItem component="li">
             <ListItemIcon><DescriptionOutlined /></ListItemIcon>
@@ -91,7 +95,7 @@ const Drawer: React.FC<DrawerProps> = ({ drawerOpen }) => {
 
         </List>
 
-      }
+      } */}
 
     </MuiDrawer>
   );
@@ -114,3 +118,18 @@ export default Drawer;
             Add another video
           </ListItemButton>
         </List> */}
+
+
+{/* <IconButton><DescriptionOutlined /></IconButton>
+          <IconButton><ArchiveOutlined /></IconButton>
+          <IconButton><DeleteOutlined /></IconButton> */}
+
+{/* <ListItem >
+            <IconButton><DescriptionOutlined /></IconButton>
+          </ListItem>
+          <ListItem >
+            <IconButton><ArchiveOutlined /></IconButton>
+          </ListItem>
+          <ListItem >
+            <IconButton><DeleteOutlined /></IconButton>
+          </ListItem> */}
