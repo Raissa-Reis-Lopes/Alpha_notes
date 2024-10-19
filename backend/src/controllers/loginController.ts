@@ -7,7 +7,6 @@ export const authenticate = async (req: Request, res: Response) => {
     try {
         const user: IUserResponse = await loginServices.getUser(email);
 
-        console.log("ema", email, password, user);
         if (!user) {
             return res.status(400).json({ error: "User not found" });
         }
