@@ -16,6 +16,10 @@
   /* Animação de rotação */
 }
 
+.pending {
+  border-left-color: #ffae00;
+}
+
 .processing {
   border-left-color: #009cff;
 }

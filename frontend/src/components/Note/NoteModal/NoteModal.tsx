@@ -1,11 +1,11 @@
 import './NoteModal.css';
 import { Box, Button, Card, CardContent, CardOverflow, Divider, Input, Modal, Textarea } from "@mui/joy";
 import { useEffect, useState } from 'react';
-import { Note } from '../../contexts/NotesContext';
+import { Note } from '../../../contexts/NotesContext';
 import { ModalDialog } from '@mui/joy';
 import { Transition } from 'react-transition-group';
 import React from 'react';
-import ToolbarCard from '../ToolbarCard/ToolbarCard';
+import ToolbarCard from '../../ToolbarCard/ToolbarCard';
 
 interface NoteModalProps {
   open: boolean;

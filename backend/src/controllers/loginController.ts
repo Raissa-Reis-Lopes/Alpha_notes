@@ -5,8 +5,9 @@ import { Request, Response } from "express"
 export const authenticate = async (req: Request, res: Response) => {
     const { email, password } = req.body;
     try {
-        const user : IUserResponse = await loginServices.getUser(email);
+        const user: IUserResponse = await loginServices.getUser(email);
 
+        console.log("ema", email, password, user);
         if (!user) {
             return res.status(400).json({ error: "User not found" });
         }
