@@ -1,36 +1,36 @@
 services:
-  frontend:
-    build:
-      context: ./frontend
-    container_name: alpha_keep_frontend
-    ports:
-      - "3000:80" # Nginx
-    restart: unless-stopped
-    depends_on:
-      - backend
-    networks:
-      - alpha_keep-network
-    environment:
-      - CHOKIDAR_USEPOLLING=true
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #   container_name: alpha_keep_frontend
+  #   ports:
+  #     - "3000:80" # Nginx
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - alpha_keep-network
+  #   environment:
+  #     - CHOKIDAR_USEPOLLING=true
 
-  backend:
-    build:
-      context: ./backend
-    container_name: alpha_keep_backend
-    ports:
-      - "3001:3001"
-    depends_on:
-      - db
-    restart: unless-stopped
-    networks:
-      - alpha_keep-network
-    volumes:
-      - ./backend:/usr/src/app:rw # Mapeia o diretório do backend
-      - /usr/src/app/node_modules # Mantém os node_modules do contêiner
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
-    command: [ "npm", "run", "dev" ] # Alternativamente, pode chamar o script de desenvolvimento
+  # backend:
+  #   build:
+  #     context: ./backend
+  #   container_name: alpha_keep_backend
+  #   ports:
+  #     - "3001:3001"
+  #   depends_on:
+  #     - db
+  #   restart: unless-stopped
+  #   networks:
+  #     - alpha_keep-network
+  #   volumes:
+  #     - ./backend:/usr/src/app:rw # Mapeia o diretório do backend
+  #     - /usr/src/app/node_modules # Mantém os node_modules do contêiner
+  #   environment:
+  #     - DATABASE_URL=${DATABASE_URL}
+  #     - JWT_SECRET=${JWT_SECRET}
+  #   command: [ "npm", "run", "dev" ] # Alternativamente, pode chamar o script de desenvolvimento
 
   db:
     image: ankane/pgvector
@@ -53,60 +53,3 @@ networks:
 
 volumes:
   pgdata:
-
-    # services:
-    #   frontend:
-    #     build:
-    #       context: ./frontend
-    #     container_name: alpha_keep_frontend
-    #     ports:
-    #       #  - "3000:3000"
-    #       - "80:80" # Nginx
-    #     restart: unless-stopped
-    #     depends_on:
-    #       - backend
-    #     networks:
-    #       - alpha_keep-network
-    #     environment:
-    #       - CHOKIDAR_USEPOLLING=true
-
-    #   backend:
-    #     build:
-    #       context: ./backend
-    #     container_name: alpha_keep_backend
-    #     ports:
-    #       - "3001:3001"
-    #     depends_on:
-    #       - db
-    #     restart: unless-stopped
-    #     networks:
-    #       - alpha_keep-network
-    #     volumes:
-    #       - ./backend:/usr/src/app # Monta o diretório local para o contêiner
-    #       - /usr/src/app/node_modules # Evita sobrescrever os node_modules
-    #     environment:
-    #       - DATABASE_URL=${DATABASE_URL}
-    #       - JWT_SECRET=${JWT_SECRET}
-    #     command: ["npm", "run", "dev"]
-
-    #   db:
-    #     image: ankane/pgvector
-    #     container_name: alpha_keep_db
-    #     ports:
-    #       - "5432:5432"
-    #     environment:
-    #       - POSTGRES_USER=${POSTGRES_USER}
-    #       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    #       - POSTGRES_DB=${POSTGRES_DB}
-    #     volumes:
-    #       - pgdata:/var/lib/postgresql/data
-    #       - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
-    #     networks:
-    #       - alpha_keep-network
-
-    # networks:
-    #   alpha_keep-network:
-
-
-    # volumes:
-    #   pgdata:

@@ -44,6 +44,7 @@ CREATE TABLE IF NOT EXISTS images (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     note_id UUID NOT NULL,
     image_path TEXT NOT NULL,
+    description TEXT, -- Descrição gerada pela IA
     CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id) ON DELETE CASCADE
 );
 
