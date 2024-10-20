@@ -125,14 +125,18 @@ export const updateNote = async (
         SET 
             title = $1, 
             content = $2, 
-            updated_at = $3
-        WHERE id = $4 AND created_by = $5
+            is_in_trash = $3,
+            is_in_archive = $4,
+            updated_at = $5
+        WHERE id = $6 AND created_by = $7
         RETURNING *;
     `;
     try {
         const result = await pool.query(query, [
             updatedNote.title,
             updatedNote.content,
+            updatedNote.is_in_trash,
+            updatedNote.is_in_archive,
             updatedNote.updated_at,
             noteId,
             userId
@@ -144,7 +148,7 @@ export const updateNote = async (
         return result.rows[0] as INote;
     } catch (error) {
         console.error(error);
-        throw new Error("Failed to update note.");
+        throw error;
     }
 };
 
