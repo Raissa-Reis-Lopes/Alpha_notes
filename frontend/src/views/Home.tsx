@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import HomePage from '../components/HomePage/HomePage';
 import SmileFace from '../components/SmileFace/SmileFace';
 import { styled } from '@mui/material/styles';
-import NoteInput from '../components/NoteInputHome/NoteInputHome';
+import NoteInput from '../components/Note/NoteInputHome/NoteInputHome';
 import TextLink from '../components/TextLinks/TextLinks';
 import CustomButton from '../components/CustomButton/CustomButton';
 import HomeContainer from '../components/HomeContainer/HomeContainer';
@@ -41,10 +41,10 @@ const Home: React.FC = () => {
           onChange={(e) => setInputValue(e.target.value)}
           style={{ marginBottom: '1rem' }}
         />
-        <CustomButton 
-          type="button" 
-          color="#00bf74" 
-          hoverColor="#009f64" 
+        <CustomButton
+          type="button"
+          color="#00bf74"
+          hoverColor="#009f64"
           width='15rem'
           onClick={handleRegisterClick}
         >

@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import LoginContainer from '../components/LoginContainer/LoginContainer';
-import NoteBox from '../components/NoteBox/NoteBox';
+import NoteBox from '../components/Note/NoteBox/NoteBox';
 import { styled } from '@mui/material/styles';
 import LoginPage from '../components/LoginPage/LoginPage';
 import CustomInput from '../components/CustomInput/CustomInput';
