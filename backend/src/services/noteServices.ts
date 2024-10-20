@@ -195,19 +195,26 @@ export const updateNote = async (
     fields: Partial<INote>,
     userId: string
 ): Promise<INote> => {
-    const currentNote = await noteRepository.getNoteById(noteId, userId);
-    if (!currentNote) {
-        throw new Error("Note not found");
+    try {
+        const currentNote = await noteRepository.getNoteById(noteId, userId);
+        if (!currentNote) {
+            throw new Error("Note not found");
+        }
+
+        const updatedNote: INote = {
+            ...currentNote,
+            title: fields.title || currentNote.title,
+            content: fields.content || currentNote.content,
+            is_in_trash: fields.is_in_trash || currentNote.is_in_trash,
+            is_in_archive: fields.is_in_archive || currentNote.is_in_archive,
+            updated_at: new Date(),
+        };
+
+        await noteRepository.updateNote(noteId, updatedNote, userId);
+
+        return updatedNote;
+    } catch (error: any) {
+        throw error;
     }
 
-    const updatedNote: INote = {
-        ...currentNote,
-        title: fields.title || currentNote.title,
-        content: fields.content || currentNote.content,
-        updated_at: new Date(),
-    };
-
-    await noteRepository.updateNote(noteId, updatedNote, userId);
-
-    return updatedNote;
 };

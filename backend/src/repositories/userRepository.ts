@@ -23,7 +23,7 @@ export const createUser = async (
     password: string,
 ) => {
     const query =
-        "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING *";
+        "INSERT INTO users (username, email, password) VALUES ($1, $2, $3) RETURNING id, username, email";
     try {
         const result = await pool.query(query, [
             username,

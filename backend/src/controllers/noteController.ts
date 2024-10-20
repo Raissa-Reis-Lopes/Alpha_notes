@@ -131,28 +131,6 @@ export const getNoteById = async (
     }
 };
 
-export const deleteNote = async (
-    req: Request,
-    res: Response
-): Promise<void> => {
-    const response: IAPIResponse<INote> = { success: false };
-    try {
-        const noteId = req.params.noteId;
-        const note: INote = await noteServices.deleteNote(noteId);
-        response.data = note;
-        response.success = true;
-        response.message = "Note deleted successfully!";
-        res.status(200).json(response);
-    } catch (error: any) {
-
-        console.error(error);
-        res.status(500).json({
-            data: null,
-            error: error.message || "An unexpected error occurred"
-        });
-    }
-};
-
 export const updateNote = async (req: Request, res: Response): Promise<void> => {
     const response: IAPIResponse<INote> = { success: false };
     try {
@@ -175,7 +153,6 @@ export const updateNote = async (req: Request, res: Response): Promise<void> => 
         res.json(response);
 
         if (fields.content && fields.content !== currentNote.content) {
-            console.log("Chegou aqui onde vai ocorrer o embedidng")
             if (socketId) {
                 const client = webSocketService.getClient(socketId);
                 if (client) {
@@ -198,6 +175,28 @@ export const updateNote = async (req: Request, res: Response): Promise<void> => 
         }
     } catch (error: any) {
         console.error(error)
+        res.status(500).json({
+            data: null,
+            error: error.message || "An unexpected error occurred"
+        });
+    }
+};
+
+export const deleteNote = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    const response: IAPIResponse<INote> = { success: false };
+    try {
+        const noteId = req.params.noteId;
+        const note: INote = await noteServices.deleteNote(noteId);
+        response.data = note;
+        response.success = true;
+        response.message = "Note deleted successfully!";
+        res.status(200).json(response);
+    } catch (error: any) {
+
+        console.error(error);
         res.status(500).json({
             data: null,
             error: error.message || "An unexpected error occurred"
