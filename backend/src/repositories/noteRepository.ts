@@ -73,22 +73,28 @@ export const createNote = async (
     }
 };
 
-export const updateNoteWithEmbeddings = async (
-    noteId: string,
-    chunks: { text: string; embedding: number[]; index: number }[]
+export const saveChunks = async (
+    chunks: { embedding: number[]; index: number; note_id: string; source: string; image_id: string | null; url_id: string | null }[]
 ): Promise<void> => {
     const chunkQuery = `
-        INSERT INTO chunks (note_id, chunk_index, text, embedding)
-        VALUES ($1, $2, $3, $4::vector)
+        INSERT INTO chunks (note_id, chunk_index, embedding, source, image_id, url_id)
+        VALUES ($1, $2, $3::vector, $4, $5, $6)
         RETURNING *;
     `;
     try {
         // Inserir os chunks no banco
         for (const chunk of chunks) {
-            await pool.query(chunkQuery, [noteId, chunk.index, chunk.text, JSON.stringify(chunk.embedding)]);
+            await pool.query(chunkQuery, [
+                chunk.note_id,
+                chunk.index,
+                JSON.stringify(chunk.embedding),
+                chunk.source,
+                chunk.image_id,
+                chunk.url_id
+            ]);
         }
     } catch (error) {
-        console.error(error);
+        console.error("Error saving chunks:", error);
         throw error;
     }
 };
@@ -109,37 +115,6 @@ export const updateNoteStatus = async (noteId: string, status: string) => {
     }
 };
 
-
-
-// export const updateNoteWithEmbeddings = async (
-//     noteId: string,
-//     enrichedMetadata: object, // Recebendo os metadados atualizados
-//     chunks: { text: string; embedding: number[]; index: number }[]
-// ): Promise<void> => {
-//     const chunkQuery = `
-//         INSERT INTO chunks (note_id, chunk_index, text, embedding)
-//         VALUES ($1, $2, $3, $4::vector)
-//         RETURNING *;
-//     `;
-//     const updateNoteQuery = `
-//         UPDATE notes SET metadata = $2, updated_at = NOW() WHERE id = $1
-//     `;
-//     try {
-//         // Atualizar a nota com os metadados e embeddings
-//         await pool.query(updateNoteQuery, [noteId, enrichedMetadata]);
-
-//         // Inserir os chunks no banco
-//         for (const chunk of chunks) {
-//             await pool.query(chunkQuery, [noteId, chunk.index, chunk.text, JSON.stringify(chunk.embedding)]);
-//         }
-//     } catch (error) {
-//         console.error(error);
-//         throw error;
-//     }
-// };
-
-
-
 export const updateNote = async (
     noteId: string,
     updatedNote: INote,
@@ -150,16 +125,14 @@ export const updateNote = async (
         SET 
             title = $1, 
             content = $2, 
-            metadata = $3,
-            updated_at = $4
-        WHERE id = $5 AND created_by = $6
+            updated_at = $3
+        WHERE id = $4 AND created_by = $5
         RETURNING *;
     `;
     try {
         const result = await pool.query(query, [
             updatedNote.title,
             updatedNote.content,
-            updatedNote.metadata,
             updatedNote.updated_at,
             noteId,
             userId

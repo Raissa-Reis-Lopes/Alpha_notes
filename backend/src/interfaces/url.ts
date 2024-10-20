@@ -1,7 +1,7 @@
 export interface IUrl {
-    id?: string;
+    id: string;
     note_id?: string,
-    url?: string;
+    url: string;
     status?: string;
     transcription?: string;
 }

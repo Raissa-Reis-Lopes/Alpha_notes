@@ -50,12 +50,12 @@ CREATE TABLE IF NOT EXISTS chunks (
     note_id UUID NOT NULL, -- Sempre associamos uma nota, seja direta ou indiretamente
     source TEXT NOT NULL CHECK (source IN ('note', 'image', 'url')), -- Indica se refere a uma nota, imagem ou URL
     image_id UUID, -- Para quando o chunk for associado a uma imagem
-    link_id UUID,  -- Para quando o chunk for associado a uma URL
+    url_id UUID,  -- Para quando o chunk for associado a uma URL
     chunk_index INT NOT NULL,
     embedding VECTOR(1536),
     CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id) ON DELETE CASCADE,
     CONSTRAINT fk_image_id FOREIGN KEY (image_id) REFERENCES images (id) ON DELETE CASCADE,
-    CONSTRAINT fk_link_id FOREIGN KEY (link_id) REFERENCES urls (id) ON DELETE CASCADE
+    CONSTRAINT fk_url_id FOREIGN KEY (url_id) REFERENCES urls (id) ON DELETE CASCADE
 );
 
 -- Indexação para otimizar buscas vetoriais nos chunks

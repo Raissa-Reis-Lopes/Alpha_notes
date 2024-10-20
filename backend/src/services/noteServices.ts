@@ -1,14 +1,17 @@
-// services/noteServices.ts
 import * as noteRepository from "../repositories/noteRepository";
+import * as imageRepository from "../repositories/imageRepository"
 import { INote } from "../interfaces/note";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { IImage } from "../interfaces/image";
+import { IUrl } from "../interfaces/url";
+import { getImageDescription } from "../utils/getImageDescription";
+import path from "path";
 
 const openAIEmbeddings = new OpenAIEmbeddings({
     openAIApiKey: process.env.OPENAI_KEY,
 });
 
-// Função para dividir o texto em chunks usando o RecursiveCharacterTextSplitter
 const splitTextIntoChunks = async (text: string, chunkSize: number, chunkOverlap: number = 0): Promise<string[]> => {
     const textSplitter = new RecursiveCharacterTextSplitter({
         chunkSize: chunkSize,
@@ -18,112 +21,83 @@ const splitTextIntoChunks = async (text: string, chunkSize: number, chunkOverlap
     return documents.map(doc => doc.pageContent);
 };
 
-// Função para gerar embeddings para cada chunk
 const generateEmbeddingsForChunks = async (chunks: string[]): Promise<number[][]> => {
     const embeddings = await openAIEmbeddings.embedDocuments(chunks);
     return embeddings;
 };
 
-// // ESSA FUNÇÃO AQUI VAI TER QUE RECEBER OS ARRAYS DE IMAGENS E DE LINKS
-// // DENTRO DA
-// // Função para criar a nota sem embeddings inicialmente
-// export const createNoteWithoutEmbeddings = async (
-//     title: string,
-//     content: string,
-//     created_by: string,
-//     images: [],
-//     links: []
-// ): Promise<INote> => {
-//     try {
-
-//         //ACESSA OS ARRAYS DE IMAGEM E DE LINK
-//         //COM CADA UM DOS ARRAYS, CHAMA UMA FUNÇÃO DIFERENTE LÁ NO REPOSITORY PRA SALVAR ESSES DADOS NA TABELA DE IMAGEM E DE LINK
-//         //addImage adiciona essas imagens no banco de dados
-//         // for(const image of images){
-//         //   pego cada um dos paths da imagem, passo pra função da IA que gera a descrição
-//         //   com esse resultado, a gente passa como description pra salvar no banco das imagens 
-//         //   noteRepository.createImage(noteId, imagePath, description)
-//         //}
-
-//         //Faz a mesma coisa pros links
-//         // Com cada um dos arrays,
-
-
-
-
-//         if (!title || !content) {
-//             throw new Error("Title and content cannot be empty.");
-//         }
-
-//         // Criar a nota no repositório sem processar embeddings
-//         const note = await noteRepository.createNote(title, content, created_by);
-//         return note;
-//     } catch (error) {
-//         throw error;
-//     }
-// };
-
-
-// //FUNÇÂO PARA extrair a descrição da imagem
-
-
-// //FUNÇÂO na pasta util que o Pedro criou pra extrair a transcrição dos vídeos
-// //acessa
-
-
-
-// Função para criar a nota sem embeddings inicialmente
 export const createNoteWithoutEmbeddings = async (
     title: string,
     content: string,
     created_by: string,
+    images: IImage[],
+    urls: IUrl[]
 ): Promise<INote> => {
     try {
-        if (!title || !content) {
-            throw new Error("Title and content cannot be empty.");
+        if (!title) {
+            throw new Error("Title can't be empty.");
         }
 
-        // Criar a nota no repositório sem processar embeddings
         const note = await noteRepository.createNote(title, content, created_by);
+
+        if (images.length > 0) {
+            for (const image of images) {
+                await imageRepository.updateImageWithNoteId(image.id, note.id);
+            }
+        }
+
         return note;
     } catch (error) {
         throw error;
     }
 };
 
-// Função para processar embeddings e chunks em segundo plano
-export const processEmbeddingsForNote = async (noteId: string, userId: string): Promise<void> => {
+export const processEmbeddings = async (noteId: string, userId: string): Promise<void> => {
     try {
-        // Obter a nota sem os embeddings
         const note = await noteRepository.getNoteById(noteId, userId);
 
-        console.log("Essa é a nota que está tendo um novo embedding", note)
-
-
-        // TRACSIRÇÃO DOS VIDEOS
-        // DESCRIÇÃO DAS IMAGENS
-        // FAZ O EMBEDDING DE CADA UM
-
-
-        // Dividir o conteúdo da nota em chunks
         const chunkSize = 200;
         const chunks = await splitTextIntoChunks(note.content, chunkSize);
 
-        // Gerar embeddings para cada chunk
         const embeddings = await generateEmbeddingsForChunks(chunks);
 
-        // Preparar os dados dos chunks
         const chunkData = chunks.map((chunk, index) => ({
-            text: chunk,
             embedding: embeddings[index],
-            index
+            index,
+            note_id: noteId,
+            source: 'note',
+            image_id: null,
+            url_id: null,
         }));
 
-        // Após a geração dos embeddings, atualiza o status para 'completed'
+        const images = await imageRepository.getImagesByNoteId(noteId);
+
+        for (const image of images) {
+            await imageRepository.updateImageStatus(image.id, 'processing');
+
+            const imagePath = path.join(__dirname, '../../uploads', image.filename);
+
+            const description = await getImageDescription(imagePath);
+            const imageChunks = await splitTextIntoChunks(JSON.stringify(description), chunkSize);
+            const imageEmbeddings = await generateEmbeddingsForChunks(imageChunks);
+
+
+            const imageChunkData = imageChunks.map((chunk, index) => ({
+                embedding: imageEmbeddings[index],
+                index,
+                note_id: noteId,
+                source: 'image',
+                image_id: image.id,
+                url_id: null,
+            }));
+
+            await imageRepository.updateImageStatus(image.id, 'processed');
+            await noteRepository.saveChunks(imageChunkData);
+        }
+
         await noteRepository.updateNoteStatus(noteId, 'completed');
 
-        // Atualizar a nota
-        await noteRepository.updateNoteWithEmbeddings(noteId, chunkData);
+        await noteRepository.saveChunks(chunkData);
     } catch (error) {
         console.error("Error processing embeddings:", error);
         throw error;
@@ -138,42 +112,6 @@ export const updateNoteStatus = async (noteId: string, status: string): Promise<
         throw error;
     }
 };
-
-
-// export const createNote = async (
-//     title: string,
-//     content: string,
-//     created_by: string,
-// ): Promise<INote> => {
-//     try {
-//         if (!title || !content) {
-//             throw new Error("Title and content cannot be empty.");
-//         }
-
-//         // Dividir o conteúdo em chunks
-//         const chunkSize = 200; // Número de caracteres por chunk 
-//         const chunks = await splitTextIntoChunks(content, chunkSize);
-
-//         // Gerar embeddings para cada chunk
-//         const embeddings = await generateEmbeddingsForChunks(chunks);
-
-//         // Preparar os chunks com seus embeddings e índices
-//         const chunkData = chunks.map((chunk, index) => ({
-//             text: chunk,
-//             embedding: embeddings[index],
-//             index: index
-//         }));
-//         // Criar a nota no repositório
-//         const note = await noteRepository.createNote(
-//             title,
-//             content,
-//             created_by
-//         );
-//         return note;
-//     } catch (error) {
-//         throw error;
-//     }
-// };
 
 const generateEmbedding = async (text: string): Promise<number[]> => {
     const formattedText = text.replace(/\n/g, ' ');
@@ -251,6 +189,7 @@ export const deleteNote = async (noteId: string): Promise<INote> => {
     }
 };
 
+// Refactor: tem que arrumar a lógica do update com as alterações todas que foram feitas
 export const updateNote = async (
     noteId: string,
     fields: Partial<INote>,
@@ -261,7 +200,6 @@ export const updateNote = async (
         throw new Error("Note not found");
     }
 
-    // Atualizar a nota com os novos campos sem modificar os chunks
     const updatedNote: INote = {
         ...currentNote,
         title: fields.title || currentNote.title,
@@ -269,49 +207,7 @@ export const updateNote = async (
         updated_at: new Date(),
     };
 
-    // Atualizar a nota no repositório
     await noteRepository.updateNote(noteId, updatedNote, userId);
 
-    return updatedNote; // Retornar a nota atualizada
+    return updatedNote;
 };
-
-// export const updateNote = async (
-//     noteId: string,
-//     fields: Partial<INote>,
-//     userId: string
-// ): Promise<INote> => {
-//     try {
-//         const currentNote = await noteRepository.getNoteById(noteId, userId);
-//         if (!currentNote) {
-//             throw new Error("Note not found");
-//         }
-
-//         if (fields.content && fields.content !== currentNote.content) {
-//             // Dividir o novo conteúdo em chunks
-//             const chunkSize = 200;
-//             const newChunks = await splitTextIntoChunks(fields.content, chunkSize);
-
-//             // Gerar embeddings para os novos chunks
-//             const newEmbeddings = await generateEmbeddingsForChunks(newChunks);
-
-//             // Preparar os chunks com seus embeddings e índices
-//             const newChunkData = newChunks.map((chunk, index) => ({
-//                 text: chunk,
-//                 embedding: newEmbeddings[index],
-//                 index: index
-//             }));
-//         }
-
-//         const updatedNote: INote = {
-//             ...currentNote,
-//             title: fields.title || currentNote.title,
-//             content: fields.content || currentNote.content,
-//             updated_at: new Date(),
-//         };
-
-//         const note = await noteRepository.updateNote(noteId, updatedNote, userId);
-//         return note;
-//     } catch (error: any) {
-//         throw new Error(`Failed to update note: ${error.message}`);
-//     }
-// };

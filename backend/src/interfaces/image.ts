@@ -1,7 +1,7 @@
 export interface IImage {
-    id?: string;
+    id: string;
     note_id?: string,
-    filename?: string;
+    filename: string;
     status?: string;
     description?: string;
 }
