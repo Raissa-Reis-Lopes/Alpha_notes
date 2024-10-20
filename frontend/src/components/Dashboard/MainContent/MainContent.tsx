@@ -6,6 +6,7 @@ import NoteInput from '../../Note/NoteInput/NoteInput';
 import NoteCardList from '../../Note/NoteCard/NoteCardList';
 import { useNotes } from '../../../contexts/NotesContext';
 import { CssBaseline } from '@mui/joy';
+import NoteInputV2 from '../../Note/NoteInputV2/NoteInputV2';
 
 interface MainContentProps {
   drawerOpen: boolean;
@@ -39,7 +40,7 @@ const MainContent: React.FC<MainContentProps> = ({ drawerOpen, drawerWidth, mini
 
   return (
     <Box
-      className='MainContent'
+      className='main-content'
       component="main"
       sx={{
         display: 'flex',
@@ -51,11 +52,11 @@ const MainContent: React.FC<MainContentProps> = ({ drawerOpen, drawerWidth, mini
         marginLeft: `${calculatedMarginLeft}px`,
         /* marginLeft: "60px", */
         transition: 'margin-left 0.3s ease, margin-top 0.3s ease',
-        gap: "32px"
+        gap: "32px",
       }}
     >
-      <NoteInput />
-      <Box sx={{ display: "flex", alignItems: "start", width: "100%" }}>
+      <NoteInputV2 />
+      <Box sx={{ display: "flex", alignItems: "start", width: "100%", height: "100%" }}>
         <NoteCardList notes={notes} />
       </Box>
     </Box>

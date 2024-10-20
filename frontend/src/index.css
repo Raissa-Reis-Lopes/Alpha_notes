@@ -1,5 +1,19 @@
+html {
+    background-color: #efebf3;
+    height: 100vh;
+    display: flex;
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
+    display: flex;
+    flex: 1;
+}
+
+#root {
+    width: 100%;
+    display: flex;
+    flex: 1 1;
 }

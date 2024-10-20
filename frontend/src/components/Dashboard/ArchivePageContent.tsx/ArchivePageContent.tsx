@@ -6,6 +6,7 @@ import NoteInput from '../../Note/NoteInput/NoteInput';
 import NoteCardList from '../../Note/NoteCard/NoteCardList';
 import { Note, useNotes } from '../../../contexts/NotesContext';
 import { CssBaseline } from '@mui/joy';
+import NoteInputV2 from '../../Note/NoteInputV2/NoteInputV2';
 
 
 interface ArchivePageContentProps {
