@@ -1,9 +1,7 @@
 .loader {
-  position: relative;
-  bottom: 92%;
-  margin-left: auto;
-
-
+  position: absolute;
+  top: 8px;
+  right: 8px;
 
   border: 2px solid rgba(0, 0, 0, 0.1);
   /* Cor do círculo externo */
@@ -13,7 +11,6 @@
   width: 10px;
   height: 10px;
   animation: spin 1s linear infinite;
-  /* Animação de rotação */
 }
 
 .pending {

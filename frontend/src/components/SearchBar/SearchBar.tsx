@@ -11,10 +11,15 @@ const Search = styled('div')(({ theme }) => ({
   display: 'flex', //new
   position: 'relative',
   borderRadius: theme.shape.borderRadius,
-  backgroundColor: alpha(theme.palette.common.black, 0.05), // Cor mais clara para fundo
+  //backgroundColor: alpha(theme.palette.common.black, 0.05),
+  //'&:hover': {
+  //  backgroundColor: alpha(theme.palette.common.black, 0.1),
+  //},
+  backgroundColor: '#fbfcfe',
   '&:hover': {
-    backgroundColor: alpha(theme.palette.common.black, 0.1), // Cor mais escura no hover
+    backgroundColor: '#f1f1f1', // Cor do fundo ao hover
   },
+
   marginRight: theme.spacing(2),
   marginLeft: 0,
   width: '100%',

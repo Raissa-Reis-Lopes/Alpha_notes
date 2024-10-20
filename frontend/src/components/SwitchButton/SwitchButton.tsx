@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { styled } from '@mui/system';
 import { Switch, switchClasses } from '@mui/base/Switch';
+import { Box } from '@mui/joy';
 
 interface SwitchButtonProps {
   onChange: (checked: boolean) => void;
@@ -19,7 +20,7 @@ const SwitchButton: React.FC<SwitchButtonProps> = ({ onChange }) => {
   };
 
   return (
-    <div>
+    <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <Switch
         slots={{
           root: Root,
@@ -31,7 +32,7 @@ const SwitchButton: React.FC<SwitchButtonProps> = ({ onChange }) => {
         title={`${checked ? "Desativar busca otimizada com IA" : "Ativar busca otimizada com IA"}`}
 
       />
-    </div>
+    </Box>
   );
 }
 const blue = {
@@ -61,7 +62,7 @@ const Root = styled('span')(
   display: inline-block;
   width: 38px;
   height: 24px;
-  margin: 10px;
+  margin-right: 10px;
   cursor: pointer;
 
   &.${switchClasses.disabled} {

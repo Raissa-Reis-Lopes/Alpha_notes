@@ -7,6 +7,8 @@ import MobileMenu from '../components/MobileMenu/MobileMenu';
 import { CssBaseline } from '@mui/material';
 import SearchPageContent from '../components/Dashboard/SearchPageContent/SearchPageContent';
 import { useParams } from 'react-router-dom';
+import ArchivePageContent from '../components/Dashboard/ArchivePageContent.tsx/ArchivePageContent';
+import { Box } from '@mui/joy';
 
 const drawerWidth = 240;
 const miniDrawerWidth = 60;
@@ -36,7 +38,7 @@ const Dashboard: React.FC = () => {
   const currentSection = section || 'notes';
 
   return (
-    <div>
+    <Box sx={{ display: "flex", flex: 1 }}>
       {user ? (
         <>
           {/* <CssBaseline /> */}
@@ -68,7 +70,16 @@ const Dashboard: React.FC = () => {
               miniAppBarHeight={miniAppBarHeight}
             />
           }
-          {currentSection === 'archive' && <p>ARCHIVE PAGE</p>}
+          {currentSection === 'archive' &&
+            <ArchivePageContent
+              drawerOpen={drawerOpen}
+              drawerWidth={drawerWidth}
+              miniDrawerWidth={miniDrawerWidth}
+              /* appBarIsMobile={appBarIsMobile} */
+              appBarHeight={appBarHeight}
+              miniAppBarHeight={miniAppBarHeight}
+            />
+          }
           {currentSection === 'trash' && <p>TRASH PAGE</p>}
 
           <MobileMenu
@@ -82,7 +93,7 @@ const Dashboard: React.FC = () => {
       ) : (
         <p>Please log in.</p>
       )}
-    </div>
+    </Box>
   );
 };
 
