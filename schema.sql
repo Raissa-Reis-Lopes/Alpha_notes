@@ -18,10 +18,13 @@ CREATE TABLE IF NOT EXISTS notes (
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
     status TEXT DEFAULT 'pending',
+    isInTrash boolean DEFAULT false,
+    isInArchive boolean DEFAULT false,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by UUID NOT NULL,
     CONSTRAINT fk_created_by FOREIGN KEY (created_by) REFERENCES users (id)
+    CONSTRAINT chk_trash_archive CHECK (NOT (isInTrash AND isInArchive));
 );
 
 -- Cria a tabela de imagens associadas às notas
