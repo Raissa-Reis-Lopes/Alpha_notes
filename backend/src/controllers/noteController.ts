@@ -8,7 +8,7 @@ import webSocketService from "..";
 export const createNote = async (req: Request, res: Response) => {
     const response: IAPIResponse<INote> = { success: false };
     try {
-        const { title, content, metadata } = req.body;
+        const { title, content, images, links } = req.body;
         const socketId = req.headers['x-socket-id'] as string;
         const userId = req.user!.id;
 
@@ -21,7 +21,8 @@ export const createNote = async (req: Request, res: Response) => {
             title,
             content,
             userId,
-            metadata
+            // images,
+            // links
         );
 
         response.data = note;
@@ -29,8 +30,8 @@ export const createNote = async (req: Request, res: Response) => {
         response.message = "Note successfully created!";
         res.status(201).json(response);
 
-          // Notifica o cliente que o processamento dos embeddings começou, se o WebSocket estiver disponível
-          if (socketId) {
+        // Notifica o cliente que o processamento dos embeddings começou, se o WebSocket estiver disponível
+        if (socketId) {
             const client = webSocketService.getClient(socketId);
             if (client) {
                 client.send(JSON.stringify({ status: 'pending', noteId: note.id }));
@@ -40,8 +41,7 @@ export const createNote = async (req: Request, res: Response) => {
         // Processa os embeddings em segundo plano
         noteServices.processEmbeddingsForNote(note.id, userId).then(async () => {
             // Atualiza o status da nota para 'completed' quando os embeddings forem gerados
-            await noteServices.updateNoteStatus(note.id, 'completed');
-            
+            await noteServices.updateNoteStatus(note.id, 'completed')
             // Notifica o cliente via WebSocket (se existir)
             if (socketId) {
                 const client = webSocketService.getClient(socketId);
@@ -194,7 +194,7 @@ export const updateNote = async (req: Request, res: Response): Promise<void> => 
             noteServices.processEmbeddingsForNote(updatedNote.id, userId).then(async () => {
                 // Atualiza o status da nota para 'completed' quando os embeddings forem gerados
                 await noteServices.updateNoteStatus(updatedNote.id, 'completed');
-                
+
                 // Notifica o cliente via WebSocket (se existir)
                 if (socketId) {
                     const client = webSocketService.getClient(socketId);

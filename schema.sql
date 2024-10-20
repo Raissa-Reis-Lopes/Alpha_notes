@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS notes (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     title VARCHAR(255) NOT NULL,
     content TEXT NOT NULL,
-    metadata JSONB, 
     status TEXT DEFAULT 'pending',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -25,28 +24,46 @@ CREATE TABLE IF NOT EXISTS notes (
     CONSTRAINT fk_created_by FOREIGN KEY (created_by) REFERENCES users (id)
 );
 
--- Cria a tabela de chunks associados às notas
-CREATE TABLE IF NOT EXISTS chunks (
+-- Cria a tabela de imagens associadas às notas
+CREATE TABLE IF NOT EXISTS images (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    note_id UUID,
+    filename TEXT NOT NULL,
+    status TEXT DEFAULT 'unprocessed',
+    description TEXT, -- Descrição gerada pela IA
+    CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS urls (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     note_id UUID NOT NULL,
-    chunk_index INT NOT NULL,
-    text TEXT NOT NULL,
-    embedding VECTOR(1536),
+    url TEXT NOT NULL,
+    status TEXT DEFAULT 'unprocessed',
+    transcription TEXT, -- Transcrição gerada pela IA
     CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id) ON DELETE CASCADE
+);
+
+
+-- Cria a tabela de chunks, agora referenciando notas, imagens ou URLs
+CREATE TABLE IF NOT EXISTS chunks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    note_id UUID NOT NULL, -- Sempre associamos uma nota, seja direta ou indiretamente
+    source TEXT NOT NULL CHECK (source IN ('note', 'image', 'url')), -- Indica se refere a uma nota, imagem ou URL
+    image_id UUID, -- Para quando o chunk for associado a uma imagem
+    link_id UUID,  -- Para quando o chunk for associado a uma URL
+    chunk_index INT NOT NULL,
+    embedding VECTOR(1536),
+    CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id) ON DELETE CASCADE,
+    CONSTRAINT fk_image_id FOREIGN KEY (image_id) REFERENCES images (id) ON DELETE CASCADE,
+    CONSTRAINT fk_link_id FOREIGN KEY (link_id) REFERENCES urls (id) ON DELETE CASCADE
 );
 
 -- Indexação para otimizar buscas vetoriais nos chunks
 CREATE INDEX ON chunks USING ivfflat (embedding VECTOR_COSINE_OPS)
 WITH (lists = 100);
 
--- Cria a tabela de imagens associadas às notas
-CREATE TABLE IF NOT EXISTS images (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    note_id UUID NOT NULL,
-    image_path TEXT NOT NULL,
-    description TEXT, -- Descrição gerada pela IA
-    CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id) ON DELETE CASCADE
-);
+
+
 
 CREATE OR REPLACE FUNCTION match_chunks(
   query_embedding vector(1536),
@@ -57,7 +74,6 @@ RETURNS TABLE (
   id UUID,
   title VARCHAR(255),
   content TEXT,
-  chunk_text TEXT,
   similarity float
 )
 LANGUAGE sql STABLE
@@ -66,14 +82,12 @@ AS $$
     id,
     title,
     content,
-    chunk_text,
     similarity
   FROM (
     SELECT DISTINCT ON (notes.id)  -- Garante que cada nota seja única
       notes.id,
       notes.title,
       notes.content,
-      chunks.text AS chunk_text,
       1 - (chunks.embedding <=> query_embedding) AS similarity
     FROM chunks
     JOIN notes ON chunks.note_id = notes.id

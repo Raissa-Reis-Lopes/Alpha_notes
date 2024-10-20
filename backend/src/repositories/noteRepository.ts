@@ -58,15 +58,14 @@ export const createNote = async (
     title: string,
     content: string,
     created_by: string,
-    metadata: object
 ): Promise<INote> => {
     const query = `
-        INSERT INTO notes (title, content, metadata, created_by) 
-        VALUES ($1, $2, $3, $4) 
+        INSERT INTO notes (title, content, created_by) 
+        VALUES ($1, $2, $3) 
         RETURNING *;
     `;
     try {
-        const result = await pool.query(query, [title, content, metadata, created_by]);
+        const result = await pool.query(query, [title, content, created_by]);
         return result.rows[0] as INote;
     } catch (error) {
         console.error(error);
@@ -76,7 +75,6 @@ export const createNote = async (
 
 export const updateNoteWithEmbeddings = async (
     noteId: string,
-    enrichedMetadata: object, // Recebendo os metadados atualizados
     chunks: { text: string; embedding: number[]; index: number }[]
 ): Promise<void> => {
     const chunkQuery = `
@@ -84,13 +82,7 @@ export const updateNoteWithEmbeddings = async (
         VALUES ($1, $2, $3, $4::vector)
         RETURNING *;
     `;
-    const updateNoteQuery = `
-        UPDATE notes SET metadata = $2, updated_at = NOW() WHERE id = $1
-    `;
     try {
-        // Atualizar a nota com os metadados e embeddings
-        await pool.query(updateNoteQuery, [noteId, enrichedMetadata]);
-
         // Inserir os chunks no banco
         for (const chunk of chunks) {
             await pool.query(chunkQuery, [noteId, chunk.index, chunk.text, JSON.stringify(chunk.embedding)]);
@@ -107,16 +99,16 @@ export const updateNoteStatus = async (noteId: string, status: string) => {
       SET status = $1, updated_at = NOW()
       WHERE id = $2
     `;
-  
+
     try {
-      await pool.query(query, [status, noteId]);
-      console.log(`Status da nota ${noteId} atualizado para '${status}'`);
+        await pool.query(query, [status, noteId]);
+        console.log(`Status da nota ${noteId} atualizado para '${status}'`);
     } catch (error) {
-      console.error('Erro ao atualizar o status da nota:', error);
-      throw error;
+        console.error('Erro ao atualizar o status da nota:', error);
+        throw error;
     }
-  };
-  
+};
+
 
 
 // export const updateNoteWithEmbeddings = async (

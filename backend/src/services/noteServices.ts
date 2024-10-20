@@ -24,13 +24,59 @@ const generateEmbeddingsForChunks = async (chunks: string[]): Promise<number[][]
     return embeddings;
 };
 
+// // ESSA FUNÇÃO AQUI VAI TER QUE RECEBER OS ARRAYS DE IMAGENS E DE LINKS
+// // DENTRO DA
+// // Função para criar a nota sem embeddings inicialmente
+// export const createNoteWithoutEmbeddings = async (
+//     title: string,
+//     content: string,
+//     created_by: string,
+//     images: [],
+//     links: []
+// ): Promise<INote> => {
+//     try {
+
+//         //ACESSA OS ARRAYS DE IMAGEM E DE LINK
+//         //COM CADA UM DOS ARRAYS, CHAMA UMA FUNÇÃO DIFERENTE LÁ NO REPOSITORY PRA SALVAR ESSES DADOS NA TABELA DE IMAGEM E DE LINK
+//         //addImage adiciona essas imagens no banco de dados
+//         // for(const image of images){
+//         //   pego cada um dos paths da imagem, passo pra função da IA que gera a descrição
+//         //   com esse resultado, a gente passa como description pra salvar no banco das imagens 
+//         //   noteRepository.createImage(noteId, imagePath, description)
+//         //}
+
+//         //Faz a mesma coisa pros links
+//         // Com cada um dos arrays,
+
+
+
+
+//         if (!title || !content) {
+//             throw new Error("Title and content cannot be empty.");
+//         }
+
+//         // Criar a nota no repositório sem processar embeddings
+//         const note = await noteRepository.createNote(title, content, created_by);
+//         return note;
+//     } catch (error) {
+//         throw error;
+//     }
+// };
+
+
+// //FUNÇÂO PARA extrair a descrição da imagem
+
+
+// //FUNÇÂO na pasta util que o Pedro criou pra extrair a transcrição dos vídeos
+// //acessa
+
+
 
 // Função para criar a nota sem embeddings inicialmente
 export const createNoteWithoutEmbeddings = async (
     title: string,
     content: string,
     created_by: string,
-    metadata: object = {}
 ): Promise<INote> => {
     try {
         if (!title || !content) {
@@ -38,7 +84,7 @@ export const createNoteWithoutEmbeddings = async (
         }
 
         // Criar a nota no repositório sem processar embeddings
-        const note = await noteRepository.createNote(title, content, created_by, metadata);
+        const note = await noteRepository.createNote(title, content, created_by);
         return note;
     } catch (error) {
         throw error;
@@ -52,6 +98,12 @@ export const processEmbeddingsForNote = async (noteId: string, userId: string): 
         const note = await noteRepository.getNoteById(noteId, userId);
 
         console.log("Essa é a nota que está tendo um novo embedding", note)
+
+
+        // TRACSIRÇÃO DOS VIDEOS
+        // DESCRIÇÃO DAS IMAGENS
+        // FAZ O EMBEDDING DE CADA UM
+
 
         // Dividir o conteúdo da nota em chunks
         const chunkSize = 200;
@@ -67,18 +119,12 @@ export const processEmbeddingsForNote = async (noteId: string, userId: string): 
             index
         }));
 
-          // Atualizar a nota com os chunks e embeddings nos metadados
-          const enrichedMetadata = {
-            ...note.metadata,
-            chunks: chunkData
-        };
-
         // Após a geração dos embeddings, atualiza o status para 'completed'
         await noteRepository.updateNoteStatus(noteId, 'completed');
 
-// Atualizar a nota e salvar embeddings nos metadados
-await noteRepository.updateNoteWithEmbeddings(noteId, enrichedMetadata, chunkData);
-} catch (error) {
+        // Atualizar a nota
+        await noteRepository.updateNoteWithEmbeddings(noteId, chunkData);
+    } catch (error) {
         console.error("Error processing embeddings:", error);
         throw error;
     }
@@ -98,7 +144,6 @@ export const updateNoteStatus = async (noteId: string, status: string): Promise<
 //     title: string,
 //     content: string,
 //     created_by: string,
-//     metadata: object = {}
 // ): Promise<INote> => {
 //     try {
 //         if (!title || !content) {
@@ -118,19 +163,11 @@ export const updateNoteStatus = async (noteId: string, status: string): Promise<
 //             embedding: embeddings[index],
 //             index: index
 //         }));
-
-//         // Enriquecer os metadados com os chunks
-//         const enrichedMetadata = {
-//             ...metadata,
-//             chunks: chunkData
-//         };
-
 //         // Criar a nota no repositório
 //         const note = await noteRepository.createNote(
 //             title,
 //             content,
-//             created_by,
-//             enrichedMetadata
+//             created_by
 //         );
 //         return note;
 //     } catch (error) {
@@ -249,8 +286,6 @@ export const updateNote = async (
 //             throw new Error("Note not found");
 //         }
 
-//         let updatedMetadata = currentNote.metadata;
-
 //         if (fields.content && fields.content !== currentNote.content) {
 //             // Dividir o novo conteúdo em chunks
 //             const chunkSize = 200;
@@ -265,19 +300,12 @@ export const updateNote = async (
 //                 embedding: newEmbeddings[index],
 //                 index: index
 //             }));
-
-//             // Atualizar os metadados com os novos chunks
-//             updatedMetadata = {
-//                 ...updatedMetadata,
-//                 chunks: newChunkData
-//             };
 //         }
 
 //         const updatedNote: INote = {
 //             ...currentNote,
 //             title: fields.title || currentNote.title,
 //             content: fields.content || currentNote.content,
-//             metadata: updatedMetadata,
 //             updated_at: new Date(),
 //         };
 
