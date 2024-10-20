@@ -43,7 +43,6 @@ export const deleteImage = async (imageId: string) => {
                 console.error(`Erro ao deletar o arquivo: ${err.message}`);
                 throw err;
             }
-            console.log(`Arquivo ${image.filename} deletado com sucesso.`);
         });
 
     } catch (error: any) {

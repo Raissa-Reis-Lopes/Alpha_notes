@@ -11,7 +11,7 @@ export const saveImage = async (filename: string): Promise<IImage> => {
         `
 
         const result = await pool.query(query, [filename])
-        return result.rows[0] as Pick<IImage, 'id' | 'filename'>;
+        return result.rows[0] as IImage;
     } catch (error) {
         console.error(error);
         throw error;
