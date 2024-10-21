@@ -36,7 +36,7 @@ export const createNote = async (req: Request, res: Response) => {
             }
         }
 
-        noteServices.processEmbeddings(note.id, userId).then(async () => {
+        noteServices.processEmbeddings(note.id).then(async () => {
             await noteServices.updateNoteStatus(note.id, 'completed')
             if (socketId) {
                 const client = webSocketService.getClient(socketId);
@@ -156,7 +156,7 @@ export const getNoteById = async (
             return;
         }
 
-        const note: INote = await noteServices.getNoteById(noteId, userId);
+        const note: INote = await noteServices.getNoteById(noteId);
         response.data = note;
         response.success = true;
         response.message = "Note retrieved successfully";
@@ -178,7 +178,7 @@ export const updateNote = async (req: Request, res: Response): Promise<void> => 
         const socketId = req.headers['x-socket-id'] as string;
         const userId = req.user!.id;
 
-        const currentNote = await noteServices.getNoteById(noteId, userId);
+        const currentNote = await noteServices.getNoteById(noteId);
 
         if (!userId) {
             res.status(400).json({ message: "User ID is missing" });
@@ -199,7 +199,7 @@ export const updateNote = async (req: Request, res: Response): Promise<void> => 
                 }
             }
 
-            noteServices.processEmbeddings(updatedNote.id, userId).then(async () => {
+            noteServices.processEmbeddings(updatedNote.id).then(async () => {
                 await noteServices.updateNoteStatus(updatedNote.id, 'completed');
 
                 if (socketId) {

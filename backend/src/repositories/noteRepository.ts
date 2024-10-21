@@ -165,40 +165,60 @@ export const getAllNotes = async (): Promise<INote[]> => {
 //     }
 // };
 
-export const getNoteById = async (noteId: string, userId: string): Promise<INote> => {
+export const getNoteById = async (noteId: string): Promise<INote> => {
     try {
-        const result = await pool.query(`
-            SELECT * FROM notes WHERE id = $1 AND created_by = $2
-        `, [noteId, userId]);
+        const query = `
+            SELECT 
+                n.id as note_id, n.title, n.content, n.created_by, n.created_at, n.updated_at,
+                i.id as image_id, i.filename as image_filename, 
+                u.id as url_id, u.url as url_link, u.transcription as url_transcription 
+            FROM notes n
+            LEFT JOIN images i ON n.id = i.note_id
+            LEFT JOIN urls u ON n.id = u.note_id
+            WHERE n.id = $1
+        `;
+
+        const result = await pool.query(query, [noteId]);
 
         if (result.rows.length === 0) {
             throw new Error(`Note with ID ${noteId} not found.`);
         }
-        return result.rows[0] as INote;
-    } catch (error) {
-        console.error(error);
-        throw error;
-    }
-};
 
-export const getNoteWithAssociations = async (noteId: string): Promise<INote> => {
-    try {
-        // Recupera a nota
-        const noteQuery = `SELECT * FROM notes WHERE id = $1;`;
-        const noteResult = await pool.query(noteQuery, [noteId]);
-        const note = noteResult.rows[0] as INote;
+        const noteMap: { [key: string]: INote } = {};
 
-        // Recupera as imagens associadas à nota
-        const imageQuery = `SELECT * FROM images WHERE note_id = $1;`;
-        const imageResult = await pool.query(imageQuery, [noteId]);
-        note.images = imageResult.rows as IImage[];
+        for (const row of result.rows) {
+            const noteId = row.note_id;
 
-        // Recupera as URLs associadas à nota
-        const urlQuery = `SELECT * FROM urls WHERE note_id = $1;`;
-        const urlResult = await pool.query(urlQuery, [noteId]);
-        note.urls = urlResult.rows as IUrl[];
+            if (!noteMap[noteId]) {
+                noteMap[noteId] = {
+                    id: noteId,
+                    title: row.title,
+                    content: row.content,
+                    created_by: row.created_by,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
+                    images: [],
+                    urls: []
+                };
+            }
 
-        return note;
+            if (row.image_id && row.image_filename) {
+                noteMap[noteId].images!.push({
+                    id: row.image_id,
+                    filename: row.image_filename
+                });
+            }
+
+            if (row.url_id && row.url_link) {
+                noteMap[noteId].urls!.push({
+                    id: row.url_id,
+                    url: row.url_link,
+                    transcription: row.url_transcription
+                });
+            }
+        }
+
+        return Object.values(noteMap)[0];
     } catch (error) {
         console.error(error);
         throw error;
