@@ -46,7 +46,8 @@ export const createNoteWithoutEmbeddings = async (
             }
         }
 
-        return note;
+        const noteWithAssociations = await noteRepository.getNoteWithAssociations(note.id);
+        return noteWithAssociations;
     } catch (error) {
         throw error;
     }
@@ -173,7 +174,6 @@ export const getPaginatedNotes = async (page: number, limit: number): Promise<{ 
         throw error;
     }
 };
-
 
 export const getAllNotes = async (): Promise<INote[]> => {
     try {
