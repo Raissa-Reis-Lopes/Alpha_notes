@@ -6,8 +6,7 @@ import PaletteOutlinedIcon from '@mui/icons-material/PaletteOutlined';
 import VideoCallOutlinedIcon from '@mui/icons-material/VideoCallOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import { useEffect, useRef, useState } from 'react';
-import { useNotes } from '../../contexts/NotesContext';
-import { v4 as uuidv4 } from 'uuid';
+import { useNotes } from '../../../contexts/NotesContext';
 
 const NoteInput: React.FC = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -17,13 +16,13 @@ const NoteInput: React.FC = () => {
   const { notes, createNote } = useNotes();
 
   const handleFocus = () => {
-    setIsExpanded(true); // Expande ao focar no textarea
+    setIsExpanded(true);
   };
 
   const handleClose = () => {
     setTitle('');
     setContent('');
-    setIsExpanded(false); // Esconde os elementos adicionais
+    setIsExpanded(false);
   };
 
   const handleSave = () => {

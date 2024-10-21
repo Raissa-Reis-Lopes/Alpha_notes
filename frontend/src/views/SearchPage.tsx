@@ -6,16 +6,13 @@ import MainContent from '../components/Dashboard/MainContent/MainContent';
 import MobileMenu from '../components/MobileMenu/MobileMenu';
 import { CssBaseline } from '@mui/material';
 import SearchPageContent from '../components/Dashboard/SearchPageContent/SearchPageContent';
-import { useParams } from 'react-router-dom';
-import ArchivePageContent from '../components/Dashboard/ArchivePageContent.tsx/ArchivePageContent';
-import { Box } from '@mui/joy';
 
 const drawerWidth = 240;
 const miniDrawerWidth = 60;
 const appBarHeight = 64;
 const miniAppBarHeight = 56;
 
-const Dashboard: React.FC = () => {
+const SearchPage: React.FC = () => {
   //const userContext = useContext(UserContext);
   const { user } = useUser();
 
@@ -34,11 +31,8 @@ const Dashboard: React.FC = () => {
   const mobileMenuId = 'primary-search-account-menu-mobile';
   const menuId = 'primary-search-account-menu';
 
-  const { section } = useParams<{ section: string }>();
-  const currentSection = section || 'notes';
-
   return (
-    <Box sx={{ display: "flex", flex: 1 }}>
+    <div>
       {user ? (
         <>
           {/* <CssBaseline /> */}
@@ -50,38 +44,14 @@ const Dashboard: React.FC = () => {
             menuId={menuId}
           />
           <Drawer drawerOpen={drawerOpen} toggleDrawer={handleDrawerToggle} />
-          {currentSection === 'notes' &&
-            <MainContent
-              drawerOpen={drawerOpen}
-              drawerWidth={drawerWidth}
-              miniDrawerWidth={miniDrawerWidth}
-              /* appBarIsMobile={appBarIsMobile} */
-              appBarHeight={appBarHeight}
-              miniAppBarHeight={miniAppBarHeight}
-            />
-          }
-          {currentSection === 'search' &&
-            <SearchPageContent
-              drawerOpen={drawerOpen}
-              drawerWidth={drawerWidth}
-              miniDrawerWidth={miniDrawerWidth}
-              /* appBarIsMobile={appBarIsMobile} */
-              appBarHeight={appBarHeight}
-              miniAppBarHeight={miniAppBarHeight}
-            />
-          }
-          {currentSection === 'archive' &&
-            <ArchivePageContent
-              drawerOpen={drawerOpen}
-              drawerWidth={drawerWidth}
-              miniDrawerWidth={miniDrawerWidth}
-              /* appBarIsMobile={appBarIsMobile} */
-              appBarHeight={appBarHeight}
-              miniAppBarHeight={miniAppBarHeight}
-            />
-          }
-          {currentSection === 'trash' && <p>TRASH PAGE</p>}
-
+          <SearchPageContent
+            drawerOpen={drawerOpen}
+            drawerWidth={drawerWidth}
+            miniDrawerWidth={miniDrawerWidth}
+            /* appBarIsMobile={appBarIsMobile} */
+            appBarHeight={appBarHeight}
+            miniAppBarHeight={miniAppBarHeight}
+          />
           <MobileMenu
             mobileMoreAnchorEl={mobileMoreAnchorEl}
             mobileMenuId={mobileMenuId}
@@ -93,8 +63,8 @@ const Dashboard: React.FC = () => {
       ) : (
         <p>Please log in.</p>
       )}
-    </Box>
+    </div>
   );
 };
 
-export default Dashboard;
+export default SearchPage;

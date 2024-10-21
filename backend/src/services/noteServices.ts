@@ -1,14 +1,18 @@
-// services/noteServices.ts
 import * as noteRepository from "../repositories/noteRepository";
+import * as imageRepository from "../repositories/imageRepository"
+import * as urlRepository from "../repositories/urlRepository"
 import { INote } from "../interfaces/note";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
+import { IImage } from "../interfaces/image";
+import { IUrl } from "../interfaces/url";
+import { getImageDescription } from "../utils/getImageDescription";
+import path from "path";
 
 const openAIEmbeddings = new OpenAIEmbeddings({
     openAIApiKey: process.env.OPENAI_KEY,
 });
 
-// Função para dividir o texto em chunks usando o RecursiveCharacterTextSplitter
 const splitTextIntoChunks = async (text: string, chunkSize: number, chunkOverlap: number = 0): Promise<string[]> => {
     const textSplitter = new RecursiveCharacterTextSplitter({
         chunkSize: chunkSize,
@@ -18,67 +22,109 @@ const splitTextIntoChunks = async (text: string, chunkSize: number, chunkOverlap
     return documents.map(doc => doc.pageContent);
 };
 
-// Função para gerar embeddings para cada chunk
 const generateEmbeddingsForChunks = async (chunks: string[]): Promise<number[][]> => {
     const embeddings = await openAIEmbeddings.embedDocuments(chunks);
     return embeddings;
 };
 
-
-// Função para criar a nota sem embeddings inicialmente
 export const createNoteWithoutEmbeddings = async (
     title: string,
     content: string,
     created_by: string,
-    metadata: object = {}
+    images: IImage[],
+    urls: IUrl[]
 ): Promise<INote> => {
     try {
-        if (!title || !content) {
-            throw new Error("Title and content cannot be empty.");
+        if (!title) {
+            throw new Error("Title can't be empty.");
         }
 
-        // Criar a nota no repositório sem processar embeddings
-        const note = await noteRepository.createNote(title, content, created_by, metadata);
+        const note = await noteRepository.createNote(title, content, created_by);
+
+        if (images.length > 0) {
+            for (const image of images) {
+                await imageRepository.updateImageWithNoteId(image.id, note.id);
+            }
+        }
+
+        if (urls.length > 0) {
+            for (const url of urls) {
+                await urlRepository.updateUrlWithNoteId(url.id, note.id);
+            }
+        }
+
         return note;
     } catch (error) {
         throw error;
     }
 };
 
-// Função para processar embeddings e chunks em segundo plano
-export const processEmbeddingsForNote = async (noteId: string, userId: string): Promise<void> => {
+export const processEmbeddings = async (noteId: string, userId: string): Promise<void> => {
     try {
-        // Obter a nota sem os embeddings
         const note = await noteRepository.getNoteById(noteId, userId);
 
-        console.log("Essa é a nota que está tendo um novo embedding", note)
-
-        // Dividir o conteúdo da nota em chunks
         const chunkSize = 200;
         const chunks = await splitTextIntoChunks(note.content, chunkSize);
 
-        // Gerar embeddings para cada chunk
         const embeddings = await generateEmbeddingsForChunks(chunks);
 
-        // Preparar os dados dos chunks
         const chunkData = chunks.map((chunk, index) => ({
-            text: chunk,
             embedding: embeddings[index],
-            index
+            index,
+            note_id: noteId,
+            source: 'note',
+            image_id: null,
+            url_id: null,
         }));
 
-          // Atualizar a nota com os chunks e embeddings nos metadados
-          const enrichedMetadata = {
-            ...note.metadata,
-            chunks: chunkData
-        };
+        const images = await imageRepository.getImagesByNoteId(noteId);
 
-        // Após a geração dos embeddings, atualiza o status para 'completed'
+        for (const image of images) {
+            await imageRepository.updateImageStatus(image.id, 'processing');
+
+            const imagePath = path.join(__dirname, '../../uploads', image.filename);
+
+            const description = await getImageDescription(imagePath);
+            const imageChunks = await splitTextIntoChunks(JSON.stringify(description), chunkSize);
+            const imageEmbeddings = await generateEmbeddingsForChunks(imageChunks);
+
+
+            const imageChunkData = imageChunks.map((chunk, index) => ({
+                embedding: imageEmbeddings[index],
+                index,
+                note_id: noteId,
+                source: 'image',
+                image_id: image.id,
+                url_id: null,
+            }));
+
+            await imageRepository.updateImageStatus(image.id, 'processed');
+            await noteRepository.saveChunks(imageChunkData);
+        }
+
+        const urls = await urlRepository.getUrlsByNoteId(noteId);
+        for (const url of urls) {
+            await urlRepository.updateUrlStatus(url.id, 'processing');
+            const urlChunks = await splitTextIntoChunks(url.url, chunkSize);
+            const urlEmbeddings = await generateEmbeddingsForChunks(urlChunks);
+
+            const urlChunkData = urlChunks.map((chunk, index) => ({
+                embedding: urlEmbeddings[index],
+                index,
+                note_id: noteId,
+                source: 'url',
+                image_id: null,
+                url_id: url.id,
+            }));
+
+            await urlRepository.updateUrlStatus(url.id, 'processed');
+            await noteRepository.saveChunks(urlChunkData);
+        }
+
         await noteRepository.updateNoteStatus(noteId, 'completed');
 
-// Atualizar a nota e salvar embeddings nos metadados
-await noteRepository.updateNoteWithEmbeddings(noteId, enrichedMetadata, chunkData);
-} catch (error) {
+        await noteRepository.saveChunks(chunkData);
+    } catch (error) {
         console.error("Error processing embeddings:", error);
         throw error;
     }
@@ -92,51 +138,6 @@ export const updateNoteStatus = async (noteId: string, status: string): Promise<
         throw error;
     }
 };
-
-
-// export const createNote = async (
-//     title: string,
-//     content: string,
-//     created_by: string,
-//     metadata: object = {}
-// ): Promise<INote> => {
-//     try {
-//         if (!title || !content) {
-//             throw new Error("Title and content cannot be empty.");
-//         }
-
-//         // Dividir o conteúdo em chunks
-//         const chunkSize = 200; // Número de caracteres por chunk 
-//         const chunks = await splitTextIntoChunks(content, chunkSize);
-
-//         // Gerar embeddings para cada chunk
-//         const embeddings = await generateEmbeddingsForChunks(chunks);
-
-//         // Preparar os chunks com seus embeddings e índices
-//         const chunkData = chunks.map((chunk, index) => ({
-//             text: chunk,
-//             embedding: embeddings[index],
-//             index: index
-//         }));
-
-//         // Enriquecer os metadados com os chunks
-//         const enrichedMetadata = {
-//             ...metadata,
-//             chunks: chunkData
-//         };
-
-//         // Criar a nota no repositório
-//         const note = await noteRepository.createNote(
-//             title,
-//             content,
-//             created_by,
-//             enrichedMetadata
-//         );
-//         return note;
-//     } catch (error) {
-//         throw error;
-//     }
-// };
 
 const generateEmbedding = async (text: string): Promise<number[]> => {
     const formattedText = text.replace(/\n/g, ' ');
@@ -214,76 +215,32 @@ export const deleteNote = async (noteId: string): Promise<INote> => {
     }
 };
 
+// Refactor: tem que arrumar a lógica do update com as alterações todas que foram feitas
 export const updateNote = async (
     noteId: string,
     fields: Partial<INote>,
     userId: string
 ): Promise<INote> => {
-    const currentNote = await noteRepository.getNoteById(noteId, userId);
-    if (!currentNote) {
-        throw new Error("Note not found");
+    try {
+        const currentNote = await noteRepository.getNoteById(noteId, userId);
+        if (!currentNote) {
+            throw new Error("Note not found");
+        }
+
+        const updatedNote: INote = {
+            ...currentNote,
+            title: fields.title || currentNote.title,
+            content: fields.content || currentNote.content,
+            is_in_trash: fields.is_in_trash || currentNote.is_in_trash,
+            is_in_archive: fields.is_in_archive || currentNote.is_in_archive,
+            updated_at: new Date(),
+        };
+
+        await noteRepository.updateNote(noteId, updatedNote, userId);
+
+        return updatedNote;
+    } catch (error: any) {
+        throw error;
     }
 
-    // Atualizar a nota com os novos campos sem modificar os chunks
-    const updatedNote: INote = {
-        ...currentNote,
-        title: fields.title || currentNote.title,
-        content: fields.content || currentNote.content,
-        updated_at: new Date(),
-    };
-
-    // Atualizar a nota no repositório
-    await noteRepository.updateNote(noteId, updatedNote, userId);
-
-    return updatedNote; // Retornar a nota atualizada
 };
-
-// export const updateNote = async (
-//     noteId: string,
-//     fields: Partial<INote>,
-//     userId: string
-// ): Promise<INote> => {
-//     try {
-//         const currentNote = await noteRepository.getNoteById(noteId, userId);
-//         if (!currentNote) {
-//             throw new Error("Note not found");
-//         }
-
-//         let updatedMetadata = currentNote.metadata;
-
-//         if (fields.content && fields.content !== currentNote.content) {
-//             // Dividir o novo conteúdo em chunks
-//             const chunkSize = 200;
-//             const newChunks = await splitTextIntoChunks(fields.content, chunkSize);
-
-//             // Gerar embeddings para os novos chunks
-//             const newEmbeddings = await generateEmbeddingsForChunks(newChunks);
-
-//             // Preparar os chunks com seus embeddings e índices
-//             const newChunkData = newChunks.map((chunk, index) => ({
-//                 text: chunk,
-//                 embedding: newEmbeddings[index],
-//                 index: index
-//             }));
-
-//             // Atualizar os metadados com os novos chunks
-//             updatedMetadata = {
-//                 ...updatedMetadata,
-//                 chunks: newChunkData
-//             };
-//         }
-
-//         const updatedNote: INote = {
-//             ...currentNote,
-//             title: fields.title || currentNote.title,
-//             content: fields.content || currentNote.content,
-//             metadata: updatedMetadata,
-//             updated_at: new Date(),
-//         };
-
-//         const note = await noteRepository.updateNote(noteId, updatedNote, userId);
-//         return note;
-//     } catch (error: any) {
-//         throw new Error(`Failed to update note: ${error.message}`);
-//     }
-// };

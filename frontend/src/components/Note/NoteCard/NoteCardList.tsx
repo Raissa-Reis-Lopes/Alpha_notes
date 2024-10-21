@@ -3,10 +3,10 @@ import { Box } from "@mui/material";
 import { Typography } from '@mui/joy';
 import { DescriptionOutlined } from '@mui/icons-material';
 import { useRef, useState } from 'react';
-import { Note, useNotes } from '../../contexts/NotesContext';
-import ToolbarCard from '../ToolbarCard/ToolbarCard';
+import { Note, useNotes } from '../../../contexts/NotesContext';
+import ToolbarCard from '../../ToolbarCard/ToolbarCard';
 import NoteModal from '../NoteModal/NoteModal';
-import Loader from '../Loader/Loader';
+import Loader from '../../Loader/Loader';
 
 interface NoteCardProps {
   id: string;
@@ -33,12 +33,14 @@ const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived,
   //const handleSoftDeleteNote = (noteToSoftDelete: Note) => softDeleteNote(noteToSoftDelete.id);
   const handleDeleteNote = (noteToDelete: Note) => deleteNote(noteToDelete.id);
 
+  const darkTheme = true;
   return (
     <>
-      <Box className="NoteCardComponent"
+      <Box className="note-card-component"
         onMouseEnter={toggleHover}
         onMouseLeave={toggleHover}
         onClick={handleOpenModal}
+        sx={{ backgroundColor: `${darkTheme ? "#fefcff" : "inital"}` }}
       >
 
         <Box>
@@ -100,8 +102,10 @@ const NoteCardList: React.FC<NoteCardListProps> = ({ notes }) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 
+  const darkTheme = true;
   return (
-    <Box className="NoteCardListComponent">
+    <Box className="NoteCardListComponent"
+      sx={{ borderColor: `${darkTheme ? "#828282" : "#e0e0e0"}` }}>
       {!notes || notes.length === 0 ?
         <Box sx={{
           display: "flex",

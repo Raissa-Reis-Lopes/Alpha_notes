@@ -1,16 +1,16 @@
-.NoteCardComponent {
+.note-card-component {
   display: flex;
   flex-direction: column;
   min-width: 240px;
   max-width: 480px;
   max-height: 480px;
-  /* 42 */
-  /* background-color: #371C44; */
-  border: 1px solid #e0e0e0;
+  height: fit-content;
+  border: 1px solid;
   border-radius: 8px;
   padding: 8px;
   gap: 8px;
   transition: all .6s cubic-bezier(0.165, 0.84, 0.44, 1);
+  position: relative;
 }
 
 .NoteCardComponent:hover {
@@ -32,4 +32,5 @@
 
 .NoteCardListComponent {
   width: 100%;
+  height: 100%;
 }

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { createNoteApi, deleteNoteApi, getAllNotesApi, updateNoteApi } from '../api/notesApi';
+import { createNoteApi, deleteNoteApi, getAllNotesApi, searchNotesByQueryApi, updateNoteApi } from '../api/notesApi';
 import { useWebSocket } from './WebSocketContext';
 
 interface Note {
@@ -14,7 +14,10 @@ interface Note {
 
 interface NotesContextType {
   notes: Note[];
+  searchedNotes: Note[];
+  setSearchedNotes: React.Dispatch<React.SetStateAction<Note[]>>;
   getAllNotes: () => void;
+  searchNotesByQuery: (query: string) => void;
   createNote: (note: Partial<Note>) => void;
   updateNote: (id: string, updatedNoteData: Partial<Note>) => void;
   archiveNote: (id: string) => void;
@@ -25,6 +28,7 @@ interface NotesContextType {
 export const NotesContext = createContext<NotesContextType | undefined>(undefined);
 
 export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [searchedNotes, setSearchedNotes] = useState<Note[]>([]);
   const [notes, setNotes] = useState<Note[]>([
     /* {
         id: '1',
@@ -63,6 +67,20 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     });
 
   }, [webSocketService]);
+
+  const searchNotesByQuery = async (query: string) => {
+    const { data, error } = await searchNotesByQueryApi({ query: query });
+
+    if (error) {
+      console.log(error);
+      return error;
+    }
+
+    if (data) {
+      setSearchedNotes(data as Note[]);
+      console.log("Successfully searched notes by query", data);
+    }
+  };
 
 
   const getAllNotes = async () => {
@@ -158,7 +176,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   return (
-    <NotesContext.Provider value={{ notes, getAllNotes, createNote, updateNote, archiveNote, softDeleteNote, deleteNote }}>
+    <NotesContext.Provider value={{ notes, searchedNotes, setSearchedNotes, getAllNotes, searchNotesByQuery, createNote, updateNote, archiveNote, softDeleteNote, deleteNote }}>
       {children}
     </NotesContext.Provider>
   );

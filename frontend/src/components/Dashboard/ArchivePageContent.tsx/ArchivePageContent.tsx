@@ -1,13 +1,15 @@
-import './MainContent.css';
-import React, { useEffect } from 'react';
+import './ArchivePageContent.css';
+import React, { useEffect, useState } from 'react';
 import { Box, useMediaQuery, useTheme } from '@mui/material';
-import { useUser } from '../../contexts/UserContext';
-import NoteInput from '../NoteInput/NoteInput';
-import NoteCardList from '../NoteCard/NoteCardList';
-import { useNotes } from '../../contexts/NotesContext';
+import { useUser } from '../../../contexts/UserContext';
+import NoteInput from '../../Note/NoteInput/NoteInput';
+import NoteCardList from '../../Note/NoteCard/NoteCardList';
+import { Note, useNotes } from '../../../contexts/NotesContext';
 import { CssBaseline } from '@mui/joy';
+import NoteInputV2 from '../../Note/NoteInputV2/NoteInputV2';
 
-interface MainContentProps {
+
+interface ArchivePageContentProps {
   drawerOpen: boolean;
   drawerWidth: number;
   miniDrawerWidth: number;
@@ -15,7 +17,7 @@ interface MainContentProps {
   miniAppBarHeight: number;
 }
 
-const MainContent: React.FC<MainContentProps> = ({ drawerOpen, drawerWidth, miniDrawerWidth, appBarHeight, miniAppBarHeight }) => {
+const ArchivePageContent: React.FC<ArchivePageContentProps> = ({ drawerOpen, drawerWidth, miniDrawerWidth, appBarHeight, miniAppBarHeight }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
@@ -23,9 +25,9 @@ const MainContent: React.FC<MainContentProps> = ({ drawerOpen, drawerWidth, mini
   const calculatedMarginLeft = drawerOpen ? drawerWidth : miniDrawerWidth;
 
   const { user } = useUser();
-  const { notes, getAllNotes } = useNotes();
+  const [archivedNotes, setArchivedNotes] = useState<Note[]>([]);
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (!user) return;
 
     (async function fetchNotes() {
@@ -35,11 +37,11 @@ const MainContent: React.FC<MainContentProps> = ({ drawerOpen, drawerWidth, mini
         console.error('Erro ao buscar notas:', error);
       }
     }());
-  }, [user]);
+  }, [user]); */
 
   return (
     <Box
-      className='MainContent'
+      className='archive-page-content'
       component="main"
       sx={{
         display: 'flex',
@@ -54,12 +56,12 @@ const MainContent: React.FC<MainContentProps> = ({ drawerOpen, drawerWidth, mini
         gap: "32px"
       }}
     >
-      <NoteInput />
+      <p>Notas arquivadas!</p>
       <Box sx={{ display: "flex", alignItems: "start", width: "100%" }}>
-        <NoteCardList notes={notes} />
+        <NoteCardList notes={archivedNotes} />
       </Box>
     </Box>
   )
 };
 
-export default MainContent;
+export default ArchivePageContent;
