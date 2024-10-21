@@ -119,17 +119,42 @@ const generateEmbedding = async (text: string): Promise<number[]> => {
     return embedding[0];
 };
 
-export const searchNotesByQuery = async (query: string, matchThreshold = 0.2, matchCount = 10): Promise<INote[]> => {
+// export const searchNotesByQuery = async (query: string, matchThreshold = 0.2, matchCount = 10): Promise<INote[]> => {
+//     try {
+//         if (!query) {
+//             throw new Error("Query cannot be empty.");
+//         }
+
+//         const queryEmbedding = await generateEmbedding(query);
+//         const notes = await noteRepository.getNotesByEmbedding(queryEmbedding, matchThreshold, matchCount);
+
+//         if (!notes) {
+//             throw new Error("No notes were found for this query")
+//         }
+
+//         return notes;
+//     } catch (error: any) {
+//         throw new Error(`Failed to search notes: ${error.message}`);
+//     }
+// };
+
+export const searchNotesByQuery = async (
+    query: string,
+    matchThreshold = 0.2,
+    limit = 10, // Default para a quantidade de notas retornadas
+    page = 1  // Default para a primeira página
+): Promise<INote[]> => {
     try {
         if (!query) {
             throw new Error("Query cannot be empty.");
         }
 
         const queryEmbedding = await generateEmbedding(query);
-        const notes = await noteRepository.getNotesByEmbedding(queryEmbedding, matchThreshold, matchCount);
+        const offset = (page - 1) * limit;  // Cálculo do offset com base na página e no limite
+        const notes = await noteRepository.getNotesByEmbedding(queryEmbedding, matchThreshold, limit, offset);
 
         if (!notes) {
-            throw new Error("No notes were found for this query")
+            throw new Error("No notes were found for this query");
         }
 
         return notes;
@@ -137,6 +162,18 @@ export const searchNotesByQuery = async (query: string, matchThreshold = 0.2, ma
         throw new Error(`Failed to search notes: ${error.message}`);
     }
 };
+
+
+export const getPaginatedNotes = async (page: number, limit: number): Promise<{ notes: INote[], totalCount: number }> => {
+    try {
+        const offset = (page - 1) * limit;
+        const { notes, totalCount } = await noteRepository.getPaginatedNotes(limit, offset);
+        return { notes, totalCount };
+    } catch (error) {
+        throw error;
+    }
+};
+
 
 export const getAllNotes = async (): Promise<INote[]> => {
     try {
@@ -189,7 +226,6 @@ export const deleteNote = async (noteId: string): Promise<INote> => {
     }
 };
 
-// Refactor: tem que arrumar a lógica do update com as alterações todas que foram feitas
 export const updateNote = async (
     noteId: string,
     fields: Partial<INote>,

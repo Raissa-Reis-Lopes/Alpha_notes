@@ -1,27 +1,71 @@
 import { pool } from "../database/connection";
 import { INote } from "../interfaces/note";
 
+// export const getNotesByEmbedding = async (
+//     embedding: number[],
+//     matchThreshold: number,
+//     matchCount: number
+// ): Promise<INote[]> => {
+//     try {
+//         const query = `
+//             SELECT * 
+//             FROM match_chunks($1, $2, $3);
+//         `;
+
+//         const values = [JSON.stringify(embedding), matchThreshold, matchCount];
+
+//         const { rows } = await pool.query(query, values);
+
+//         return rows;
+//     } catch (error: any) {
+//         throw error;
+//     }
+// };
+
 export const getNotesByEmbedding = async (
     embedding: number[],
     matchThreshold: number,
-    matchCount: number
+    matchCount: number,
+    offset: number
 ): Promise<INote[]> => {
     try {
-        // Query que chama a função SQL match_chunks
         const query = `
             SELECT * 
-            FROM match_chunks($1, $2, $3);
+            FROM match_chunks($1, $2, $3, $4);  -- Inclui o parâmetro de offset
         `;
 
-        // Definindo os parâmetros
-        const values = [JSON.stringify(embedding), matchThreshold, matchCount];
+        const values = [JSON.stringify(embedding), matchThreshold, matchCount, offset];
 
-        // Executando a query
         const { rows } = await pool.query(query, values);
 
         return rows;
     } catch (error: any) {
         throw error;
+    }
+};
+
+
+export const getPaginatedNotes = async (limit: number, offset: number): Promise<{ notes: INote[], totalCount: number }> => {
+    try {
+        const notesQuery = `
+            SELECT * FROM notes
+            ORDER BY created_at DESC
+            LIMIT $1 OFFSET $2
+        `;
+        const notesResult = await pool.query(notesQuery, [limit, offset]);
+
+        const countQuery = `SELECT COUNT(*) FROM notes`;
+        const countResult = await pool.query(countQuery);
+
+        const totalCount = parseInt(countResult.rows[0].count, 10);
+
+        return {
+            notes: notesResult.rows,
+            totalCount
+        };
+    } catch (error) {
+        console.error(error);
+        throw new Error("Error fetching paginated notes.");
     }
 };
 
@@ -82,7 +126,6 @@ export const saveChunks = async (
         RETURNING *;
     `;
     try {
-        // Inserir os chunks no banco
         for (const chunk of chunks) {
             await pool.query(chunkQuery, [
                 chunk.note_id,
