@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS images (
     note_id UUID,
     filename TEXT NOT NULL,
     status TEXT DEFAULT 'unprocessed',
-    description TEXT, -- Descrição gerada pela IA
+    description TEXT, 
     CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id) ON DELETE CASCADE
 );
 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS urls (
     note_id UUID NOT NULL,
     url TEXT NOT NULL,
     status TEXT DEFAULT 'unprocessed',
-    transcription TEXT, -- Transcrição gerada pela IA
+    transcription TEXT, 
     CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id) ON DELETE CASCADE
 );
 
@@ -50,10 +50,10 @@ CREATE TABLE IF NOT EXISTS urls (
 -- Cria a tabela de chunks, agora referenciando notas, imagens ou URLs
 CREATE TABLE IF NOT EXISTS chunks (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    note_id UUID NOT NULL, -- Sempre associamos uma nota, seja direta ou indiretamente
-    source TEXT NOT NULL CHECK (source IN ('note', 'image', 'url')), -- Indica se refere a uma nota, imagem ou URL
-    image_id UUID, -- Para quando o chunk for associado a uma imagem
-    url_id UUID,  -- Para quando o chunk for associado a uma URL
+    note_id UUID NOT NULL, 
+    source TEXT NOT NULL CHECK (source IN ('note', 'image', 'url')), 
+    image_id UUID, 
+    url_id UUID,  
     chunk_index INT NOT NULL,
     embedding VECTOR(1536),
     CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id) ON DELETE CASCADE,
@@ -66,12 +66,12 @@ CREATE INDEX ON chunks USING ivfflat (embedding VECTOR_COSINE_OPS)
 WITH (lists = 100);
 
 
-
-
 CREATE OR REPLACE FUNCTION match_chunks(
   query_embedding vector(1536),
   match_threshold float,
-  match_count int
+  match_count int,
+  offset_param int DEFAULT 0,
+  filterCondition text DEFAULT '' 
 )
 RETURNS TABLE (
   id UUID,
@@ -79,24 +79,27 @@ RETURNS TABLE (
   content TEXT,
   similarity float
 )
-LANGUAGE sql STABLE
+LANGUAGE plpgsql STABLE
 AS $$
-  SELECT
-    id,
-    title,
-    content,
-    similarity
-  FROM (
-    SELECT DISTINCT ON (notes.id)  -- Garante que cada nota seja única
-      notes.id,
-      notes.title,
-      notes.content,
-      1 - (chunks.embedding <=> query_embedding) AS similarity
-    FROM chunks
-    JOIN notes ON chunks.note_id = notes.id
-    WHERE chunks.embedding <=> query_embedding < 1 - match_threshold
-    ORDER BY notes.id, similarity DESC  -- Primeiro pelo ID da nota para DISTINCT ON, depois pela similaridade
-  ) AS unique_notes
-  ORDER BY similarity DESC  -- Ordena o resultado final apenas pela similaridade
-  LIMIT match_count;
+BEGIN
+  RETURN QUERY EXECUTE format(
+    'SELECT id, title, content, similarity
+     FROM (
+       SELECT DISTINCT ON (n.id)  
+         n.id,
+         n.title,
+         n.content,
+         1 - (c.embedding <=> $1) AS similarity
+       FROM chunks c
+       JOIN notes n ON c.note_id = n.id
+       %s
+       AND (c.embedding <=> $1) < 1 - $2
+       ORDER BY n.id, similarity DESC
+     ) AS unique_notes
+     ORDER BY similarity DESC
+     LIMIT $3 OFFSET $4',
+     filterCondition  
+  )
+  USING query_embedding, match_threshold, match_count, offset_param;
+END;
 $$;

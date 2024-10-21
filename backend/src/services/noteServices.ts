@@ -53,18 +53,19 @@ export const createNoteWithoutEmbeddings = async (
             }
         }
 
-        return note;
+        const completeNote = await noteRepository.getNoteById(note.id)
+        return completeNote;
     } catch (error) {
         throw error;
     }
 };
 
-export const processEmbeddings = async (noteId: string, userId: string): Promise<void> => {
+export const processEmbeddings = async (noteId: string): Promise<void> => {
     try {
-        const note = await noteRepository.getNoteById(noteId, userId);
+        const note = await noteRepository.getNoteById(noteId);
 
         const chunkSize = 200;
-        const chunks = await splitTextIntoChunks(note.content, chunkSize);
+        const chunks = await splitTextIntoChunks((note.title + "" + note.content), chunkSize);
 
         const embeddings = await generateEmbeddingsForChunks(chunks);
 
@@ -145,17 +146,24 @@ const generateEmbedding = async (text: string): Promise<number[]> => {
     return embedding[0];
 };
 
-export const searchNotesByQuery = async (query: string, matchThreshold = 0.2, matchCount = 10): Promise<INote[]> => {
+export const searchNotesByQuery = async (
+    query: string,
+    matchThreshold = 0.2,
+    limit = 10, // Default para a quantidade de notas retornadas
+    page = 1,  // Default para a primeira página
+    filter?: string
+): Promise<INote[]> => {
     try {
         if (!query) {
             throw new Error("Query cannot be empty.");
         }
 
         const queryEmbedding = await generateEmbedding(query);
-        const notes = await noteRepository.getNotesByEmbedding(queryEmbedding, matchThreshold, matchCount);
+        const offset = (page - 1) * limit;  // Cálculo do offset com base na página e no limite
+        const notes = await noteRepository.getNotesByEmbedding(queryEmbedding, matchThreshold, limit, offset, filter as string);
 
         if (!notes) {
-            throw new Error("No notes were found for this query")
+            throw new Error("No notes were found for this query");
         }
 
         return notes;
@@ -164,27 +172,34 @@ export const searchNotesByQuery = async (query: string, matchThreshold = 0.2, ma
     }
 };
 
-export const getAllNotes = async (): Promise<INote[]> => {
+
+export const getPaginatedNotes = async (page: number, limit: number, filter?: string | undefined): Promise<{ notes: INote[], totalCount: number }> => {
     try {
-        const notes = await noteRepository.getAllNotes();
+        const offset = (page - 1) * limit;
+        const { notes, totalCount } = await noteRepository.getPaginatedNotes(limit, offset, filter);
+        return { notes, totalCount };
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const getAllNotes = async (filter?: string): Promise<INote[]> => {
+    try {
+        const notes = await noteRepository.getAllNotes(filter);
         return notes;
     } catch (error) {
         throw error;
     }
 };
 
-export const getNoteById = async (noteId: string, userId: string): Promise<INote> => {
+export const getNoteById = async (noteId: string): Promise<INote> => {
     try {
-
-        if (!userId) {
-            throw new Error("User not logged in. This action is forbidden");
-        }
 
         if (!noteId) {
             throw new Error("Note ID is required");
         }
 
-        const note = await noteRepository.getNoteById(noteId, userId);
+        const note = await noteRepository.getNoteById(noteId);
 
         if (!note) {
             throw new Error(`Note with id ${noteId} not found`);
@@ -215,14 +230,13 @@ export const deleteNote = async (noteId: string): Promise<INote> => {
     }
 };
 
-// Refactor: tem que arrumar a lógica do update com as alterações todas que foram feitas
 export const updateNote = async (
     noteId: string,
     fields: Partial<INote>,
     userId: string
 ): Promise<INote> => {
     try {
-        const currentNote = await noteRepository.getNoteById(noteId, userId);
+        const currentNote = await noteRepository.getNoteById(noteId);
         if (!currentNote) {
             throw new Error("Note not found");
         }
@@ -238,7 +252,9 @@ export const updateNote = async (
 
         await noteRepository.updateNote(noteId, updatedNote, userId);
 
-        return updatedNote;
+        const completeNote = await noteRepository.getNoteById(noteId)
+
+        return completeNote;
     } catch (error: any) {
         throw error;
     }

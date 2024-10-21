@@ -62,7 +62,6 @@ export const updateImageStatus = async (imageId: string, status: string) => {
 
     try {
         await pool.query(query, [status, imageId]);
-        console.log(`Status da imagem ${imageId} atualizado para '${status}'`);
     } catch (error) {
         console.error('Erro ao atualizar o status da imagem:', error);
         throw error;

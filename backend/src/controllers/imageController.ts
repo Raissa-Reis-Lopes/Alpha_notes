@@ -5,10 +5,9 @@ import * as imageServices from "../services/imageServices"
 import { IAPIResponse } from '../interfaces/api';
 import { IImage } from '../interfaces/image';
 
-// Configuração do multer (armazenamento em disco)
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');  // Define o diretório onde os arquivos serão salvos
+    cb(null, 'uploads/');
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
@@ -16,7 +15,6 @@ const storage = multer.diskStorage({
   }
 });
 
-// Função de upload que será usada no router
 export const upload = multer({ storage: storage });
 
 export const uploadImage = async (req: Request, res: Response) => {

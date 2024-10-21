@@ -5,10 +5,7 @@ import { auth } from '../middlewares/auth';
 
 const router = Router();
 
-// Rota para fazer upload da imagem
 router.post('/', auth, imageController.upload.single('image'), imageController.uploadImage);
-
-// Rota para remover uma imagem (se necessário)
 router.delete('/:imageId', auth, imageController.deleteImage);
 
 export default router;
