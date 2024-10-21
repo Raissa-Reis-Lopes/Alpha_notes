@@ -38,30 +38,3 @@ export const deleteUrl = async (req: Request, res: Response): Promise<void> => {
     });
   }
 };
-
-export const updateUrlStatus = async (req: Request, res: Response) => {
-  try {
-    const { urlId } = req.params;
-    const { status } = req.body;
-
-    await urlServices.updateUrlStatus(urlId, status);
-
-    return res.status(200).json({ success: true, message: 'Status da URL atualizado com sucesso' });
-  } catch (error: any) {
-    console.error('Erro ao atualizar status da URL:', error);
-    return res.status(500).json({ message: 'Erro ao atualizar status da URL', error: error.message });
-  }
-};
-
-export const updateUrlWithNoteId = async (req: Request, res: Response) => {
-  try {
-    const { urlId, noteId } = req.body;
-
-    const updatedUrl = await urlServices.updateUrlWithNoteId(urlId, noteId);
-
-    return res.status(200).json({ success: true, message: 'URL atualizada com sucesso', url: updatedUrl });
-  } catch (error: any) {
-    console.error('Erro ao atualizar URL:', error);
-    return res.status(500).json({ message: 'Erro ao atualizar URL', error: error.message });
-  }
-};
