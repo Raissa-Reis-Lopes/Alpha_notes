@@ -1,4 +1,3 @@
-// controllers/noteController.ts
 import { Request, Response } from "express";
 import * as noteServices from "../services/noteServices";
 import { INote } from "../interfaces/note";
@@ -58,29 +57,94 @@ export const createNote = async (req: Request, res: Response) => {
     }
 };
 
+
 export const searchNotesByQuery = async (req: Request, res: Response): Promise<void> => {
     const response: IAPIResponse<INote[]> = { success: false };
+
     try {
         const { query } = req.body;
+        const page = parseInt(req.query.page as string) || 1;
+        const limit = parseInt(req.query.limit as string) || 10;
 
         if (!query) {
             res.status(400).json({ message: "Query cannot be empty" });
             return;
         }
-        const notes = await noteServices.searchNotesByQuery(query);
+
+        const notes = await noteServices.searchNotesByQuery(query, 0.2, limit, page);
+
         response.data = notes;
         response.success = true;
         response.message = "Notes retrieved successfully";
-        res.status(200).json(response);
+        res.status(200).json({
+            ...response,
+            currentPage: page,
+            totalPages: Math.ceil(notes.length / limit),
+        });
     } catch (error: any) {
         console.error(error);
-        console.error(error)
         res.status(500).json({
             data: null,
             error: error.message || "Failed to search notes by query"
         });
     }
 };
+
+
+// export const searchNotesByQuery = async (req: Request, res: Response): Promise<void> => {
+//     const response: IAPIResponse<INote[]> = { success: false };
+//     try {
+//         const { query } = req.body;
+
+//         if (!query) {
+//             res.status(400).json({ message: "Query cannot be empty" });
+//             return;
+//         }
+//         const notes = await noteServices.searchNotesByQuery(query);
+//         response.data = notes;
+//         response.success = true;
+//         response.message = "Notes retrieved successfully";
+//         res.status(200).json(response);
+//     } catch (error: any) {
+//         console.error(error);
+//         console.error(error)
+//         res.status(500).json({
+//             data: null,
+//             error: error.message || "Failed to search notes by query"
+//         });
+//     }
+// };
+
+export const getPaginatedNotes = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    const response: IAPIResponse<INote[]> = { success: false };
+
+    const page: number = parseInt(req.query.page as string) || 1;
+    const limit: number = parseInt(req.query.limit as string) || 10;
+
+    try {
+        const { notes, totalCount } = await noteServices.getPaginatedNotes(page, limit);
+
+        response.data = notes;
+        response.success = true;
+        response.message = "Notes retrieved successfully";
+        res.status(200).json({
+            ...response,
+            currentPage: page,
+            totalPages: Math.ceil(totalCount / limit),
+            totalCount,
+        });
+    } catch (error: any) {
+        console.error(error);
+        res.status(500).json({
+            data: null,
+            error: error.message || "Failed to retrieve paginated notes",
+        });
+    }
+};
+
 
 export const getAllNotes = async (
     req: Request,
