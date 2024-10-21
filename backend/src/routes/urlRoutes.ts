@@ -9,6 +9,6 @@ const router = Router();
 router.post('/', auth, urlController.addUrl);
 
 // Rota para remover uma URL (se necessário)
-router.delete('/:imageId', auth, urlController.deleteUrl);
+router.delete('/:urlId', auth, urlController.deleteUrl);
 
 export default router;
