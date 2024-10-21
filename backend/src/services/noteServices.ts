@@ -7,6 +7,8 @@ import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { IImage } from "../interfaces/image";
 import { IUrl } from "../interfaces/url";
 import { getImageDescription } from "../utils/getImageDescription";
+import { downloadAudioFromYouTube } from "../utils/downloadAudio";
+import { transcribeAudio } from "../utils/transcribeAudio"
 import path from "path";
 
 const openAIEmbeddings = new OpenAIEmbeddings({
@@ -100,6 +102,7 @@ export const processEmbeddings = async (noteId: string): Promise<void> => {
                 url_id: null,
             }));
 
+            await imageRepository.updateImageDescription(image.id, JSON.stringify(description));
             await imageRepository.updateImageStatus(image.id, 'processed');
             await noteRepository.saveChunks(imageChunkData);
         }
@@ -107,7 +110,18 @@ export const processEmbeddings = async (noteId: string): Promise<void> => {
         const urls = await urlRepository.getUrlsByNoteId(noteId);
         for (const url of urls) {
             await urlRepository.updateUrlStatus(url.id, 'processing');
-            const urlChunks = await splitTextIntoChunks(url.url, chunkSize);
+            //AQUI TEM QUE TER A FUNÇÃO QUE FAZ A TRANSCRIÇÃO DO VÍDEO
+            //E PASSA ELA AQUI NO LUGAR DESSE URL.URL   
+
+            const audioPath = path.join(__dirname, '../../audios', url.url);
+
+            console.log(url.url)
+
+            const audioDownloaded = await downloadAudioFromYouTube(url.url, audioPath);
+            const transcription = await transcribeAudio(audioDownloaded, url.id);
+            console.log(transcription)
+
+            const urlChunks = await splitTextIntoChunks(JSON.stringify(transcription), chunkSize);
             const urlEmbeddings = await generateEmbeddingsForChunks(urlChunks);
 
             const urlChunkData = urlChunks.map((chunk, index) => ({
@@ -119,6 +133,7 @@ export const processEmbeddings = async (noteId: string): Promise<void> => {
                 url_id: url.id,
             }));
 
+            await urlRepository.updateUrlTranscription(url.id, JSON.stringify(transcription));
             await urlRepository.updateUrlStatus(url.id, 'processed');
             await noteRepository.saveChunks(urlChunkData);
         }

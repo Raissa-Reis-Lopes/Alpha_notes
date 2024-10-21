@@ -64,18 +64,17 @@ export const updateUrlStatus = async (urlId: string, status: string): Promise<vo
     }
 };
 
-export const updateUrlWithNoteId = async (urlId: string, noteId: string): Promise<IUrl> => {
+export const updateUrlTranscription = async (imageId: string, transcription: string) => {
+    const query = `
+      UPDATE urls
+      SET transcription = $1
+      WHERE id = $2
+    `;
+
     try {
-        const query = `
-            UPDATE urls
-            SET note_id = $1
-            WHERE id = $2
-            RETURNING *;
-        `;
-        const result = await pool.query(query, [noteId, urlId]);
-        return result.rows[0] as IUrl;
+        await pool.query(query, [transcription, imageId]);
     } catch (error) {
-        console.error('Erro ao atualizar URL com note ID:', error);
+        console.error('Erro ao atualizar o status da imagem:', error);
         throw error;
     }
 };

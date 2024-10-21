@@ -3,11 +3,8 @@ import { dirname } from "path";
 import fs from "fs";
 import path from "path";
 
-const __filename = process.argv[1];
-const __dirname = dirname(__filename);
-
 export async function downloadAudioFromYouTube(videoURL: string, outputPath: string): Promise<string> {
-    const audioDir = path.join(__dirname, "audio");
+    const audioDir = path.join(__dirname, "audios");
     if (!fs.existsSync(audioDir)) {
         fs.mkdirSync(audioDir);
     }
