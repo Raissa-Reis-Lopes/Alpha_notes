@@ -58,7 +58,7 @@ export const processEmbeddings = async (noteId: string): Promise<void> => {
         const note = await noteRepository.getNoteById(noteId);
 
         const chunkSize = 200;
-        const chunks = await splitTextIntoChunks(note.content, chunkSize);
+        const chunks = await splitTextIntoChunks((note.title + "" + note.content), chunkSize);
 
         const embeddings = await generateEmbeddingsForChunks(chunks);
 
