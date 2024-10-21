@@ -58,7 +58,6 @@ export const updateUrlStatus = async (urlId: string, status: string): Promise<vo
 
     try {
         await pool.query(query, [status, urlId]);
-        console.log(`Status da URL ${urlId} atualizado para '${status}'`);
     } catch (error) {
         console.error('Erro ao atualizar o status da URL:', error);
         throw error;

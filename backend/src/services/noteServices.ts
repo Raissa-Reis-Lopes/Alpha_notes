@@ -49,7 +49,8 @@ export const createNoteWithoutEmbeddings = async (
 
         if (urls.length > 0) {
             for (const url of urls) {
-                await urlRepository.updateUrlWithNoteId(url.id, note.id);
+                console.log(url)
+                await urlRepository.saveUrl(url.url, note.id);
             }
         }
 
