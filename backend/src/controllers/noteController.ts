@@ -58,6 +58,7 @@ export const createNote = async (req: Request, res: Response) => {
 };
 
 
+
 export const searchNotesByQuery = async (req: Request, res: Response): Promise<void> => {
     const response: IAPIResponse<INote[]> = { success: false };
 
@@ -65,13 +66,14 @@ export const searchNotesByQuery = async (req: Request, res: Response): Promise<v
         const { query } = req.body;
         const page = parseInt(req.query.page as string) || 1;
         const limit = parseInt(req.query.limit as string) || 10;
+        const filter: string = req.query.filter as string;
 
         if (!query) {
             res.status(400).json({ message: "Query cannot be empty" });
             return;
         }
 
-        const notes = await noteServices.searchNotesByQuery(query, 0.2, limit, page);
+        const notes = await noteServices.searchNotesByQuery(query, 0.2, limit, page, filter);
 
         response.data = notes;
         response.success = true;
@@ -95,12 +97,12 @@ export const getPaginatedNotes = async (
     res: Response
 ): Promise<void> => {
     const response: IAPIResponse<INote[]> = { success: false };
-
-    const page: number = parseInt(req.query.page as string) || 1;
-    const limit: number = parseInt(req.query.limit as string) || 10;
-
     try {
-        const { notes, totalCount } = await noteServices.getPaginatedNotes(page, limit);
+        const page: number = parseInt(req.query.page as string) || 1;
+        const limit: number = parseInt(req.query.limit as string) || 10;
+        const filter: string | undefined = typeof req.query.filter === 'string' ? req.query.filter : undefined; // Verifica se filter é uma string
+
+        const { notes, totalCount } = await noteServices.getPaginatedNotes(page, limit, filter);
 
         response.data = notes;
         response.success = true;
@@ -127,7 +129,10 @@ export const getAllNotes = async (
 ): Promise<void> => {
     const response: IAPIResponse<INote[]> = { success: false };
     try {
-        const notes: INote[] = await noteServices.getAllNotes();
+        const filter: string | undefined = typeof req.query.filter === 'string' ? req.query.filter : undefined;
+
+
+        const notes: INote[] = await noteServices.getAllNotes(filter);
         response.data = notes;
         response.success = true;
         response.message = "Notes retrieved successfully";

@@ -7,15 +7,26 @@ export const getNotesByEmbedding = async (
     embedding: number[],
     matchThreshold: number,
     matchCount: number,
-    offset: number
+    offset: number,
+    filter: string
 ): Promise<INote[]> => {
     try {
+        // Condição de filtro com base no parâmetro "filter"
+        let filterCondition = '';
+        if (filter === 'trash') {
+            filterCondition = 'WHERE n.is_in_trash = true';
+        } else if (filter === 'archive') {
+            filterCondition = 'WHERE n.is_in_archive = true';
+        } else {
+            filterCondition = 'WHERE (n.is_in_trash = false OR n.is_in_trash IS NULL) AND (n.is_in_archive = false OR n.is_in_archive IS NULL)';
+        }
+
         const query = `
             SELECT * 
-            FROM match_chunks($1, $2, $3, $4);  -- Inclui o parâmetro de offset
+            FROM match_chunks($1, $2, $3, $4, $5);
         `;
 
-        const values = [JSON.stringify(embedding), matchThreshold, matchCount, offset];
+        const values = [JSON.stringify(embedding), matchThreshold, matchCount, offset, filterCondition];
 
         const { rows } = await pool.query(query, values);
 
@@ -25,8 +36,18 @@ export const getNotesByEmbedding = async (
     }
 };
 
-export const getPaginatedNotes = async (limit: number, offset: number): Promise<{ notes: INote[], totalCount: number }> => {
+
+export const getPaginatedNotes = async (limit: number, offset: number, filter?: string): Promise<{ notes: INote[], totalCount: number }> => {
     try {
+        let filterCondition = '';
+        if (filter === 'trash') {
+            filterCondition = 'WHERE n.is_in_trash = true';
+        } else if (filter === 'archive') {
+            filterCondition = 'WHERE n.is_in_archive = true';
+        } else {
+            filterCondition = 'WHERE (n.is_in_trash = false OR n.is_in_trash IS NULL) AND (n.is_in_archive = false OR n.is_in_archive IS NULL)';
+        }
+
         // Consulta paginada com JOIN para retornar notas, imagens e URLs
         const notesQuery = `
             SELECT 
@@ -36,14 +57,15 @@ export const getPaginatedNotes = async (limit: number, offset: number): Promise<
             FROM notes n
             LEFT JOIN images i ON n.id = i.note_id
             LEFT JOIN urls u ON n.id = u.note_id
+            ${filterCondition}  -- Adiciona a condição de filtro aqui
             ORDER BY n.created_at DESC
             LIMIT $1 OFFSET $2;
         `;
 
         const notesResult = await pool.query(notesQuery, [limit, offset]);
 
-        // Consulta para contar o total de notas
-        const countQuery = `SELECT COUNT(*) FROM notes`;
+        // Consulta para contar o total de notas com o mesmo filtro
+        const countQuery = `SELECT COUNT(*) FROM notes n ${filterCondition};`;
         const countResult = await pool.query(countQuery);
         const totalCount = parseInt(countResult.rows[0].count, 10);
 
@@ -61,14 +83,14 @@ export const getPaginatedNotes = async (limit: number, offset: number): Promise<
                     content: row.content,
                     created_by: row.created_by,
                     created_at: row.created_at,
-                    updated_at: row.update_at,
+                    updated_at: row.updated_at,
                     images: [],
                     urls: []
                 };
             }
 
             // Adiciona a imagem se existir
-            if (row.image_id && row.image_filename) {
+            if (row.image_id) {
                 notesMap[noteId].images!.push({
                     id: row.image_id,
                     filename: row.image_filename // Retorna o 'id' e o 'filename'
@@ -76,7 +98,7 @@ export const getPaginatedNotes = async (limit: number, offset: number): Promise<
             }
 
             // Adiciona a URL se existir
-            if (row.url_id && row.url_link) {
+            if (row.url_id) {
                 notesMap[noteId].urls!.push({
                     id: row.url_id,
                     url: row.url_link,               // Retorna o 'url'
@@ -95,18 +117,28 @@ export const getPaginatedNotes = async (limit: number, offset: number): Promise<
     }
 };
 
-export const getAllNotes = async (): Promise<INote[]> => {
+export const getAllNotes = async (filter?: string): Promise<INote[]> => {
     try {
-        const query = `
+        let query = `
             SELECT 
-                n.id as note_id, n.title, n.content, n.created_by, n.created_at, n.updated_at,
-                i.id as image_id, i.filename as image_filename, -- Retorna o id e filename da imagem
-                u.id as url_id, u.url as url_link, u.transcription as url_transcription -- Retorna id, url e transcription
+                n.id as note_id, n.title, n.content, n.created_by, n.created_at, n.updated_at, n.is_in_trash, n.is_in_archive,
+                i.id as image_id, i.filename as image_filename, 
+                u.id as url_id, u.url as url_link, u.transcription as url_transcription 
             FROM notes n
             LEFT JOIN images i ON n.id = i.note_id
             LEFT JOIN urls u ON n.id = u.note_id
-            ORDER BY n.created_at DESC;
         `;
+
+        // Adiciona a condição com base no filtro
+        if (filter === 'trash') {
+            query += ` WHERE n.is_in_trash = true`;
+        } else if (filter === 'archive') {
+            query += ` WHERE n.is_in_archive = true`;
+        } else {
+            query += ` WHERE (n.is_in_trash = false OR n.is_in_trash IS NULL) AND (n.is_in_archive = false OR n.is_in_archive IS NULL)`; // Para notas normais
+        }
+
+        query += ` ORDER BY n.created_at DESC;`;
 
         const { rows } = await pool.query(query);
 
@@ -125,6 +157,8 @@ export const getAllNotes = async (): Promise<INote[]> => {
                     created_by: row.created_by,
                     created_at: row.created_at,
                     updated_at: row.updated_at,
+                    is_in_trash: row.is_in_trash,
+                    is_in_archive: row.is_in_archive,
                     images: [],
                     urls: []
                 };
