@@ -46,18 +46,19 @@ export const createNoteWithoutEmbeddings = async (
             }
         }
 
-        return note;
+        const completeNote = await noteRepository.getNoteById(note.id)
+        return completeNote;
     } catch (error) {
         throw error;
     }
 };
 
-export const processEmbeddings = async (noteId: string, userId: string): Promise<void> => {
+export const processEmbeddings = async (noteId: string): Promise<void> => {
     try {
-        const note = await noteRepository.getNoteById(noteId, userId);
+        const note = await noteRepository.getNoteById(noteId);
 
         const chunkSize = 200;
-        const chunks = await splitTextIntoChunks(note.content, chunkSize);
+        const chunks = await splitTextIntoChunks((note.title + "" + note.content), chunkSize);
 
         const embeddings = await generateEmbeddingsForChunks(chunks);
 
@@ -174,7 +175,6 @@ export const getPaginatedNotes = async (page: number, limit: number): Promise<{ 
     }
 };
 
-
 export const getAllNotes = async (): Promise<INote[]> => {
     try {
         const notes = await noteRepository.getAllNotes();
@@ -184,18 +184,14 @@ export const getAllNotes = async (): Promise<INote[]> => {
     }
 };
 
-export const getNoteById = async (noteId: string, userId: string): Promise<INote> => {
+export const getNoteById = async (noteId: string): Promise<INote> => {
     try {
-
-        if (!userId) {
-            throw new Error("User not logged in. This action is forbidden");
-        }
 
         if (!noteId) {
             throw new Error("Note ID is required");
         }
 
-        const note = await noteRepository.getNoteById(noteId, userId);
+        const note = await noteRepository.getNoteById(noteId);
 
         if (!note) {
             throw new Error(`Note with id ${noteId} not found`);
@@ -232,7 +228,7 @@ export const updateNote = async (
     userId: string
 ): Promise<INote> => {
     try {
-        const currentNote = await noteRepository.getNoteById(noteId, userId);
+        const currentNote = await noteRepository.getNoteById(noteId);
         if (!currentNote) {
             throw new Error("Note not found");
         }
@@ -248,7 +244,9 @@ export const updateNote = async (
 
         await noteRepository.updateNote(noteId, updatedNote, userId);
 
-        return updatedNote;
+        const completeNote = await noteRepository.getNoteById(noteId)
+
+        return completeNote;
     } catch (error: any) {
         throw error;
     }

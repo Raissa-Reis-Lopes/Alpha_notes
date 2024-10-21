@@ -1,26 +1,7 @@
 import { pool } from "../database/connection";
+import { IImage } from "../interfaces/image";
 import { INote } from "../interfaces/note";
-
-// export const getNotesByEmbedding = async (
-//     embedding: number[],
-//     matchThreshold: number,
-//     matchCount: number
-// ): Promise<INote[]> => {
-//     try {
-//         const query = `
-//             SELECT * 
-//             FROM match_chunks($1, $2, $3);
-//         `;
-
-//         const values = [JSON.stringify(embedding), matchThreshold, matchCount];
-
-//         const { rows } = await pool.query(query, values);
-
-//         return rows;
-//     } catch (error: any) {
-//         throw error;
-//     }
-// };
+import { IUrl } from "../interfaces/url";
 
 export const getNotesByEmbedding = async (
     embedding: number[],
@@ -44,23 +25,68 @@ export const getNotesByEmbedding = async (
     }
 };
 
-
 export const getPaginatedNotes = async (limit: number, offset: number): Promise<{ notes: INote[], totalCount: number }> => {
     try {
+        // Consulta paginada com JOIN para retornar notas, imagens e URLs
         const notesQuery = `
-            SELECT * FROM notes
-            ORDER BY created_at DESC
-            LIMIT $1 OFFSET $2
+            SELECT 
+                n.id as note_id, n.title, n.content, n.created_by, n.created_at, n.updated_at,
+                i.id as image_id, i.filename as image_filename, -- Imagens
+                u.id as url_id, u.url as url_link, u.transcription as url_transcription -- URLs
+            FROM notes n
+            LEFT JOIN images i ON n.id = i.note_id
+            LEFT JOIN urls u ON n.id = u.note_id
+            ORDER BY n.created_at DESC
+            LIMIT $1 OFFSET $2;
         `;
+
         const notesResult = await pool.query(notesQuery, [limit, offset]);
 
+        // Consulta para contar o total de notas
         const countQuery = `SELECT COUNT(*) FROM notes`;
         const countResult = await pool.query(countQuery);
-
         const totalCount = parseInt(countResult.rows[0].count, 10);
 
+        // Organizar os dados em um formato de nota com arrays de imagens e URLs
+        const notesMap: { [key: string]: INote } = {};
+
+        for (const row of notesResult.rows) {
+            const noteId = row.note_id;
+
+            // Se a nota ainda não existir no map, cria uma nova entrada
+            if (!notesMap[noteId]) {
+                notesMap[noteId] = {
+                    id: noteId,
+                    title: row.title,
+                    content: row.content,
+                    created_by: row.created_by,
+                    created_at: row.created_at,
+                    updated_at: row.update_at,
+                    images: [],
+                    urls: []
+                };
+            }
+
+            // Adiciona a imagem se existir
+            if (row.image_id && row.image_filename) {
+                notesMap[noteId].images!.push({
+                    id: row.image_id,
+                    filename: row.image_filename // Retorna o 'id' e o 'filename'
+                });
+            }
+
+            // Adiciona a URL se existir
+            if (row.url_id && row.url_link) {
+                notesMap[noteId].urls!.push({
+                    id: row.url_id,
+                    url: row.url_link,               // Retorna o 'url'
+                    transcription: row.url_transcription // Retorna a 'transcription'
+                });
+            }
+        }
+
         return {
-            notes: notesResult.rows,
+            notes: Object.values(notesMap),
             totalCount
         };
     } catch (error) {
@@ -69,34 +95,136 @@ export const getPaginatedNotes = async (limit: number, offset: number): Promise<
     }
 };
 
-
 export const getAllNotes = async (): Promise<INote[]> => {
     try {
-        const { rows } = await pool.query(`
-            SELECT * FROM notes
-        `);
-        return rows;
+        const query = `
+            SELECT 
+                n.id as note_id, n.title, n.content, n.created_by, n.created_at, n.updated_at,
+                i.id as image_id, i.filename as image_filename, -- Retorna o id e filename da imagem
+                u.id as url_id, u.url as url_link, u.transcription as url_transcription -- Retorna id, url e transcription
+            FROM notes n
+            LEFT JOIN images i ON n.id = i.note_id
+            LEFT JOIN urls u ON n.id = u.note_id
+            ORDER BY n.created_at DESC;
+        `;
+
+        const { rows } = await pool.query(query);
+
+        // Organizar os dados em um formato de nota com arrays de imagens e urls
+        const notesMap: { [key: string]: INote } = {};
+
+        for (const row of rows) {
+            const noteId = row.note_id;
+
+            // Se a nota ainda não existir no map, cria uma nova entrada
+            if (!notesMap[noteId]) {
+                notesMap[noteId] = {
+                    id: noteId,
+                    title: row.title,
+                    content: row.content,
+                    created_by: row.created_by,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
+                    images: [],
+                    urls: []
+                };
+            }
+
+            // Adiciona a imagem se existir
+            if (row.image_id && row.image_filename) {
+                notesMap[noteId].images!.push({
+                    id: row.image_id,
+                    filename: row.image_filename // Retorna o 'id' e o 'filename'
+                });
+            }
+
+            // Adiciona a URL se existir
+            if (row.url_id && row.url_link) {
+                notesMap[noteId].urls!.push({
+                    id: row.url_id,
+                    url: row.url_link,               // Retorna o 'url'
+                    transcription: row.url_transcription // Retorna a 'transcription'
+                });
+            }
+        }
+
+        // Retorna as notas como um array
+        return Object.values(notesMap);
     } catch (error) {
         console.error(error);
         throw new Error("Error fetching notes.");
     }
 };
+//         const { rows } = await pool.query(`
+//             SELECT * FROM notes
+//         `);
+//         return rows;
+//     } catch (error) {
+//         console.error(error);
+//         throw new Error("Error fetching notes.");
+//     }
+// };
 
-export const getNoteById = async (noteId: string, userId: string): Promise<INote> => {
+export const getNoteById = async (noteId: string): Promise<INote> => {
     try {
-        const result = await pool.query(`
-            SELECT * FROM notes WHERE id = $1 AND created_by = $2
-        `, [noteId, userId]);
+        const query = `
+            SELECT 
+                n.id as note_id, n.title, n.content, n.created_by, n.created_at, n.updated_at,
+                i.id as image_id, i.filename as image_filename, 
+                u.id as url_id, u.url as url_link, u.transcription as url_transcription 
+            FROM notes n
+            LEFT JOIN images i ON n.id = i.note_id
+            LEFT JOIN urls u ON n.id = u.note_id
+            WHERE n.id = $1
+        `;
+
+        const result = await pool.query(query, [noteId]);
 
         if (result.rows.length === 0) {
             throw new Error(`Note with ID ${noteId} not found.`);
         }
-        return result.rows[0] as INote;
+
+        const noteMap: { [key: string]: INote } = {};
+
+        for (const row of result.rows) {
+            const noteId = row.note_id;
+
+            if (!noteMap[noteId]) {
+                noteMap[noteId] = {
+                    id: noteId,
+                    title: row.title,
+                    content: row.content,
+                    created_by: row.created_by,
+                    created_at: row.created_at,
+                    updated_at: row.updated_at,
+                    images: [],
+                    urls: []
+                };
+            }
+
+            if (row.image_id && row.image_filename) {
+                noteMap[noteId].images!.push({
+                    id: row.image_id,
+                    filename: row.image_filename
+                });
+            }
+
+            if (row.url_id && row.url_link) {
+                noteMap[noteId].urls!.push({
+                    id: row.url_id,
+                    url: row.url_link,
+                    transcription: row.url_transcription
+                });
+            }
+        }
+
+        return Object.values(noteMap)[0];
     } catch (error) {
         console.error(error);
         throw error;
     }
 };
+
 
 export const createNote = async (
     title: string,
@@ -110,7 +238,23 @@ export const createNote = async (
     `;
     try {
         const result = await pool.query(query, [title, content, created_by]);
-        return result.rows[0] as INote;
+        const note = result.rows[0] as INote;
+
+        // Buscar as imagens associadas à nota
+        const imageQuery = `
+         SELECT * FROM images WHERE note_id = $1;
+     `;
+        const imageResult = await pool.query(imageQuery, [note.id]);
+        note.images = imageResult.rows as IImage[];
+
+        // Buscar as URLs associadas à nota
+        const urlQuery = `
+         SELECT * FROM urls WHERE note_id = $1;
+     `;
+        const urlResult = await pool.query(urlQuery, [note.id]);
+        note.urls = urlResult.rows as IUrl[];
+
+        return note;
     } catch (error) {
         console.error(error);
         throw error;
@@ -151,7 +295,6 @@ export const updateNoteStatus = async (noteId: string, status: string) => {
 
     try {
         await pool.query(query, [status, noteId]);
-        console.log(`Status da nota ${noteId} atualizado para '${status}'`);
     } catch (error) {
         console.error('Erro ao atualizar o status da nota:', error);
         throw error;
@@ -194,7 +337,6 @@ export const updateNote = async (
         throw error;
     }
 };
-
 
 export const deleteNoteById = async (noteId: string): Promise<INote> => {
     try {
