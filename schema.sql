@@ -65,11 +65,13 @@ CREATE TABLE IF NOT EXISTS chunks (
 CREATE INDEX ON chunks USING ivfflat (embedding VECTOR_COSINE_OPS)
 WITH (lists = 100);
 
+
 CREATE OR REPLACE FUNCTION match_chunks(
   query_embedding vector(1536),
   match_threshold float,
   match_count int,
-  offset_param int DEFAULT 0  
+  offset_param int DEFAULT 0,
+  filterCondition text DEFAULT '' 
 )
 RETURNS TABLE (
   id UUID,
@@ -77,25 +79,27 @@ RETURNS TABLE (
   content TEXT,
   similarity float
 )
-LANGUAGE sql STABLE
+LANGUAGE plpgsql STABLE
 AS $$
-  SELECT
-    id,
-    title,
-    content,
-    similarity
-  FROM (
-    SELECT DISTINCT ON (notes.id)  
-      notes.id,
-      notes.title,
-      notes.content,
-      1 - (chunks.embedding <=> query_embedding) AS similarity
-    FROM chunks
-    JOIN notes ON chunks.note_id = notes.id
-    WHERE chunks.embedding <=> query_embedding < 1 - match_threshold
-    ORDER BY notes.id, similarity DESC  
-  ) AS unique_notes
-  ORDER BY similarity DESC  
-  LIMIT match_count
-  OFFSET offset_param;  
+BEGIN
+  RETURN QUERY EXECUTE format(
+    'SELECT id, title, content, similarity
+     FROM (
+       SELECT DISTINCT ON (n.id)  
+         n.id,
+         n.title,
+         n.content,
+         1 - (c.embedding <=> $1) AS similarity
+       FROM chunks c
+       JOIN notes n ON c.note_id = n.id
+       %s
+       AND (c.embedding <=> $1) < 1 - $2
+       ORDER BY n.id, similarity DESC
+     ) AS unique_notes
+     ORDER BY similarity DESC
+     LIMIT $3 OFFSET $4',
+     filterCondition  
+  )
+  USING query_embedding, match_threshold, match_count, offset_param;
+END;
 $$;
