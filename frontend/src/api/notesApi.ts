@@ -1,21 +1,29 @@
 import { Note } from '../contexts/NotesContext';
 import request, { requestOptions } from '../utils/request';
 
-export async function getAllNotesApi() {
+interface GetAllNotesResponse {
+  data: Note[];
+  error?: string;
+}
 
+export async function getAllNotesApi(filter?: string): Promise<GetAllNotesResponse> {
   const requestParams: requestOptions = {
-    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes`,
+    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes${filter ? `?filter=${filter}` : ''}`,
     method: 'GET',
   };
 
   try {
     const response = await request(requestParams);
-
-    if (response.error) return { data: null as null, error: response.message };
-    return { data: response.data, error: null as null };
-
+    return {
+      data: response.data as Note[],
+    };
   } catch (error) {
-    return { data: null as null, error: "getAllNotesApi : Um erro inesperado aconteceu" };
+    const errorMessage = (error as any).message || "Erro desconhecido";
+    console.error("Erro ao buscar notas:", errorMessage);
+    return {
+      data: [],
+      error: errorMessage,
+    };
   }
 }
 
@@ -124,6 +132,117 @@ export async function deleteNoteApi({ id }: { id: string }) {
   }
 }
 
+export async function archiveNoteApi({ id }: { id: string }, socketId: string) {
+  const body = { is_in_archive: true };
+
+  const requestParams: requestOptions = {
+    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/${id}`,
+    method: 'PUT',
+    body,
+    headers: {
+      'Content-Type': 'application/json',
+      'x-socket-id': socketId,
+    },
+  };
+
+  try {
+    const response = await request<Note>(requestParams);
+
+    if (response.error) return { data: null as null, error: response.message };
+    return { data: response.data, error: null as null };
+
+  } catch (error) {
+    return { data: null as null, error: "archiveNoteApi : Um erro inesperado aconteceu" };
+  }
+}
+
+
+export async function moveNoteToTrashApi({ id }: { id: string }, socketId: string) {
+  const body = { is_in_trash: true };
+
+const requestParams: requestOptions = {
+    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/${id}`,
+    method: 'PUT',
+    body, //passo o fields
+    headers: {
+        'Content-Type': 'application/json',
+        'x-socket-id': socketId,
+    },
+};
+
+
+  try {
+    const response = await request<Note>(requestParams);
+
+    if (response.error) return { data: null as null, error: response.message };
+    return { data: response.data, error: null as null };
+
+  } catch (error) {
+    return { data: null as null, error: "moveNoteToTrashApi : Um erro inesperado aconteceu" };
+  }
+}
+
+
+export async function restoreFromTrashApi({ id }: { id: string }, socketId: string) {
+  const body = {is_in_trash: false};
+
+  const requestParams: requestOptions = {
+    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/${id}`,
+    method: 'PUT',
+    body,
+    headers: {
+      'Content-Type': 'application/json',
+      'x-socket-id': socketId,
+    },
+  };
+
+  try {
+    const response = await request<Note>(requestParams);
+
+    if (response.error) {
+      console.error("Erro ao restaurar nota do lixo:", response.error);
+      return { data: null as null, error: response.message };
+    }
+    return { data: response.data, error: null as null };
+
+  } catch (error) {
+    console.error("restoreFromTrashApi: Um erro inesperado aconteceu", error);
+    return { data: null as null, error: "restoreFromTrashApi: Um erro inesperado aconteceu" };
+  }
+}
+
+export async function restoreFromArchiveApi({ id }: { id: string }, socketId: string) {
+  const body = {is_in_archive: false};
+
+  const requestParams: requestOptions = {
+      url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/${id}`,
+      method: 'PUT',
+      body,
+      headers: {
+          'Content-Type': 'application/json',
+          'x-socket-id': socketId,
+      },
+  };
+
+  try {
+      const response = await request<Note>(requestParams);
+
+      if (response.error) {
+          console.error("Erro ao restaurar nota do arquivo:", response.error);
+          return { data: null, error: response.message };
+      }
+      
+      return { data: response.data, error: null };
+  } catch (error) {
+      console.error("restoreFromArchiveApi: Um erro inesperado aconteceu", error);
+      if (error instanceof SyntaxError) {
+          console.error("Resposta da API não é um JSON válido.");
+      }
+      return { data: null, error: "restoreFromArchiveApi: Um erro inesperado aconteceu" };
+  }
+}
+
+export type {GetAllNotesResponse};
 
 
 

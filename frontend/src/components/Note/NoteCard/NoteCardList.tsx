@@ -2,92 +2,67 @@ import './NoteCardList.css';
 import { Box } from "@mui/material";
 import { Typography } from '@mui/joy';
 import { DescriptionOutlined } from '@mui/icons-material';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { Note, useNotes } from '../../../contexts/NotesContext';
 import ToolbarCard from '../../ToolbarCard/ToolbarCard';
 import NoteModal from '../NoteModal/NoteModal';
 import Loader from '../../Loader/Loader';
 
 interface NoteCardProps {
-  id: string;
-  title: string;
-  content: string;
-  date: string;
-  archived: boolean;
-  metadata: object;
-  status: 'processing' | 'completed' | 'failed';
+  note: Note;
 }
-const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived, metadata, status }) => {
+
+const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
+  const { id, title, content, date, archived, metadata, status } = note;
   const [isHovered, setIsHovered] = useState(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { notes, updateNote, archiveNote, softDeleteNote, deleteNote } = useNotes();
+  const { updateNote, softDeleteNote, archiveNote } = useNotes();
 
-  const toggleHover = () => setIsHovered(!isHovered);
-
+  const toggleHover = () => setIsHovered(prev => !prev);
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 
   const handleUpdateNote = (updatedNote: Note) => updateNote(updatedNote.id, updatedNote);
-  //const handleArchiveNote = (noteToArchive: Note) => archiveNote(noteToArchive.id);
-  //const handleSoftDeleteNote = (noteToSoftDelete: Note) => softDeleteNote(noteToSoftDelete.id);
-  const handleDeleteNote = (noteToDelete: Note) => deleteNote(noteToDelete.id);
+  const handleSoftDeleteNote = (noteToSoftDelete: Note) => softDeleteNote(noteToSoftDelete.id);
+  const handleArchiveNote = (noteToArchive: Note) => archiveNote(noteToArchive.id);
 
-  const darkTheme = true;
   return (
     <>
-      <Box className="note-card-component"
+      <Box
+        className="note-card-component"
         onMouseEnter={toggleHover}
         onMouseLeave={toggleHover}
         onClick={handleOpenModal}
-        sx={{ backgroundColor: `${darkTheme ? "#fefcff" : "inital"}` }}
+        sx={{ backgroundColor: "#fefcff" }}
       >
+        <Typography level="title-md" sx={{ p: 2, whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+          {title}
+        </Typography>
 
-        <Box>
-          <Typography level="title-md" padding={"12px 12px 0 12px"}
-            sx={{
-              outline: "none",
-              whiteSpace: "pre-wrap",
-              wordWrap: "break-word"
-            }}
-          >{title}</Typography>
-        </Box>
+        <Typography level="body-md" sx={{ p: 2, whiteSpace: "pre-wrap", wordWrap: "break-word" }}>
+          {content}
+        </Typography>
 
-        <Box>
-          <Typography level="body-md" padding={"12px 12px"}
-            sx={{
-              outline: "none",
-              whiteSpace: "pre-wrap",
-              wordWrap: "break-word"
-            }}
-          >{content}</Typography>
-        </Box>
-        {true && (
-          <Box className="note-toolbar"
-            sx={{
-              padding: "0 12px",
-              display: "flex",
-              justifyContent: "space-between",
-              visibility: isHovered ? "visible" : "hidden",
-            }}>
-            <ToolbarCard note={{ id, title, content, date, archived, metadata, status }} onDelete={handleDeleteNote} />
-            <Box>
-
-            </Box>
+        {isHovered && (
+          <Box className="note-toolbar" sx={{ padding: "0 12px", display: "flex", justifyContent: "space-between" }}>
+            <ToolbarCard
+              note={note}
+              onDelete={handleSoftDeleteNote}
+              onArchive={handleArchiveNote}
+            />
           </Box>
         )}
         <Loader className={status} title={status} />
       </Box>
 
-      {/* Modal de Edição */}
       <NoteModal
         open={isModalOpen}
         onClose={handleCloseModal}
-        note={{ id, title, content, date, archived, metadata, status }}
+        note={note}
         onSave={handleUpdateNote}
-        onDelete={handleDeleteNote}
+        onDelete={handleSoftDeleteNote}
+        onArchive={handleArchiveNote}
       />
-
     </>
   );
 };
@@ -97,58 +72,22 @@ interface NoteCardListProps {
 }
 
 const NoteCardList: React.FC<NoteCardListProps> = ({ notes }) => {
+  const sortedNoteList = notes.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-  const sortedNoteList = notes.sort((a, b) => {
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
-  });
+  if (!notes || notes.length === 0) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", width: "100%", marginTop: "10vh" }}>
+        <DescriptionOutlined sx={{ fontSize: "100px", opacity: "0.1" }} />
+        <Typography sx={{ fontSize: "24px", color: "#5f6368" }}>Nenhuma anotação encontrada.</Typography>
+      </Box>
+    );
+  }
 
-  const darkTheme = true;
   return (
-    <Box className="NoteCardListComponent"
-      sx={{ borderColor: `${darkTheme ? "#828282" : "#e0e0e0"}` }}>
-      {!notes || notes.length === 0 ?
-        <Box sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-          width: "100%",
-          marginTop: "10vh"
-        }}>
-          <DescriptionOutlined sx={{ fontSize: "100px", opacity: "0.1" }} />
-          <Typography sx={{ fontSize: "24px", color: "#5f6368" }}>Nenhuma anotação encontrada.</Typography>
-        </Box>
-        :
-        <Box
-          sx={{
-            /* display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "space-around",
-            alignItems: "flex-start",
-            maxWidth: "100vw",
-            gap: "16px", */
-            /* overflowY: "auto", */
-
-            display: "flex",
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            gap: "16px",
-          }}>
-          {sortedNoteList.map(item => (
-            <NoteCard
-              key={item.id}
-              id={item.id}
-              title={item.title}
-              content={item.content}
-              date={(new Date(item.date).toLocaleString())}
-              archived={item.archived}
-              metadata={item.metadata}
-              status={item.status}
-            />
-          ))}
-        </Box>
-
-      }
+    <Box className="NoteCardListComponent" sx={{ display: "flex", flexDirection: 'row', flexWrap: 'wrap', gap: "16px" }}>
+      {sortedNoteList.map(item => (
+        <NoteCard key={item.id} note={item} />
+      ))}
     </Box>
   );
 };
