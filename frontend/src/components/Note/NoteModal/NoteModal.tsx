@@ -13,8 +13,10 @@ interface NoteModalProps {
   note: Note | null;
   onSave: (updatedNote: Note) => void;
   onDelete: (noteToDelete: Note) => void;
+  onArchive: (noteToArchive: Note) => void;
 }
-const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDelete }) => {
+
+const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDelete, onArchive }) => {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
 
@@ -36,14 +38,6 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
     }
   };
 
-  /* const handleBackdropClick = () => {
-    if (title !== note?.title || content !== note?.content) {
-      handleSave();
-    } else {
-      onClose();
-    }
-  }; */
-
   const handleClose = () => {
     onClose();
   };
@@ -52,19 +46,13 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
     return null; // ou retornar um componente de loading ou mensagem de erro
   }
 
-
-
-
   return (
     <Transition in={open} timeout={400}>
       {(state: string) => (
         <Modal
-          /*  component="div"  */// Adiciona a propriedade component
           keepMounted
-          /* open={!['exited', 'exiting'].includes(state)} */
-          /*   onClose={() => setOpen(false)} */
           open={open}
-          onClose={handleClose} // Utilize onClose
+          onClose={handleClose}
           slotProps={{
             backdrop: {
               sx: {
@@ -72,8 +60,8 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
                 backdropFilter: 'none',
                 transition: `opacity 400ms, backdrop-filter 400ms`,
                 ...{
-                  entering: { opacity: 1/* , backdropFilter: 'blur(8px)' */ },
-                  entered: { opacity: 1/* , backdropFilter: 'blur(8px)' */ },
+                  entering: { opacity: 1 },
+                  entered: { opacity: 1 },
                 }[state],
               },
             },
@@ -95,23 +83,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
               padding: 0,
             }}
           >
-
-            {/* Componente isolado */}
-            <Card variant="outlined" /* sx={{ width: 320 }} */>
-
-              {/* TODO: Implementar quando for adicionar imagens */}
-              {/*       
-                <CardOverflow>
-                  <AspectRatio ratio="2">
-                    <img
-                      src="https://images.unsplash.com/photo-1532614338840-ab30cf10ed36?auto=format&fit=crop&w=318"
-                      srcSet="https://images.unsplash.com/photo-1532614338840-ab30cf10ed36?auto=format&fit=crop&w=318&dpr=2 2x"
-                      loading="lazy"
-                      alt=""
-                    />
-                  </AspectRatio>
-                </CardOverflow> 
-                */}
+            <Card variant="outlined">
               <CardContent>
                 <Box>
                   <Input
@@ -122,11 +94,9 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
                 </Box>
                 <Box>
                   <Textarea
-                    disabled={false}
                     minRows={2}
                     variant="outlined"
                     placeholder="Criar nota..."
-                    /*  onFocus={handleFocus} */
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                   />
@@ -143,25 +113,24 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
                         onClick={handleClose}
                         size="sm"
                         variant="outlined"
-
-                        sx={{
-                          fontSize: "13px"
-                        }}
-                      >Cancelar</Button>,
+                        sx={{ fontSize: "13px" }}
+                      >
+                        Cancelar
+                      </Button>,
                       <Button
                         key="save"
                         color="primary"
                         onClick={handleSave}
                         size="sm"
                         variant="solid"
-
-                        sx={{
-                          fontSize: "13px"
-                        }}
-                      >Salvar</Button>
+                        sx={{ fontSize: "13px" }}
+                      >
+                        Salvar
+                      </Button>
                     ]}
                     note={note}
                     onDelete={onDelete}
+                    onArchive={onArchive}
                   />
                 </CardContent>
               </CardOverflow>
@@ -170,7 +139,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
         </Modal>
       )}
     </Transition>
-  )
+  );
 };
 
 export default NoteModal;
