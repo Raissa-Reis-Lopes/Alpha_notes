@@ -68,6 +68,22 @@ export const updateImageStatus = async (imageId: string, status: string) => {
     }
 };
 
+export const updateImageDescription = async (imageId: string, description: string) => {
+    const query = `
+      UPDATE images
+      SET description = $1
+      WHERE id = $2
+    `;
+
+    try {
+        await pool.query(query, [description, imageId]);
+    } catch (error) {
+        console.error('Erro ao atualizar o status da imagem:', error);
+        throw error;
+    }
+};
+
+
 
 export const updateImageWithNoteId = async (imageId: string, noteId: string): Promise<IImage> => {
     try {

@@ -1,12 +1,16 @@
 import * as noteRepository from "../repositories/noteRepository";
 import * as imageRepository from "../repositories/imageRepository"
+import * as urlRepository from "../repositories/urlRepository"
 import { INote } from "../interfaces/note";
 import { OpenAIEmbeddings } from "@langchain/openai";
 import { RecursiveCharacterTextSplitter } from "@langchain/textsplitters";
 import { IImage } from "../interfaces/image";
 import { IUrl } from "../interfaces/url";
 import { getImageDescription } from "../utils/getImageDescription";
+import { downloadAudioFromYouTube } from "../utils/downloadAudio";
+import { transcribeAudio } from "../utils/transcribeAudio"
 import path from "path";
+import { getTranscriptionSummary } from "../utils/getTranscriptionSummary.ts";
 
 const openAIEmbeddings = new OpenAIEmbeddings({
     openAIApiKey: process.env.OPENAI_KEY,
@@ -43,6 +47,13 @@ export const createNoteWithoutEmbeddings = async (
         if (images.length > 0) {
             for (const image of images) {
                 await imageRepository.updateImageWithNoteId(image.id, note.id);
+            }
+        }
+
+        if (urls.length > 0) {
+            for (const url of urls) {
+                console.log(url)
+                await urlRepository.saveUrl(url.url, note.id);
             }
         }
 
@@ -92,8 +103,36 @@ export const processEmbeddings = async (noteId: string): Promise<void> => {
                 url_id: null,
             }));
 
+            await imageRepository.updateImageDescription(image.id, JSON.stringify(description));
             await imageRepository.updateImageStatus(image.id, 'processed');
             await noteRepository.saveChunks(imageChunkData);
+        }
+
+        const urls = await urlRepository.getUrlsByNoteId(noteId);
+        for (const url of urls) {
+            await urlRepository.updateUrlStatus(url.id, 'processing');
+
+            const audioPath = path.join(__dirname, '../../audios');
+            const audioDownloaded = await downloadAudioFromYouTube(url.url, audioPath);
+
+            const transcription = await transcribeAudio(audioDownloaded);
+            const transcriptionContent = transcription[0]?.pageContent;;
+            const summary = await getTranscriptionSummary(transcriptionContent);
+            const urlChunks = await splitTextIntoChunks(JSON.stringify(transcriptionContent), chunkSize);
+            const urlEmbeddings = await generateEmbeddingsForChunks(urlChunks);
+
+            const urlChunkData = urlChunks.map((chunk, index) => ({
+                embedding: urlEmbeddings[index],
+                index,
+                note_id: noteId,
+                source: 'url',
+                image_id: null,
+                url_id: url.id,
+            }));
+
+            await urlRepository.updateUrlTranscriptionAndSummary(url.id, JSON.stringify(transcriptionContent), JSON.stringify(summary));
+            await urlRepository.updateUrlStatus(url.id, 'processed');
+            await noteRepository.saveChunks(urlChunkData);
         }
 
         await noteRepository.updateNoteStatus(noteId, 'completed');
@@ -133,7 +172,7 @@ export const searchNotesByQuery = async (
         }
 
         const queryEmbedding = await generateEmbedding(query);
-        const offset = (page - 1) * limit;  // Cálculo do offset com base na página e no limite
+        const offset = (page - 1) * limit;
         const notes = await noteRepository.getNotesByEmbedding(queryEmbedding, matchThreshold, limit, offset, filter as string);
 
         if (!notes) {
