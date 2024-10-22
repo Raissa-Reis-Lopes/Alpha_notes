@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS images (
 
 CREATE TABLE IF NOT EXISTS urls (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    note_id UUID NOT NULL,
+    note_id UUID,
     url TEXT NOT NULL,
     status TEXT DEFAULT 'unprocessed',
     transcription TEXT, 

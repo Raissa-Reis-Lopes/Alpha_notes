@@ -7,7 +7,7 @@ export const saveImage = async (filename: string): Promise<IImage> => {
         const query = `
         INSERT INTO images( filename ) 
         VALUES ($1)
-        RETURNING *;
+        RETURNING id, filename;
         `
 
         const result = await pool.query(query, [filename])
@@ -97,7 +97,7 @@ export const updateImageWithNoteId = async (imageId: string, noteId: string): Pr
         const result = await pool.query(query, [noteId, imageId]);
         return result.rows[0] as IImage;
     } catch (error) {
-        console.error('Erro ao atualizar imagem:', error);
+        console.error('Erro ao adicionar o id da nota à imagem:', error);
         throw error;
     }
 };

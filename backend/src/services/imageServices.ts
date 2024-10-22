@@ -15,8 +15,6 @@ export const saveImage = async (filename: string) => {
     }
 }
 
-
-
 export const deleteImage = async (imageId: string) => {
     try {
         if (!imageId) {
