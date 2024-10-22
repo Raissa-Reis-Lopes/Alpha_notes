@@ -53,7 +53,7 @@ export const createNoteWithoutEmbeddings = async (
         if (urls.length > 0) {
             for (const url of urls) {
                 console.log(url)
-                await urlRepository.saveUrl(url.url, note.id);
+                await urlRepository.updateUrlWithNoteId(url.id, note.id);
             }
         }
 
@@ -109,6 +109,7 @@ export const processEmbeddings = async (noteId: string): Promise<void> => {
         }
 
         const urls = await urlRepository.getUrlsByNoteId(noteId);
+
         for (const url of urls) {
             await urlRepository.updateUrlStatus(url.id, 'processing');
 

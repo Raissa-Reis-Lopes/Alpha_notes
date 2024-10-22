@@ -1,20 +1,37 @@
 import { pool } from "../database/connection";
 import { IUrl } from "../interfaces/url";
 
-export const saveUrl = async (url: string, noteId?: string): Promise<IUrl> => {
+export const saveUrl = async (url: string): Promise<IUrl> => {
     try {
         const query = `
-        INSERT INTO urls (url, note_id) 
-        VALUES ($1, $2)
-        RETURNING *;
+        INSERT INTO urls (url) 
+        VALUES ($1)
+        RETURNING id, url;
         `;
-        const result = await pool.query(query, [url, noteId]);
+        const result = await pool.query(query, [url]);
         return result.rows[0] as IUrl;
     } catch (error) {
         console.error(error);
         throw error;
     }
 };
+
+export const updateUrlWithNoteId = async (urlId: string, noteId: string): Promise<void> => {
+    const query = `
+        UPDATE urls
+        SET note_id = $1
+        WHERE id = $2
+        RETURNING *;
+    `;
+
+    try {
+        await pool.query(query, [noteId, urlId]);
+    } catch (error) {
+        console.error('Erro ao adicionar o id da nota à URL:', error);
+        throw error;
+    }
+};
+
 
 export const getUrlById = async (urlId: string): Promise<IUrl | null> => {
     try {
