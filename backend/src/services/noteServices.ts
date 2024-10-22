@@ -110,15 +110,12 @@ export const processEmbeddings = async (noteId: string): Promise<void> => {
         const urls = await urlRepository.getUrlsByNoteId(noteId);
         for (const url of urls) {
             await urlRepository.updateUrlStatus(url.id, 'processing');
-            //AQUI TEM QUE TER A FUNÇÃO QUE FAZ A TRANSCRIÇÃO DO VÍDEO
-            //E PASSA ELA AQUI NO LUGAR DESSE URL.URL   
 
-            const audioPath = path.join(__dirname, '../../audios', url.url);
-
-            console.log(url.url)
-
+            const audioPath = path.join(__dirname, '../../audios');
             const audioDownloaded = await downloadAudioFromYouTube(url.url, audioPath);
-            const transcription = await transcribeAudio(audioDownloaded, url.id);
+
+            const transcription = await transcribeAudio(audioDownloaded);
+
             console.log(transcription)
 
             const urlChunks = await splitTextIntoChunks(JSON.stringify(transcription), chunkSize);
