@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS urls (
     url TEXT NOT NULL,
     status TEXT DEFAULT 'unprocessed',
     transcription TEXT, 
+    summary TEXT,
     CONSTRAINT fk_note_id FOREIGN KEY (note_id) REFERENCES notes (id) ON DELETE CASCADE
 );
 

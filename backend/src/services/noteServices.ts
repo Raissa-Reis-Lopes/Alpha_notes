@@ -172,7 +172,7 @@ export const searchNotesByQuery = async (
         }
 
         const queryEmbedding = await generateEmbedding(query);
-        const offset = (page - 1) * limit;  // Cálculo do offset com base na página e no limite
+        const offset = (page - 1) * limit;
         const notes = await noteRepository.getNotesByEmbedding(queryEmbedding, matchThreshold, limit, offset, filter as string);
 
         if (!notes) {
