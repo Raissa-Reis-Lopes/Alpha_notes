@@ -10,6 +10,7 @@ import { getImageDescription } from "../utils/getImageDescription";
 import { downloadAudioFromYouTube } from "../utils/downloadAudio";
 import { transcribeAudio } from "../utils/transcribeAudio"
 import path from "path";
+import { getTranscriptionSummary } from "../utils/getTranscriptionSummary.ts";
 
 const openAIEmbeddings = new OpenAIEmbeddings({
     openAIApiKey: process.env.OPENAI_KEY,
@@ -115,10 +116,9 @@ export const processEmbeddings = async (noteId: string): Promise<void> => {
             const audioDownloaded = await downloadAudioFromYouTube(url.url, audioPath);
 
             const transcription = await transcribeAudio(audioDownloaded);
-
-            console.log(transcription)
-
-            const urlChunks = await splitTextIntoChunks(JSON.stringify(transcription), chunkSize);
+            const transcriptionContent = transcription[0]?.pageContent;;
+            const summary = await getTranscriptionSummary(transcriptionContent);
+            const urlChunks = await splitTextIntoChunks(JSON.stringify(transcriptionContent), chunkSize);
             const urlEmbeddings = await generateEmbeddingsForChunks(urlChunks);
 
             const urlChunkData = urlChunks.map((chunk, index) => ({
@@ -130,7 +130,7 @@ export const processEmbeddings = async (noteId: string): Promise<void> => {
                 url_id: url.id,
             }));
 
-            await urlRepository.updateUrlTranscription(url.id, JSON.stringify(transcription));
+            await urlRepository.updateUrlTranscriptionAndSummary(url.id, JSON.stringify(transcriptionContent), JSON.stringify(summary));
             await urlRepository.updateUrlStatus(url.id, 'processed');
             await noteRepository.saveChunks(urlChunkData);
         }

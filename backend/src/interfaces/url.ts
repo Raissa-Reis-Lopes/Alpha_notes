@@ -4,4 +4,5 @@ export interface IUrl {
     url: string;
     status?: string;
     transcription?: string;
+    summary?: string;
 }
