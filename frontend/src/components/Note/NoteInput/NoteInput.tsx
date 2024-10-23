@@ -73,7 +73,7 @@ const NoteInput: React.FC = () => {
           disabled={false}
           minRows={2}
           variant="outlined"
-          placeholder="Criar nota..."
+          placeholder="Criar uma nota..."
           onFocus={handleFocus}
           value={content}
           onChange={(e) => setContent(e.target.value)}
