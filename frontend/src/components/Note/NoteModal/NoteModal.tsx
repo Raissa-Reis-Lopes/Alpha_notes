@@ -13,12 +13,13 @@ import { IUrl } from '../../../interface/url';
 import { DeleteOutlineOutlined, LinkOutlined, PhotoOutlined } from '@mui/icons-material';
 import { deleteImageApi, uploadImageApi } from '../../../api/imagesApi';
 import { inputBorder } from '../../../styles/Components';
+import { UpdateNoteRequest } from '../../../api/notesApi';
 
 interface NoteModalProps {
   open: boolean;
   onClose: () => void;
   note: Note;
-  onSave: (updatedNote: Note) => void;
+  onSave: (id: string, fields: UpdateNoteRequest) => void;
   onDelete: (noteToDelete: Note) => void;
   onArchive: (noteToArchive: Note) => void;
 }
@@ -56,7 +57,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
       setTitle(note.title);
       setContent(note.content);
     }
-  }, [note]);
+  }, []);
 
 
 
@@ -79,10 +80,25 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
   };
 
   const handleSave = () => {
-    if (note) {
+    /* if (note) {
+      console.log("titulo content", title, content);
       onSave({ ...note, title, content });
       onClose();
     }
+ */
+    let updatedFields: UpdateNoteRequest = {};
+
+    // Verifica se os campos foram modificados
+    if (title !== note.title) {
+      updatedFields.title = title;
+    }
+    if (content !== note.content) {
+      updatedFields.content = content;
+    }
+
+    // Chama a função onSave passando o id e os campos modificados
+    onSave(note.id, updatedFields);
+
   };
 
 

@@ -183,6 +183,10 @@ export const updateNote = async (req: Request, res: Response): Promise<void> => 
         const socketId = req.headers['x-socket-id'] as string;
         const userId = req.user!.id;
 
+        console.log("FIELDS", fields);
+        console.log("FIELDS", fields.title);
+        console.log("FIELDS", fields.content);
+
         const currentNote = await noteServices.getNoteById(noteId);
 
         if (!userId) {

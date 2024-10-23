@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { createNoteApi, deleteNoteApi, getAllNotesApi, searchNotesByQueryApi, updateNoteApi, moveNoteToTrashApi, restoreFromArchiveApi, restoreFromTrashApi, archiveNoteApi } from '../api/notesApi';
+import { createNoteApi, deleteNoteApi, getAllNotesApi, searchNotesByQueryApi, updateNoteApi, moveNoteToTrashApi, restoreFromArchiveApi, restoreFromTrashApi, archiveNoteApi, UpdateNoteRequest } from '../api/notesApi';
 import { useWebSocket } from './WebSocketContext';
 import { IUrl } from '../interface/url';
 import { IImage } from '../interface/image';
@@ -162,8 +162,9 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
-  const updateNote = async (id: string, updatedNoteData: Partial<Note>) => {
-    const { data, error } = await updateNoteApi({ id, note: updatedNoteData });
+  const updateNote = async (id: string, fields: UpdateNoteRequest) => {
+    console.log("Update note", id, fields);
+    const { data, error } = await updateNoteApi({ id, fields });
     if (error) {
       console.log(error);
       return error;

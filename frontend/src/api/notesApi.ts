@@ -6,6 +6,11 @@ interface GetAllNotesResponse {
   error?: string;
 }
 
+interface UpdateNoteRequest {
+  title?: string;
+  content?: string;
+}
+
 export async function getAllNotesApi(filter?: string) {
   const requestParams: requestOptions = {
     url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes${filter ? `?filter=${filter}` : ''}`,
@@ -90,9 +95,11 @@ export async function createNoteApi({ title, content, images, urls }: Partial<No
   }
 }
 
-export async function updateNoteApi({ id, note }: { id: string; note: Partial<Note> }) {
+export async function updateNoteApi({ id, fields }: { id: string, fields: UpdateNoteRequest }) {
+
+  console.log("aaaaaa", fields);
   const body = {
-    note
+    ...fields
   };
 
   const requestParams: requestOptions = {
@@ -240,7 +247,7 @@ export async function restoreFromArchiveApi({ id }: { id: string }, socketId: st
   }
 }
 
-export type { GetAllNotesResponse };
+export type { GetAllNotesResponse, UpdateNoteRequest };
 
 
 

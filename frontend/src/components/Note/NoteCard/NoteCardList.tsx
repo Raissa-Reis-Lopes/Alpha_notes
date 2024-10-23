@@ -10,6 +10,7 @@ import NoteModal from '../NoteModal/NoteModal';
 import { Loader, LoadIA } from '../../Loader/Loader';
 import ImageCard from '../NoteImage/NoteImage';
 import VideoLink from '../../VideoLink/VideoLink';
+import { UpdateNoteRequest } from '../../../api/notesApi';
 
 
 const NoteCard: React.FC<Note> = ({ ...note }) => {
@@ -34,27 +35,9 @@ const NoteCard: React.FC<Note> = ({ ...note }) => {
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 
-  const handleUpdateNote = (updatedNote: Note) => updateNote(updatedNote.id, updatedNote);
+  const handleUpdateNote = (id: string, fields: UpdateNoteRequest) => updateNote(id, fields);
   const handleSoftDeleteNote = (noteToSoftDelete: Note) => softDeleteNote(noteToSoftDelete.id);
   const handleArchiveNote = (noteToArchive: Note) => archiveNote(noteToArchive.id);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   useEffect(() => {
     for (const ps of processStatus) {
