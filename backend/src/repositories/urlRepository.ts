@@ -6,7 +6,7 @@ export const saveUrl = async (url: string): Promise<IUrl> => {
         const query = `
         INSERT INTO urls (url) 
         VALUES ($1)
-        RETURNING id, url, title, thumbnail;
+        RETURNING id, url;
         `;
         const result = await pool.query(query, [url]);
         return result.rows[0] as IUrl;
