@@ -29,7 +29,7 @@ export default async function request<T>({
     body: !formData ? JSON.stringify(body) : (body as FormData),
     headers: {
       ...(!formData ? { "Content-type": "application/json" } : {}),
-      ...(socketId ? { "x-socket-id": socketId } : {}), 
+      ...(socketId ? { "x-socket-id": socketId } : {}),
     },
     cache: "no-store",
     credentials: 'include',
@@ -37,7 +37,9 @@ export default async function request<T>({
   };
 
   const response = await fetch(url, requestOptions);
+  console.log("response, ", response)
   const data = await response.json();
+  console.log("data, ", data)
 
   return {
     data: data.data,
