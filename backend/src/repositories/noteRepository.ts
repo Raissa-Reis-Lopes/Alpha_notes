@@ -53,7 +53,7 @@ export const getPaginatedNotes = async (limit: number, offset: number, filter?: 
             SELECT 
                 n.id as note_id, n.title, n.content, n.created_by, n.created_at, n.updated_at,
                 i.id as image_id, i.filename as image_filename, -- Imagens
-                u.id as url_id, u.url as url_link, u.transcription as url_transcription, u.summary as url_summary
+                u.id as url_id, u.url as url_link, u.transcription as url_transcription, u.summary as url_summary, u.title as url_title, u.thumbnail as url_thumbnail
             FROM notes n
             LEFT JOIN images i ON n.id = i.note_id
             LEFT JOIN urls u ON n.id = u.note_id
@@ -103,7 +103,9 @@ export const getPaginatedNotes = async (limit: number, offset: number, filter?: 
                     id: row.url_id,
                     url: row.url_link,               // Retorna o 'url'
                     transcription: row.url_transcription,
-                    summary: row.url_summary
+                    summary: row.url_summary,
+                    title: row.url_title,
+                    thumbnail: row.url_thumbnail
                 });
             }
         }
@@ -124,7 +126,7 @@ export const getAllNotes = async (filter?: string): Promise<INote[]> => {
             SELECT 
                 n.id as note_id, n.title, n.content, n.created_by, n.created_at, n.updated_at, n.is_in_trash, n.is_in_archive,
                 i.id as image_id, i.filename as image_filename, 
-                u.id as url_id, u.url as url_link, u.transcription as url_transcription, u.summary as url_summary
+                u.id as url_id, u.url as url_link, u.transcription as url_transcription, u.summary as url_summary,  u.title as url_title, u.thumbnail as url_thumbnail
             FROM notes n
             LEFT JOIN images i ON n.id = i.note_id
             LEFT JOIN urls u ON n.id = u.note_id
@@ -179,7 +181,9 @@ export const getAllNotes = async (filter?: string): Promise<INote[]> => {
                     id: row.url_id,
                     url: row.url_link,               // Retorna o 'url'
                     transcription: row.url_transcription, // Retorna a 'transcription'
-                    summary: row.url_summary
+                    summary: row.url_summary,
+                    title: row.url_title,
+                    thumbnail: row.url_thumbnail
                 });
             }
         }
@@ -206,7 +210,7 @@ export const getNoteById = async (noteId: string): Promise<INote> => {
             SELECT 
                 n.id as note_id, n.title, n.content, n.created_by, n.created_at, n.updated_at,
                 i.id as image_id, i.filename as image_filename, 
-                u.id as url_id, u.url as url_link, u.transcription as url_transcription, u.summary as url_summary
+                u.id as url_id, u.url as url_link, u.transcription as url_transcription, u.summary as url_summary, u.title as url_title, u.thumbnail as url_thumbnail
             FROM notes n
             LEFT JOIN images i ON n.id = i.note_id
             LEFT JOIN urls u ON n.id = u.note_id
@@ -249,7 +253,9 @@ export const getNoteById = async (noteId: string): Promise<INote> => {
                     id: row.url_id,
                     url: row.url_link,
                     transcription: row.url_transcription,
-                    summary: row.url_summary
+                    summary: row.url_summary,
+                    title: row.url_title,
+                    thumbnail: row.url_thumbnail
                 });
             }
         }
