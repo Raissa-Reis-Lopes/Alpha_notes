@@ -23,6 +23,13 @@ class WebSocketService {
           }
         }
 
+        if (data.status && data.status === 'pending') {
+          console.log('Embedding pending data');
+          if (this.callbacks['pending']) {
+            this.callbacks['pending'](data);
+          }
+        }
+
         if (data.status && data.status === 'processing') {
           console.log('Embedding processing data');
           if (this.callbacks['processing']) {

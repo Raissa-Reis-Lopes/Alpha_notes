@@ -1,7 +1,7 @@
 import './ToolbarCard.css';
 import React from 'react';
 import { Box, Dropdown, Menu, IconButton, MenuButton, MenuItem } from "@mui/joy";
-import { PhotoOutlined, PaletteOutlined, VideoCallOutlined, ArchiveOutlined, MoreVert } from '@mui/icons-material';
+import { PhotoOutlined, PaletteOutlined, LinkOutlined, ArchiveOutlined, MoreVert } from '@mui/icons-material';
 import { Note } from '../../contexts/NotesContext';
 
 interface ToolbarCardProps {
@@ -27,10 +27,7 @@ const ToolbarCard: React.FC<ToolbarCardProps> = ({ note, onDelete, additionalBut
         <PhotoOutlined fontSize="small" sx={{ color: "#0000008a" }} />
       </IconButton>
       <IconButton /* onClick={} aria-controls={} */ onClick={handleButtonClick}>
-        <PaletteOutlined fontSize="small" sx={{ color: "#0000008a" }} />
-      </IconButton>
-      <IconButton /* onClick={} aria-controls={} */ onClick={handleButtonClick}>
-        <VideoCallOutlined fontSize="small" sx={{ color: "#0000008a" }} />
+        <LinkOutlined fontSize="small" sx={{ color: "#0000008a" }} />
       </IconButton>
       <IconButton /* onClick={} aria-controls={} */ onClick={handleButtonClick}>
         <ArchiveOutlined fontSize="small" sx={{ color: "#0000008a" }} />

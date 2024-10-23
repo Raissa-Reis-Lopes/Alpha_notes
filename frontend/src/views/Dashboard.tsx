@@ -10,8 +10,8 @@ import { useParams } from 'react-router-dom';
 import ArchivePageContent from '../components/Dashboard/ArchivePageContent.tsx/ArchivePageContent';
 import { Box } from '@mui/joy';
 
-const drawerWidth = 240;
-const miniDrawerWidth = 60;
+const drawerWidth = 0; //240
+const miniDrawerWidth = 0; //60
 const appBarHeight = 64;
 const miniAppBarHeight = 56;
 

@@ -1,27 +1,28 @@
 import './NoteCardList.css';
 import { Box } from "@mui/material";
-import { Typography } from '@mui/joy';
+import { AspectRatio, Card, CardOverflow, Typography } from '@mui/joy';
 import { DescriptionOutlined } from '@mui/icons-material';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Note, useNotes } from '../../../contexts/NotesContext';
 import ToolbarCard from '../../ToolbarCard/ToolbarCard';
 import NoteModal from '../NoteModal/NoteModal';
-import Loader from '../../Loader/Loader';
+import { Loader, LoadIA } from '../../Loader/Loader';
+import ImageCard from '../NoteImage/NoteImage';
+import VideoLink from '../../VideoLink/VideoLink';
 
-interface NoteCardProps {
-  id: string;
-  title: string;
-  content: string;
-  date: string;
-  archived: boolean;
-  metadata: object;
-  status: 'processing' | 'completed' | 'failed';
-}
-const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived, metadata, status }) => {
+
+const NoteCard: React.FC<Note> = ({ ...note }) => {
+  console.log("note no notecrdlist", note);
   const [isHovered, setIsHovered] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const { notes, updateNote, archiveNote, softDeleteNote, deleteNote } = useNotes();
+  const { notes, updateNote, archiveNote, softDeleteNote, deleteNote, processStatus } = useNotes();
+  const [loaderStatus, setLoaderStatus] = useState<string>('');
+
+  /* useEffect(() => {
+    console.log("loading status", note.status)
+    setLoaderStatus(note.status);
+  }, [note]); */
 
   const toggleHover = () => setIsHovered(!isHovered);
 
@@ -33,6 +34,17 @@ const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived,
   //const handleSoftDeleteNote = (noteToSoftDelete: Note) => softDeleteNote(noteToSoftDelete.id);
   const handleDeleteNote = (noteToDelete: Note) => deleteNote(noteToDelete.id);
 
+  useEffect(() => {
+    for (const ps of processStatus) {
+      if (ps.noteId === note.id) {
+        console.log("777", ps)
+        setLoaderStatus(ps.status);
+      }
+    }
+  }, [processStatus]);
+
+
+
   const darkTheme = true;
   return (
     <>
@@ -43,24 +55,28 @@ const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived,
         sx={{ backgroundColor: `${darkTheme ? "#fefcff" : "inital"}` }}
       >
 
-        <Box>
-          <Typography level="title-md" padding={"12px 12px 0 12px"}
-            sx={{
-              outline: "none",
-              whiteSpace: "pre-wrap",
-              wordWrap: "break-word"
-            }}
-          >{title}</Typography>
-        </Box>
+        <ImageCard images={note.images} />
+        <VideoLink urls={note.urls} />
 
         <Box>
-          <Typography level="body-md" padding={"12px 12px"}
+          <Typography className="card-title" level="title-md" padding={"12px 12px 0 12px"}
             sx={{
-              outline: "none",
-              whiteSpace: "pre-wrap",
-              wordWrap: "break-word"
+              /*               outline: "none",
+                            whiteSpace: "pre-wrap",
+                            wordWrap: "break-word", */
+              display: '-webkit-box',
             }}
-          >{content}</Typography>
+          >{note.title}</Typography>
+        </Box>
+
+        <Box sx={{ overflow: 'hidden' }}>
+          <Typography className="note-card-content" level="body-md" padding={"12px 12px"}
+            sx={{
+              /*   outline: "none",
+                whiteSpace: "pre-wrap",
+                wordWrap: "break-word" */
+            }}
+          >{note.content}</Typography>
         </Box>
         {true && (
           <Box className="note-toolbar"
@@ -70,20 +86,21 @@ const NoteCard: React.FC<NoteCardProps> = ({ id, title, content, date, archived,
               justifyContent: "space-between",
               visibility: isHovered ? "visible" : "hidden",
             }}>
-            <ToolbarCard note={{ id, title, content, date, archived, metadata, status }} onDelete={handleDeleteNote} />
+            <ToolbarCard note={{ ...note }} onDelete={handleDeleteNote} />
             <Box>
 
             </Box>
           </Box>
         )}
-        <Loader className={status} title={status} />
+        {/* <Loader className={loaderStatus} title={loaderStatus} /> */}
+        <LoadIA status={loaderStatus} />
       </Box>
 
       {/* Modal de Edição */}
       <NoteModal
         open={isModalOpen}
         onClose={handleCloseModal}
-        note={{ id, title, content, date, archived, metadata, status }}
+        note={{ ...note }}
         onSave={handleUpdateNote}
         onDelete={handleDeleteNote}
       />
@@ -99,12 +116,12 @@ interface NoteCardListProps {
 const NoteCardList: React.FC<NoteCardListProps> = ({ notes }) => {
 
   const sortedNoteList = notes.sort((a, b) => {
-    return new Date(b.date).getTime() - new Date(a.date).getTime();
+    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
   const darkTheme = true;
   return (
-    <Box className="NoteCardListComponent"
+    <Box className="note-card-list-component"
       sx={{ borderColor: `${darkTheme ? "#828282" : "#e0e0e0"}` }}>
       {!notes || notes.length === 0 ?
         <Box sx={{
@@ -119,7 +136,7 @@ const NoteCardList: React.FC<NoteCardListProps> = ({ notes }) => {
           <Typography sx={{ fontSize: "24px", color: "#5f6368" }}>Nenhuma anotação encontrada.</Typography>
         </Box>
         :
-        <Box
+        <Box className="card-list"
           sx={{
             /* display: "flex",
             flexWrap: "wrap",
@@ -128,22 +145,26 @@ const NoteCardList: React.FC<NoteCardListProps> = ({ notes }) => {
             maxWidth: "100vw",
             gap: "16px", */
             /* overflowY: "auto", */
-
             display: "flex",
             flexDirection: 'row',
             flexWrap: 'wrap',
             gap: "16px",
+
           }}>
-          {sortedNoteList.map(item => (
+          {sortedNoteList.map(item => ( //TODO: voltar o sortedNoteList / notes
             <NoteCard
               key={item.id}
               id={item.id}
               title={item.title}
               content={item.content}
-              date={(new Date(item.date).toLocaleString())}
-              archived={item.archived}
-              metadata={item.metadata}
               status={item.status}
+              images={item.images}
+              urls={item.urls}
+              is_in_trash={item.is_in_trash}
+              is_in_archive={item.is_in_archive}
+              created_at={item.created_at}
+              updated_at={item.updated_at}
+              created_by={item.created_by}
             />
           ))}
         </Box>

@@ -11,11 +11,11 @@ export async function getAllNotesApi() {
   try {
     const response = await request(requestParams);
 
-    if (response.error) return { data: null as null, error: response.message };
-    return { data: response.data, error: null as null };
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
 
   } catch (error) {
-    return { data: null as null, error: "getAllNotesApi : Um erro inesperado aconteceu" };
+    return { data: null as null, success: false, error: "getAllNotesApi : Um erro inesperado aconteceu" };
   }
 }
 
@@ -29,11 +29,11 @@ export async function getNoteByIdApi({ id }: { id: string }) {
   try {
     const response = await request(requestParams);
 
-    if (response.error) return { data: null as null, error: response.message };
-    return { data: response.data, error: null as null };
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
 
   } catch (error) {
-    return { data: null as null, error: "getNoteByIdApi : Um erro inesperado aconteceu" };
+    return { data: null as null, success: false, error: "getNoteByIdApi : Um erro inesperado aconteceu" };
   }
 }
 
@@ -51,19 +51,20 @@ export async function searchNotesByQueryApi({ query }: { query: string }) {
   try {
     const response = await request(requestParams);
 
-    if (response.error) return { data: null as null, error: response.message };
-    return { data: response.data, error: null as null };
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
 
   } catch (error) {
-    return { data: null as null, error: "searchNotesByQueryApi : Um erro inesperado aconteceu" };
+    return { data: null as null, success: false, error: "searchNotesByQueryApi : Um erro inesperado aconteceu" };
   }
 }
 
-export async function createNoteApi({ title, content, metadata }: Partial<Note>, socketId: string) {
+export async function createNoteApi({ title, content, images, urls }: Partial<Note>, socketId: string) {
   const body = {
     title,
     content,
-    metadata,
+    images,
+    urls,
   };
 
   const requestParams: requestOptions = {
@@ -76,11 +77,11 @@ export async function createNoteApi({ title, content, metadata }: Partial<Note>,
   try {
     const response = await request<Note>(requestParams);
 
-    if (response.error) return { data: null as null, error: response.message };
-    return { data: response.data, error: null as null };
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
 
   } catch (error) {
-    return { data: null as null, error: "createNoteApi : Um erro inesperado aconteceu" };
+    return { data: null as null, success: false, error: "createNoteApi : Um erro inesperado aconteceu" };
   }
 }
 
@@ -98,11 +99,11 @@ export async function updateNoteApi({ id, note }: { id: string; note: Partial<No
   try {
     const response = await request<Note>(requestParams);
 
-    if (response.error) return { data: null as null, error: response.message };
-    return { data: response.data, error: null as null };
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
 
   } catch (error) {
-    return { data: null as null, error: "updateNoteApi : Um erro inesperado aconteceu" };
+    return { data: null as null, success: false, error: "updateNoteApi : Um erro inesperado aconteceu" };
   }
 }
 
@@ -116,11 +117,11 @@ export async function deleteNoteApi({ id }: { id: string }) {
   try {
     const response = await request(requestParams);
 
-    if (response.error) return { data: null as null, error: response.message };
-    return { data: response.data, error: null as null };
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
 
   } catch (error) {
-    return { data: null as null, error: "deleteNoteApi : Um erro inesperado aconteceu" };
+    return { data: null as null, success: false, error: "deleteNoteApi : Um erro inesperado aconteceu" };
   }
 }
 
