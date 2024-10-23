@@ -102,7 +102,7 @@ const NoteCard: React.FC<Note> = ({ ...note }) => {
           </Box>
         )}
         {/* <Loader className={loaderStatus} title={loaderStatus} /> */}
-        <LoadIA status={loaderStatus} />
+        <LoadIA loadStatus={loaderStatus} />
       </Box>
 
       <NoteModal

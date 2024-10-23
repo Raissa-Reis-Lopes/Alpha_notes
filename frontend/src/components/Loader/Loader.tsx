@@ -14,7 +14,7 @@ interface LoaderProps {
 }
 
 interface LoaderIA {
-  status?: string;
+  loadStatus?: string;
 }
 
 export const Loader: React.FC<LoaderProps> = ({ className, title, ...props }) => {
@@ -24,11 +24,11 @@ export const Loader: React.FC<LoaderProps> = ({ className, title, ...props }) =>
 };
 
 
-export const LoadIA: React.FC<LoaderIA> = ({ status }) => {
-  if (!status) return
+export const LoadIA: React.FC<LoaderIA> = ({ loadStatus }) => {
+  if (!loadStatus) return
   return (
     <>
-      {status === 'processing' && (
+      {loadStatus === 'processing' && (
 
         <Link
           component="button"
@@ -41,7 +41,7 @@ export const LoadIA: React.FC<LoaderIA> = ({ status }) => {
         </Link>
       )}
 
-      {status === 'pending' && (
+      {loadStatus === 'pending' && (
         <Box title={'Processamento pendente'}
           sx={{ alignSelf: 'self-end' }}>
           <HourglassEmptyOutlinedIcon sx={{
@@ -55,7 +55,7 @@ export const LoadIA: React.FC<LoaderIA> = ({ status }) => {
         </Box>
       )}
 
-      {status === 'completed' && (
+      {loadStatus === 'completed' && (
         <Box title={'Conteúdo da nota processado com sucesso'}
           sx={{ alignSelf: 'self-end' }}>
           <CheckCircleIcon sx={{
