@@ -1,11 +1,10 @@
-
 .login-page {
-    background-color: #371c44; 
-    color: #fff; 
-    height: 100vh; 
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-  }
-  
+  background-color: #371c44; 
+  color: #fff; 
+  height: 100vh; 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+}

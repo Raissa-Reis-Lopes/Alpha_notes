@@ -28,15 +28,19 @@ const MainContent: React.FC<MainContentProps> = ({ drawerOpen, drawerWidth, mini
 
   useEffect(() => {
     if (!user) return;
-
-    (async function fetchNotes() {
+  
+    const fetchNotes = async () => {
       try {
-        const notes = await getAllNotes();
+        await getAllNotes(); // Busca notas ativas
       } catch (error) {
         console.error('Erro ao buscar notas:', error);
       }
-    }());
+    };
+  
+    fetchNotes();
   }, [user]);
+  
+  
 
   return (
     <Box

@@ -7,6 +7,7 @@ import { WebSocketServer } from "ws";
 import WebSocketService from "./services/webSocketServices";
 import https from "https"; // Importa o módulo https
 import fs from "fs"; // Para ler arquivos do sistema de arquivos
+import path from "path";
 
 dotenv.config();
 
@@ -20,7 +21,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.use(express.static('uploads'));
+app.use(express.static(path.join(__dirname, '../uploads')));
 app.use(express.json());
 app.use(cookieParser());
 app.use("/api", routes);

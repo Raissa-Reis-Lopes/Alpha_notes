@@ -16,16 +16,16 @@ export const saveUrl = async (url: string): Promise<IUrl> => {
     }
 };
 
-export const updateUrlWithNoteId = async (urlId: string, noteId: string): Promise<void> => {
+export const updateUrlWithNoteId = async (urlId: string, noteId: string, title: string, thumbnail: string): Promise<void> => {
     const query = `
         UPDATE urls
-        SET note_id = $1
-        WHERE id = $2
+        SET note_id = $1, title = $2, thumbnail = $3
+        WHERE id = $4
         RETURNING *;
     `;
 
     try {
-        await pool.query(query, [noteId, urlId]);
+        await pool.query(query, [noteId, title, thumbnail, urlId]);
     } catch (error) {
         console.error('Erro ao adicionar o id da nota à URL:', error);
         throw error;

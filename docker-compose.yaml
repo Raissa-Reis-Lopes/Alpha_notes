@@ -34,7 +34,7 @@ services:
       - /usr/src/app/node_modules # Mantém os node_modules do contêiner
     environment:
       - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
+      - SECRET_KEY=${SECRET_KEY}
     command: [ "npm", "run", "dev" ] # Alternativamente, pode chamar o script de desenvolvimento
 
   db:

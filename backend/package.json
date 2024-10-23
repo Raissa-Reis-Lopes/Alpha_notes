@@ -34,7 +34,9 @@
     "ws": "^8.18.0",
     "youtube-dl-exec": "^3.0.10",
     "youtube-transcript": "^1.2.1",
-    "youtubei.js": "^9.4.0"
+    "youtubei": "^1.6.1",
+    "youtubei.js": "^9.4.0",
+    "ytdl-core": "^4.11.5"
   },
   "devDependencies": {
     "@langchain/textsplitters": "^0.1.0",

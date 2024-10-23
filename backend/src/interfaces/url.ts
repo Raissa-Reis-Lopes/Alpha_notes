@@ -5,4 +5,6 @@ export interface IUrl {
     status?: string;
     transcription?: string;
     summary?: string;
+    title?: string;
+    thumbnail?: string;
 }
