@@ -11,7 +11,6 @@ interface Note {
   content: string;
   date: string;
   archived: boolean;
-  metadata: object;
   status: 'processing' | 'completed' | 'failed';
 }
 

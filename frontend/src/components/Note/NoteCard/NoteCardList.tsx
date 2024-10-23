@@ -2,7 +2,7 @@ import './NoteCardList.css';
 import { Box } from "@mui/material";
 import { Typography } from '@mui/joy';
 import { DescriptionOutlined } from '@mui/icons-material';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Note, useNotes } from '../../../contexts/NotesContext';
 import ToolbarCard from '../../ToolbarCard/ToolbarCard';
 import NoteModal from '../NoteModal/NoteModal';
@@ -39,23 +39,6 @@ const NoteCard: React.FC<Note> = ({ ...note }) => {
   const handleArchiveNote = (noteToArchive: Note) => archiveNote(noteToArchive.id);
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   useEffect(() => {
     for (const ps of processStatus) {
       if (ps.noteId === note.id) {
@@ -63,7 +46,7 @@ const NoteCard: React.FC<Note> = ({ ...note }) => {
         setLoaderStatus(ps.status);
       }
     }
-  }, [processStatus]);
+  }, [note.id, processStatus]);
 
 
 

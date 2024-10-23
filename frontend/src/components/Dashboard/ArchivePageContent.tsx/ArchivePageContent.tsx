@@ -61,7 +61,6 @@ const ArchivePageContent: React.FC<ArchivePageContentProps> = ({
               content={note.content}
               date={note.date}
               archived={note.archived}
-              metadata={note.metadata}
               status={note.status}
             />
           ))
