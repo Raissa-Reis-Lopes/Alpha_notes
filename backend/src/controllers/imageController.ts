@@ -28,7 +28,7 @@ export const uploadImage = async (req: Request, res: Response) => {
 
     const image = await imageServices.saveImage(filename);
 
-    return res.status(200).json({ success: true, message: 'Imagem enviada com sucesso', image });
+    return res.status(200).json({ success: true, message: 'Imagem enviada com sucesso', data: image });
   } catch (error: any) {
     console.error('Erro ao realizar upload do avatar:', error);
     return res.status(500).json({ message: 'Erro ao realizar upload do avatar', error: error.message });

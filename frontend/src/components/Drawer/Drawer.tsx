@@ -44,15 +44,31 @@ const Drawer: React.FC<DrawerProps> = ({ drawerOpen }) => {
     >
 
       <List >
-        <ListItem component={Link} to="/dashboard/notes" sx={{ color: `${darkTheme ? "#fff" : "initial"}` }}>
+        <ListItem component={Link} to="/dashboard/notes" sx={{
+          color: `${darkTheme ? "#fff" : "initial"}`,
+          ":hover": {
+            backgroundColor: "#00bf74",
+          }
+        }}>
           <ListItemIcon><DescriptionOutlined sx={{ color: `${darkTheme ? "#fff" : "initial"}` }} /></ListItemIcon>
           {drawerOpen && <ListItemText sx={{ margin: 0, padding: 0 }} primary="Notas" />}
         </ListItem>
-        <ListItem component={Link} to="/dashboard/archive" sx={{ color: `${darkTheme ? "#fff" : "initial"}` }}>
+        <ListItem component={Link} to="/dashboard/archive"
+          sx={{
+            color: `${darkTheme ? "#fff" : "initial"}`,
+            ":hover": {
+              backgroundColor: "#00bf74",
+            }
+          }}>
           <ListItemIcon><ArchiveOutlined sx={{ color: `${darkTheme ? "#fff" : "initial"}` }} /></ListItemIcon>
           {drawerOpen && <ListItemText sx={{ margin: 0, padding: 0 }} primary="Arquivo" />}
         </ListItem>
-        <ListItem component={Link} to="/dashboard/trash" sx={{ color: `${darkTheme ? "#fff" : "initial"}` }}>
+        <ListItem component={Link} to="/dashboard/trash" sx={{
+          color: `${darkTheme ? "#fff" : "initial"}`,
+          ":hover": {
+            backgroundColor: "#00bf74", //#f0f4f84f
+          }
+        }}>
           <ListItemIcon><DeleteOutlined sx={{ color: `${darkTheme ? "#fff" : "initial"}` }} /></ListItemIcon>
           {drawerOpen && <ListItemText sx={{ margin: 0, padding: 0 }} primary="Lixeira" />}
         </ListItem>
