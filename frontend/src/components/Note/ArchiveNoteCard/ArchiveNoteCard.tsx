@@ -13,15 +13,12 @@ interface ArchivedNoteCardProps {
   status: 'processing' | 'completed' | 'failed';
 }
 
+
 const ArchivedNoteCard: React.FC<ArchivedNoteCardProps> = ({ id, title, content, date }) => {
-  const { restoreNote, deleteNote } = useNotes();
+  const { restoreNote } = useNotes();
 
   const handleRestore = () => {
     restoreNote(id, false); // Função para desarquivar a nota
-  };
-
-  const handleDelete = () => {
-    deleteNote(id); // Função para deletar permanentemente
   };
 
   return (
@@ -31,7 +28,6 @@ const ArchivedNoteCard: React.FC<ArchivedNoteCardProps> = ({ id, title, content,
       <Typography level="body-sm" sx={{ color: "gray", marginTop: "8px" }}>{date}</Typography>
       <Box sx={{ display: "flex", justifyContent: "space-between", marginTop: "16px" }}>
         <Button variant="contained" color="primary" onClick={handleRestore}>Desarquivar</Button>
-        <Button variant="outlined" color="error" onClick={handleDelete}>Excluir Permanentemente</Button>
       </Box>
     </Box>
   );
