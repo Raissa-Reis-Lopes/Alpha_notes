@@ -1,4 +1,5 @@
 import * as urlRepository from "../repositories/urlRepository";
+import { getVideoInfo } from "../utils/getVideoTitleAndThumb";
 
 export const saveUrl = async (url: string) => {
     try {
