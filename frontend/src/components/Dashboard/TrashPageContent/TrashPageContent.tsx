@@ -1,6 +1,8 @@
 import './TrashPageContent.css';
 import React, { useEffect } from 'react';
 import { Box, useMediaQuery, useTheme } from '@mui/material';
+import { Typography } from '@mui/joy';
+import { DescriptionOutlined } from '@mui/icons-material';
 import { useUser } from '../../../contexts/UserContext';
 import TrashNoteList from '../../TrashNoteList/TrashNoteList';
 import { useNotes } from '../../../contexts/NotesContext';
@@ -13,7 +15,13 @@ interface TrashPageContentProps {
   miniAppBarHeight: number;
 }
 
-const TrashPageContent: React.FC<TrashPageContentProps> = ({ drawerOpen, drawerWidth, miniDrawerWidth, appBarHeight, miniAppBarHeight }) => {
+const TrashPageContent: React.FC<TrashPageContentProps> = ({
+  drawerOpen,
+  drawerWidth,
+  miniDrawerWidth,
+  appBarHeight,
+  miniAppBarHeight,
+}) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const currentAppBarHeight = isMobile ? miniAppBarHeight : appBarHeight;
@@ -44,8 +52,24 @@ const TrashPageContent: React.FC<TrashPageContentProps> = ({ drawerOpen, drawerW
         gap: "32px"
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "start", width: "100%" }}>
-        <TrashNoteList notes={trashNotes} /> {/* Passando as notas da lixeira */}
+      <Box sx={{ display: "flex", alignItems: "start", width: "100%", flexWrap: "wrap", gap: "16px" }}>
+        {trashNotes.length > 0 ? (
+          <TrashNoteList notes={trashNotes} />
+        ) : (
+          <Box sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            marginTop: "10vh"
+          }}>
+            <DescriptionOutlined sx={{ fontSize: "100px", opacity: "0.1" }} />
+            <Typography sx={{ fontSize: "24px", color: "#5f6368", textAlign: "center" }}>
+              Nenhuma anotação encontrada na lixeira
+            </Typography>
+          </Box>
+        )}
       </Box>
     </Box>
   );
