@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { Box, useMediaQuery, useTheme, Typography } from '@mui/material';
+import { Box, useMediaQuery, useTheme, Typography} from '@mui/material';
+import { DescriptionOutlined } from '@mui/icons-material';
 import { useUser } from '../../../contexts/UserContext';
 import ArchivedNoteCard from '../../Note/ArchiveNoteCard/ArchiveNoteCard'; // Importe o novo componente
 import { useNotes } from '../../../contexts/NotesContext';
@@ -50,7 +51,6 @@ const ArchivePageContent: React.FC<ArchivePageContentProps> = ({
         gap: "32px",
       }}
     >
-      <Typography variant="h4">Notas arquivadas!</Typography>
       <Box sx={{ display: "flex", alignItems: "start", width: "100%", flexWrap: "wrap", gap: "16px" }}>
         {archivedNotes.length > 0 ? (
           archivedNotes.map(note => (
@@ -66,7 +66,17 @@ const ArchivePageContent: React.FC<ArchivePageContentProps> = ({
             />
           ))
         ) : (
-          <Typography>Nenhuma nota arquivada.</Typography>
+          <Box sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            marginTop: "10vh"
+          }}>
+            <DescriptionOutlined sx={{ fontSize: "100px", opacity: "0.1" }} />
+            <Typography sx={{ fontSize: "24px", color: "#5f6368", textAlign: "center" }}>Nenhuma anotação encontrada nos arquivos</Typography>
+          </Box>
         )}
       </Box>
     </Box>

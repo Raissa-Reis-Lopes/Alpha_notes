@@ -44,7 +44,6 @@ const TrashPageContent: React.FC<TrashPageContentProps> = ({ drawerOpen, drawerW
         gap: "32px"
       }}
     >
-      <p>Notas na lixeira!</p>
       <Box sx={{ display: "flex", alignItems: "start", width: "100%" }}>
         <TrashNoteList notes={trashNotes} /> {/* Passando as notas da lixeira */}
       </Box>
