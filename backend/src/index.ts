@@ -7,6 +7,7 @@ import { WebSocketServer } from "ws";
 import WebSocketService from "./services/webSocketServices";
 import https from "https"; // Importa o módulo https
 import fs from "fs"; // Para ler arquivos do sistema de arquivos
+import path from "path";
 
 dotenv.config();
 

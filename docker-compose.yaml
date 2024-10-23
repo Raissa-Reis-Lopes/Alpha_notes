@@ -1,41 +1,41 @@
 services:
-  frontend:
-    build:
-      context: ./frontend
-    container_name: alpha_keep_frontend
-    ports:
-      - "3000:80" # Nginx
-      - "3000:443" # Nginx
-      - "80:80" # HTTP
-      - "443:443" # HTTPS
-    restart: unless-stopped
-    depends_on:
-      - backend
-    networks:
-      - alpha_keep-network
-    volumes:
-      - /etc/letsencrypt/live/alpha04.alphaedtech.org.br
-    environment:
-      - CHOKIDAR_USEPOLLING=true
+  # frontend:
+  #   build:
+  #     context: ./frontend
+  #   container_name: alpha_keep_frontend
+  #   ports:
+  #     - "3000:80" # Nginx
+  #     - "3000:443" # Nginx
+  #     - "80:80" # HTTP
+  #     - "443:443" # HTTPS
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - backend
+  #   networks:
+  #     - alpha_keep-network
+  #   volumes:
+  #     - /etc/letsencrypt/live/alpha04.alphaedtech.org.br
+  #   environment:
+  #     - CHOKIDAR_USEPOLLING=true
 
-  backend:
-    build:
-      context: ./backend
-    container_name: alpha_keep_backend
-    ports:
-      - "3001:3001"
-    depends_on:
-      - db
-    restart: unless-stopped
-    networks:
-      - alpha_keep-network
-    volumes:
-      - ./backend:/usr/src/app:rw # Mapeia o diretório do backend
-      - /usr/src/app/node_modules # Mantém os node_modules do contêiner
-    environment:
-      - DATABASE_URL=${DATABASE_URL}
-      - JWT_SECRET=${JWT_SECRET}
-    command: [ "npm", "run", "dev" ] # Alternativamente, pode chamar o script de desenvolvimento
+  # backend:
+  #   build:
+  #     context: ./backend
+  #   container_name: alpha_keep_backend
+  #   ports:
+  #     - "3001:3001"
+  #   depends_on:
+  #     - db
+  #   restart: unless-stopped
+  #   networks:
+  #     - alpha_keep-network
+  #   volumes:
+  #     - ./backend:/usr/src/app:rw # Mapeia o diretório do backend
+  #     - /usr/src/app/node_modules # Mantém os node_modules do contêiner
+  #   environment:
+  #     - DATABASE_URL=${DATABASE_URL}
+  #     - JWT_SECRET=${JWT_SECRET}
+  #   command: [ "npm", "run", "dev" ] # Alternativamente, pode chamar o script de desenvolvimento
 
   db:
     image: ankane/pgvector

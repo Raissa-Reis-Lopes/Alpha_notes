@@ -1,20 +1,20 @@
-FROM node:18 AS build
+#  FROM node:18 AS build
 
-WORKDIR /usr/src/app
+# WORKDIR /usr/src/app
 
-COPY package*.json ./
+# COPY package*.json ./
 
-RUN npm install
+# RUN npm install
 
-COPY . .
+# COPY . .
 
-RUN npm run build
+# RUN npm run build
 
-FROM nginx:alpine
+# FROM nginx:alpine
 
-COPY --from=build /usr/src/app/build /usr/share/nginx/html
+# COPY --from=build /usr/src/app/build /usr/share/nginx/html
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-EXPOSE 80
-EXPOSE 443
+# EXPOSE 80
+# EXPOSE 443
