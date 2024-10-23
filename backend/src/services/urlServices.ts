@@ -1,12 +1,12 @@
 import * as urlRepository from "../repositories/urlRepository";
 
-export const saveUrl = async (url: string, noteId?: string) => {
+export const saveUrl = async (url: string) => {
     try {
         if (!url) {
             throw new Error("URL não pode estar vazia.");
         }
 
-        const newUrl = await urlRepository.saveUrl(url, noteId);
+        const newUrl = await urlRepository.saveUrl(url);
         return newUrl;
     } catch (error: any) {
         throw error;

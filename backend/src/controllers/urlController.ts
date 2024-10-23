@@ -5,13 +5,13 @@ import { IUrl } from '../interfaces/url';
 
 export const addUrl = async (req: Request, res: Response) => {
   try {
-    const { note_id, url } = req.body;
+    const { url } = req.body;
 
     if (!url) {
       return res.status(400).json({ message: 'URL não fornecida.' });
     }
 
-    const newUrl = await urlServices.saveUrl(url, note_id);
+    const newUrl = await urlServices.saveUrl(url);
 
     return res.status(200).json({ success: true, message: 'URL adicionada com sucesso', url: newUrl });
   } catch (error: any) {
