@@ -8,31 +8,28 @@ interface ToolbarCardProps {
   additionalButtons?: React.ReactNode[];
   note: Note;
   onDelete: (noteToDelete: Note) => void;
+  onArchive: (noteToArchive: Note) => void; // Prop para arquivar
 }
 
-const ToolbarCard: React.FC<ToolbarCardProps> = ({ note, onDelete, additionalButtons }) => {
+const ToolbarCard: React.FC<ToolbarCardProps> = ({ note, onDelete, onArchive }) => {
   const handleButtonClick = (event: React.MouseEvent) => {
-    event.stopPropagation();
+    event.stopPropagation();  
   };
 
   return (
     <Box sx={{ display: "flex", gap: "8px", alignItems: "end" }}>
-      {/*     
-      <PhotoOutlined fontSize="small" sx={{ color: "#0000008a" }} />
-      <PaletteOutlined fontSize="small" sx={{ color: "#0000008a" }} />
-      <VideoCallOutlined fontSize="small" sx={{ color: "#0000008a" }} />
-      <ArchiveOutlined fontSize="small" sx={{ color: "#0000008a" }} /> 
-      */}
-      <IconButton  /* onClick={} aria-controls={} */ onClick={handleButtonClick}>
-        <PhotoOutlined fontSize="small" sx={{ color: "#0000008a" }} />
-      </IconButton>
-      <IconButton /* onClick={} aria-controls={} */ onClick={handleButtonClick}>
-        <LinkOutlined fontSize="small" sx={{ color: "#0000008a" }} />
-      </IconButton>
-      <IconButton /* onClick={} aria-controls={} */ onClick={handleButtonClick}>
+      <IconButton onClick={() => onArchive(note)}>
         <ArchiveOutlined fontSize="small" sx={{ color: "#0000008a" }} />
       </IconButton>
-      <Dropdown >
+      <IconButton onClick={handleButtonClick}>
+        <PhotoOutlined fontSize="small" sx={{ color: "#0000008a" }} />
+      </IconButton>
+
+      <IconButton /* onClick={} aria-controls={} */ onClick={handleButtonClick}>
+        <LinkOutlined fontSize="small" sx={{ color: "#0000008a" }} />
+
+      </IconButton>
+      <Dropdown>
         <MenuButton
           slots={{ root: IconButton }}
           slotProps={{ root: { variant: 'plain' } }}
@@ -41,17 +38,14 @@ const ToolbarCard: React.FC<ToolbarCardProps> = ({ note, onDelete, additionalBut
         >
           <MoreVert />
         </MenuButton>
-        <Menu disablePortal >
-          {/* TODO: Implementar dialog modal e mudar o softDeleteNote */}
+        <Menu disablePortal>
           <MenuItem onClick={() => onDelete(note)}>Excluir nota</MenuItem>
           <MenuItem>Adicionar marcador</MenuItem>
           <MenuItem>Fazer uma cópia</MenuItem>
         </Menu>
       </Dropdown>
-      {additionalButtons}
     </Box>
-  )
+  );
 };
 
 export default ToolbarCard;
-

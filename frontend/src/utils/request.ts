@@ -3,8 +3,9 @@ export type HTTPMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'OPTIONS'
 export interface requestOptions {
   url: string;
   method: HTTPMethod;
-  body?: object | FormData;
+  body?: object | FormData | string | undefined;
   formData?: boolean;
+  headers?: { [key: string]: string };
   auth?: boolean;
   socketId?: string;
 }
@@ -29,7 +30,7 @@ export default async function request<T>({
     body: !formData ? JSON.stringify(body) : (body as FormData),
     headers: {
       ...(!formData ? { "Content-type": "application/json" } : {}),
-      ...(socketId ? { "x-socket-id": socketId } : {}),
+      ...(socketId ? { "x-socket-id": socketId } : {}), 
     },
     cache: "no-store",
     credentials: 'include',

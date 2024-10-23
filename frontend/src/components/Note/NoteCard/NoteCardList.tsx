@@ -2,6 +2,7 @@ import './NoteCardList.css';
 import { Box } from "@mui/material";
 import { AspectRatio, Card, CardOverflow, Typography } from '@mui/joy';
 import { DescriptionOutlined } from '@mui/icons-material';
+
 import { useEffect, useRef, useState } from 'react';
 import { Note, useNotes } from '../../../contexts/NotesContext';
 import ToolbarCard from '../../ToolbarCard/ToolbarCard';
@@ -14,8 +15,7 @@ import VideoLink from '../../VideoLink/VideoLink';
 const NoteCard: React.FC<Note> = ({ ...note }) => {
   console.log("note no notecrdlist", note);
   const [isHovered, setIsHovered] = useState(false);
-  const containerRef = useRef<HTMLDivElement | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = 
   const { notes, updateNote, archiveNote, softDeleteNote, deleteNote, processStatus } = useNotes();
   const [loaderStatus, setLoaderStatus] = useState<string>('');
 
@@ -26,13 +26,15 @@ const NoteCard: React.FC<Note> = ({ ...note }) => {
 
   const toggleHover = () => setIsHovered(!isHovered);
 
+
+  const toggleHover = () => setIsHovered(prev => !prev);
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 
   const handleUpdateNote = (updatedNote: Note) => updateNote(updatedNote.id, updatedNote);
-  //const handleArchiveNote = (noteToArchive: Note) => archiveNote(noteToArchive.id);
-  //const handleSoftDeleteNote = (noteToSoftDelete: Note) => softDeleteNote(noteToSoftDelete.id);
-  const handleDeleteNote = (noteToDelete: Note) => deleteNote(noteToDelete.id);
+  const handleSoftDeleteNote = (noteToSoftDelete: Note) => softDeleteNote(noteToSoftDelete.id);
+  const handleArchiveNote = (noteToArchive: Note) => archiveNote(noteToArchive.id);
+
 
   useEffect(() => {
     for (const ps of processStatus) {
@@ -46,14 +48,17 @@ const NoteCard: React.FC<Note> = ({ ...note }) => {
 
 
   const darkTheme = true;
+
   return (
     <>
-      <Box className="note-card-component"
+      <Box
+        className="note-card-component"
         onMouseEnter={toggleHover}
         onMouseLeave={toggleHover}
         onClick={handleOpenModal}
-        sx={{ backgroundColor: `${darkTheme ? "#fefcff" : "inital"}` }}
+        sx={{ backgroundColor: "#fefcff" }}
       >
+
 
         <ImageCard images={note.images} />
         <VideoLink urls={note.urls} />
@@ -90,21 +95,22 @@ const NoteCard: React.FC<Note> = ({ ...note }) => {
             <Box>
 
             </Box>
+
           </Box>
         )}
         {/* <Loader className={loaderStatus} title={loaderStatus} /> */}
         <LoadIA status={loaderStatus} />
       </Box>
 
-      {/* Modal de Edição */}
       <NoteModal
         open={isModalOpen}
         onClose={handleCloseModal}
+s
         note={{ ...note }}
         onSave={handleUpdateNote}
-        onDelete={handleDeleteNote}
+        onDelete={handleSoftDeleteNote}
+        onArchive={handleArchiveNote}
       />
-
     </>
   );
 };
@@ -114,13 +120,16 @@ interface NoteCardListProps {
 }
 
 const NoteCardList: React.FC<NoteCardListProps> = ({ notes }) => {
+  const sortedNoteList = notes.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
 
   const sortedNoteList = notes.sort((a, b) => {
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
 
-  const darkTheme = true;
+
   return (
+
     <Box className="note-card-list-component"
       sx={{ borderColor: `${darkTheme ? "#828282" : "#e0e0e0"}` }}>
       {!notes || notes.length === 0 ?

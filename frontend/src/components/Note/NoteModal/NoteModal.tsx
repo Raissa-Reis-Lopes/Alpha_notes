@@ -20,7 +20,9 @@ interface NoteModalProps {
   note: Note;
   onSave: (updatedNote: Note) => void;
   onDelete: (noteToDelete: Note) => void;
+  onArchive: (noteToArchive: Note) => void;
 }
+
 
 interface UploadedImage {
   id: string;
@@ -31,7 +33,7 @@ interface UploadedImage {
   nameref: string;
 }
 
-const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDelete }) => {
+const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDelete, onArchive }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -83,6 +85,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
     }
   };
 
+
   const handleReloadNotes = () => {
     getAllNotes();
   }
@@ -125,7 +128,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
     }
 
     return null;
-  };
+
 
   const handlePaste = async (event: React.ClipboardEvent<HTMLDivElement>) => {
     const items = event.clipboardData.items;
@@ -183,6 +186,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
     }
     setOpenInputUrl(!openInputUrl);
   }
+
 
   const handleAddUrl = useCallback(async () => {
     //const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com\/watch\?v=|youtu\.be\/)[\w-]+$/; //sem shorts
@@ -244,12 +248,9 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
     <Transition in={open} timeout={400}>
       {(state: string) => (
         <Modal
-          /*  component="div"  */// Adiciona a propriedade component
           keepMounted
-          /* open={!['exited', 'exiting'].includes(state)} */
-          /*   onClose={() => setOpen(false)} */
           open={open}
-          onClose={handleClose} // Utilize onClose
+          onClose={handleClose}
           slotProps={{
             backdrop: {
               sx: {
@@ -257,8 +258,8 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
                 backdropFilter: 'none',
                 transition: `opacity 400ms, backdrop-filter 400ms`,
                 ...{
-                  entering: { opacity: 1/* , backdropFilter: 'blur(8px)' */ },
-                  entered: { opacity: 1/* , backdropFilter: 'blur(8px)' */ },
+                  entering: { opacity: 1 },
+                  entered: { opacity: 1 },
                 }[state],
               },
             },
@@ -287,6 +288,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
               boxShadow: '0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.4);'
             }}
           >
+
 
             <>
               {/* Images */}
@@ -482,7 +484,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
                     />
                   </AspectRatio>
                 </CardOverflow> 
-               
+
               <CardContent>
                 <Box>
                   <Input
@@ -493,11 +495,12 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
                 </Box>
                 <Box>
                   <Textarea
-                    disabled={false}
                     minRows={2}
                     variant="outlined"
                     placeholder="Criar nota..."
+
                    //  onFocus={handleFocus}
+
                     value={content}
                     onChange={(e) => setContent(e.target.value)}
                   />
@@ -514,25 +517,24 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
                         onClick={handleClose}
                         size="sm"
                         variant="outlined"
-
-                        sx={{
-                          fontSize: "13px"
-                        }}
-                      >Cancelar</Button>,
+                        sx={{ fontSize: "13px" }}
+                      >
+                        Cancelar
+                      </Button>,
                       <Button
                         key="save"
                         color="primary"
                         onClick={handleSave}
                         size="sm"
                         variant="solid"
-
-                        sx={{
-                          fontSize: "13px"
-                        }}
-                      >Salvar</Button>
+                        sx={{ fontSize: "13px" }}
+                      >
+                        Salvar
+                      </Button>
                     ]}
                     note={note}
                     onDelete={onDelete}
+                    onArchive={onArchive}
                   />
                 </CardContent>
               </CardOverflow>
