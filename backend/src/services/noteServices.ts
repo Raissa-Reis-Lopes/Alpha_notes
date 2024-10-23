@@ -11,6 +11,7 @@ import { downloadAudioFromYouTube } from "../utils/downloadAudio";
 import { transcribeAudio } from "../utils/transcribeAudio"
 import path from "path";
 import { getTranscriptionSummary } from "../utils/getTranscriptionSummary.ts";
+import { getVideoInfo } from "../utils/getVideoTitleAndThumb";
 
 const openAIEmbeddings = new OpenAIEmbeddings({
     openAIApiKey: process.env.OPENAI_KEY,
@@ -52,8 +53,9 @@ export const createNoteWithoutEmbeddings = async (
 
         if (urls.length > 0) {
             for (const url of urls) {
-                console.log(url)
-                await urlRepository.updateUrlWithNoteId(url.id, note.id);
+                const videoInfo = await getVideoInfo(url.url)
+                console.log(videoInfo)
+                await urlRepository.updateUrlWithNoteId(url.id, note.id, videoInfo.title, videoInfo.thumbnail);
             }
         }
 
