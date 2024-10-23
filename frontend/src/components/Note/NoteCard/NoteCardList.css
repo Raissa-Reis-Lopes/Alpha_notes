@@ -1,31 +1,21 @@
 .note-card-component {
   display: flex;
   flex-direction: column;
-  min-width: 300px;
-  /* 240 */
-  max-width: 300px;
-  max-height: 520px;
+  min-width: 240px;
+  max-width: 480px;
+  max-height: 480px;
   height: fit-content;
-  border: 2px solid;
+  border: 1px solid;
   border-radius: 8px;
   padding: 8px;
   gap: 8px;
   transition: all .6s cubic-bezier(0.165, 0.84, 0.44, 1);
-  /* position: relative; */
-  /* box-shadow: 0 1px 2px 0 #371c44, 0 2px 6px 2px #371c44; */
-
-
-  /* box-shadow: 0 1px 2px 0 #371c44, 0 1px 4px 2px #371c44; */
-  box-shadow: 0 1px 1px 0 #371c44, 0 1px 4px 1px #371c44;
-
+  position: relative;
 }
 
-.note-card-component:hover {
-  /* box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15); */
-  box-shadow: 0 1px 2px 0 #371c44, 0 4px 8px 4px #371c44;
+.NoteCardComponent:hover {
+  box-shadow: 0 1px 2px 0 rgba(60, 64, 67, 0.3), 0 2px 6px 2px rgba(60, 64, 67, 0.15);
   transition: all .6s cubic-bezier(0.165, 0.84, 0.44, 1);
-  transform: translate(-2px, -12px);
-  /*  box-shadow: 0 1px 2px 0 #371c44, 0 2px 6px 2px #371c44; */
 }
 
 .base-input {
@@ -40,38 +30,7 @@
   /*   display: none; */
 }
 
-.note-card-list-component {
+.NoteCardListComponent {
   width: 100%;
   height: 100%;
-}
-
-/* .card-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  grid-auto-flow: dense;
-  gap: 16px;
-
-
-
-} */
-
-
-.note-card-content {
-  flex-grow: 1;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 3;
-  white-space: "pre-wrap";
-}
-
-
-.card-title {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  -webkit-line-clamp: 3;
-  line-clamp: 3;
 }

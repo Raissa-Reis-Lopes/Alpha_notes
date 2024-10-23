@@ -8,12 +8,6 @@ export const saveUrl = async (url: string) => {
         }
 
         const newUrl = await urlRepository.saveUrl(url);
-        const videoInfo = await getVideoInfo(url);
-
-        //temporary
-        newUrl.title = videoInfo.title;
-        newUrl.thumbnail = videoInfo.thumbnail;
-
         return newUrl;
     } catch (error: any) {
         throw error;

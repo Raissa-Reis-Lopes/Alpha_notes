@@ -6,7 +6,6 @@ import { pool } from "./database/connection";
 import cors from 'cors';
 import { WebSocketServer } from "ws";
 import WebSocketService from "./services/webSocketServices";
-import path from "path";
 
 dotenv.config();
 
@@ -23,7 +22,7 @@ const corsOptions = {
 
 app.use(cors(corsOptions));
 
-app.use(express.static(path.join(__dirname, '../uploads')));
+app.use(express.static('uploads'));
 app.use(express.json());
 app.use(cookieParser());
 app.use("/api", routes);
