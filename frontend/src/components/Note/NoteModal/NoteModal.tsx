@@ -128,6 +128,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
     }
 
     return null;
+  };
 
 
   const handlePaste = async (event: React.ClipboardEvent<HTMLDivElement>) => {

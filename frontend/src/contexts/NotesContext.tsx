@@ -1,12 +1,9 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { createNoteApi, deleteNoteApi, getAllNotesApi, searchNotesByQueryApi, updateNoteApi, moveNoteToTrashApi, restoreFromArchiveApi, restoreFromTrashApi, archiveNoteApi } from '../api/notesApi';
 import { useWebSocket } from './WebSocketContext';
-
 import { IUrl } from '../interface/url';
 import { IImage } from '../interface/image';
-
 import { GetAllNotesResponse } from '../api/notesApi';
-
 
 interface Note {
   id: string;
@@ -40,26 +37,18 @@ interface NotesContextType {
   archiveNote: (id: string) => void;
   softDeleteNote: (id: string) => void;
   deleteNote: (id: string) => void;
-  restoreNote: (id: string, fromTrash: boolean) => void; 
+  restoreNote: (id: string, fromTrash: boolean) => void;
   trashNotes: Note[];
 }
-
 
 export const NotesContext = createContext<NotesContextType | undefined>(undefined);
 
 export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [notes, setNotes] = useState<Note[]>([]);
   const [searchedNotes, setSearchedNotes] = useState<Note[]>([]);
-
   const [processStatus, setProcessStatus] = useState<ProcessStatus[]>([]);
-  const [notes, setNotes] = useState<Note[]>([
-    /* {
-        id: '1',
-        title: 'Teste 1',
-        content: 'Conteúdo do teste 1',
-        date: new Date(),
-        archived: false,
-    } */
-  ]);
+  const [trashNotes, setTrashNotes] = useState<Note[]>([]);
+  const [archivedNotes, setArchivedNotes] = useState<Note[]>([]);
 
 
   const { webSocketService, socketId } = useWebSocket();
@@ -111,63 +100,46 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     };
     fetchNotes();
   }, []);
-  
+
 
   const getAllNotes = async (filter: string = '') => {
-    const { data, error }: GetAllNotesResponse = await getAllNotesApi(filter);
+    const { data, error } = await getAllNotesApi(filter);
     if (error) {
       console.log(error);
       return;
     }
-  
+
     if (data) {
       if (filter === 'trash') {
-        setTrashNotes(data);
+        setTrashNotes(data as Note[]);
         console.log("Successfully got trash notes", data);
       } else if (filter === 'archive') {
-        setArchivedNotes(data);
+        setArchivedNotes(data as Note[]);
         console.log("Successfully got archived notes", data);
       } else {
-        setNotes(data); // Este deve ser apenas para notas ativas
+        setNotes(data as Note[]); // Este deve ser apenas para notas ativas
         console.log("Successfully got all notes", data);
       }
     }
   };
-s
 
 
-  const getAllNotes = async () => {
+
+  const getAllNotes2 = async () => {
     const { data, error } = await getAllNotesApi();
     if (error) {
       console.log(error);
       return error;
     }
-    console.log("xxxxxxxxx", data);
-    //Testando CSS
-    const x = data as Note[];
-
-    x.push({
-      id: '1',
-      title: 'Teste 1',
-      content: 'Conteúdo do teste 1',
-      status: 'processing',
-      images: [],
-      urls: [],
-      is_in_trash: false,
-      is_in_archive: false,
-      created_at: new Date(),
-      updated_at: new Date(),
-      created_by: 'User Teste'
-    })
 
     if (data) {
       setNotes(data as Note[]);
       console.log("Successfully got all notes", data);
     }
+  }
 
   const getTrashNotes = async () => {
     await getAllNotes('trash'); // Chama com o filtro de lixo
-
   };
 
   const createNote = async (note: Partial<Note>) => {
@@ -176,12 +148,9 @@ s
       return;
     }
 
-    console.log("X:", note);
     const { data, error } = await createNoteApi({
-
       title: note.title, content: note.content, images: note.images, urls: note.urls
     }, socketId);
-
 
     if (error) {
       console.log(error);
@@ -215,29 +184,25 @@ s
     })); */
   };
 
-const archiveNote = async (id: string) => {
-  console.log('Archiving note with ID:', id);
-  if (!socketId) {
-    console.log("Socket ID não encontrado");
-    return;
-  }
+  const archiveNote = async (id: string) => {
+    console.log('Archiving note with ID:', id);
+    if (!socketId) {
+      console.log("Socket ID não encontrado");
+      return;
+    }
 
+    const { data, error } = await archiveNoteApi({ id }, socketId);
+    if (error) {
+      console.log(error);
+      return error;
+    }
 
-  const { data, error } = await archiveNoteApi({ id }, socketId);
-  if (error) {
-    console.log(error);
-    return error;
-  }
-
-  if (data) {
-    setNotes(prevNotes => prevNotes.filter(note => note.id !== id)); // Remove da lista de notas ativas
-    setArchivedNotes(prevArchived => [...prevArchived, data]); // Adiciona à lista de notas arquivadas
-    console.log('Nota movida para arquivadas:', data);
-  }
-};
-
-  
-  
+    if (data) {
+      setNotes(prevNotes => prevNotes.filter(note => note.id !== id)); // Remove da lista de notas ativas
+      setArchivedNotes(prevArchived => [...prevArchived, data]); // Adiciona à lista de notas arquivadas
+      console.log('Nota movida para arquivadas:', data);
+    }
+  };
 
   const softDeleteNote = async (id: string) => {
     if (!socketId) {
@@ -259,11 +224,6 @@ const archiveNote = async (id: string) => {
   };
 
 
-  return (
-    <NotesContext.Provider value={{ notes, searchedNotes, processStatus, setSearchedNotes, getAllNotes, searchNotesByQuery, createNote, updateNote, archiveNote, softDeleteNote, deleteNote }}>
-      {children}
-    </NotesContext.Provider>
-  );
 
   const searchNotesByQuery = async (query: string) => {
     const { data, error } = await searchNotesByQueryApi({ query });
@@ -276,7 +236,7 @@ const archiveNote = async (id: string) => {
       console.log("Successfully searched notes by query", data);
     }
   };
-  
+
 
   const deleteNote = async (id: string) => {
     const response = await deleteNoteApi({ id });
@@ -291,62 +251,61 @@ const archiveNote = async (id: string) => {
 
   const restoreNote = async (id: string, fromTrash: boolean) => {
     if (!socketId) {
-        console.log("Socket ID não encontrado, não posso restaurar a nota");
-        return;
+      console.log("Socket ID não encontrado, não posso restaurar a nota");
+      return;
     }
 
     const apiFunction = fromTrash ? restoreFromTrashApi : restoreFromArchiveApi;
     const { data, error } = await apiFunction({ id }, socketId);
 
     if (error) {
-        console.log(error);
-        return;
+      console.log(error);
+      return;
     }
 
     if (data) {
-        console.log("Nota restaurada:", data);
+      console.log("Nota restaurada:", data);
 
-        // Adiciona a nota restaurada às notas ativas
-        setNotes(prevNotes => [...prevNotes, data]);
+      // Adiciona a nota restaurada às notas ativas
+      setNotes(prevNotes => [...prevNotes, data]);
 
-        // Remove a nota do lixo
-        if (fromTrash) {
-            setTrashNotes(prevTrash => {
-                const updatedTrash = prevTrash.filter(note => note.id !== id);
-                console.log("Notas no lixo após restauração:", updatedTrash);
-                return updatedTrash;
-            });
-        } else {
-            setArchivedNotes(prevArchived => {
-                const updatedArchived = prevArchived.filter(note => note.id !== id);
-                console.log("Notas arquivadas após restauração:", updatedArchived);
-                return updatedArchived;
-            });
-        }
-        await getAllNotes();
+      // Remove a nota do lixo
+      if (fromTrash) {
+        setTrashNotes(prevTrash => {
+          const updatedTrash = prevTrash.filter(note => note.id !== id);
+          console.log("Notas no lixo após restauração:", updatedTrash);
+          return updatedTrash;
+        });
+      } else {
+        setArchivedNotes(prevArchived => {
+          const updatedArchived = prevArchived.filter(note => note.id !== id);
+          console.log("Notas arquivadas após restauração:", updatedArchived);
+          return updatedArchived;
+        });
+      }
+      await getAllNotes();
     }
-};
+  };
 
 
 
-
-
-
-  
-return (
-  <NotesContext.Provider value={{ notes, searchedNotes, setSearchedNotes, getAllNotes, searchNotesByQuery, createNote, updateNote, archiveNote, softDeleteNote, deleteNote, trashNotes, restoreNote, archivedNotes }}>
-    {children}
-  </NotesContext.Provider>
-);
+  return (
+    <NotesContext.Provider value={{
+      notes, searchedNotes, processStatus, trashNotes, archivedNotes,
+      setSearchedNotes, getAllNotes, searchNotesByQuery, createNote, updateNote, archiveNote, softDeleteNote, deleteNote, restoreNote,
+    }}>
+      {children}
+    </NotesContext.Provider>
+  );
 
 };
 
 export const useNotes = () => {
-const context = useContext(NotesContext);
-if (!context) {
-  throw new Error('useNotes must be used within a NotesProvider');
-}
-return context;
+  const context = useContext(NotesContext);
+  if (!context) {
+    throw new Error('useNotes must be used within a NotesProvider');
+  }
+  return context;
 };
 
 export type { Note };

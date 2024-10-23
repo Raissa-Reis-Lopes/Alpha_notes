@@ -13,18 +13,21 @@ import VideoLink from '../../VideoLink/VideoLink';
 
 
 const NoteCard: React.FC<Note> = ({ ...note }) => {
-  console.log("note no notecrdlist", note);
+  /* console.log("note no notecrdlist", note); */
   const [isHovered, setIsHovered] = useState(false);
-  const [isModalOpen, setIsModalOpen] = 
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const { notes, updateNote, archiveNote, softDeleteNote, deleteNote, processStatus } = useNotes();
   const [loaderStatus, setLoaderStatus] = useState<string>('');
+
 
   /* useEffect(() => {
     console.log("loading status", note.status)
     setLoaderStatus(note.status);
   }, [note]); */
 
-  const toggleHover = () => setIsHovered(!isHovered);
+
+
+  //~const toggleHover = () => setIsHovered(!isHovered);
 
 
   const toggleHover = () => setIsHovered(prev => !prev);
@@ -34,6 +37,23 @@ const NoteCard: React.FC<Note> = ({ ...note }) => {
   const handleUpdateNote = (updatedNote: Note) => updateNote(updatedNote.id, updatedNote);
   const handleSoftDeleteNote = (noteToSoftDelete: Note) => softDeleteNote(noteToSoftDelete.id);
   const handleArchiveNote = (noteToArchive: Note) => archiveNote(noteToArchive.id);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   useEffect(() => {
@@ -91,7 +111,7 @@ const NoteCard: React.FC<Note> = ({ ...note }) => {
               justifyContent: "space-between",
               visibility: isHovered ? "visible" : "hidden",
             }}>
-            <ToolbarCard note={{ ...note }} onDelete={handleDeleteNote} />
+            <ToolbarCard note={{ ...note }} onDelete={handleSoftDeleteNote} onArchive={handleArchiveNote} />
             <Box>
 
             </Box>
@@ -105,7 +125,6 @@ const NoteCard: React.FC<Note> = ({ ...note }) => {
       <NoteModal
         open={isModalOpen}
         onClose={handleCloseModal}
-s
         note={{ ...note }}
         onSave={handleUpdateNote}
         onDelete={handleSoftDeleteNote}
@@ -120,14 +139,11 @@ interface NoteCardListProps {
 }
 
 const NoteCardList: React.FC<NoteCardListProps> = ({ notes }) => {
-  const sortedNoteList = notes.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-
 
   const sortedNoteList = notes.sort((a, b) => {
     return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
   });
-
-
+  const darkTheme = true
   return (
 
     <Box className="note-card-list-component"
