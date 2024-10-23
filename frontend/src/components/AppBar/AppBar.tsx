@@ -71,11 +71,7 @@ const AppBar: React.FC<AppBarProps> = ({ handleDrawerToggle, handleMobileMenuOpe
       }}>
       <Toolbar sx={{ justifyContent: 'space-between', marginTop: '8px' }}>
         <Box sx={{ flexGrow: 0, display: 'flex', justifyContent: 'start' }}>
-          <IconButton edge="start" aria-label="open drawer" onClick={handleDrawerToggle} sx={{
-            ":hover": {
-              backgroundColor: "#ffffff20",
-            }
-          }}>
+          <IconButton edge="start" aria-label="open drawer" onClick={handleDrawerToggle}>
             <MenuIcon sx={{ color: `${darkTheme ? "#fff" : "initial"}` }} />
           </IconButton>
           <Logo src="/logo.svg" sx={{ margin: "0 24px" }} className='logo'></Logo>
@@ -86,50 +82,30 @@ const AppBar: React.FC<AppBarProps> = ({ handleDrawerToggle, handleMobileMenuOpe
         </Box>
 
         <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-          <IconButton color={darkTheme ? 'inherit' : 'default'} sx={{
-            ":hover": {
-              backgroundColor: "#ffffff20",
-            }
-          }} >
+          <IconButton color={darkTheme ? 'inherit' : 'default'}>
             <Badge>
               <ViewAgendaOutlined />
             </Badge>
           </IconButton>
-          <IconButton color={darkTheme ? 'inherit' : 'default'} sx={{
-            ":hover": {
-              backgroundColor: "#ffffff20",
-            }
-          }}>
+          <IconButton color={darkTheme ? 'inherit' : 'default'}>
             <Badge badgeContent={17} color="error">
               <NotificationsIcon />
             </Badge>
           </IconButton>
-          <IconButton color={darkTheme ? 'inherit' : 'default'} sx={{
-            ":hover": {
-              backgroundColor: "#ffffff20",
-            }
-          }}>
-            <Badge >
+          <IconButton color={darkTheme ? 'inherit' : 'default'}>
+            <Badge>
               <SettingsOutlined />
             </Badge>
           </IconButton>
           <IconButton edge="end" onClick={handleProfileMenuOpen} aria-controls={menuId}
-            color={darkTheme ? 'inherit' : 'default'} sx={{
-              ":hover": {
-                backgroundColor: "#ffffff20",
-              }
-            }}
+            color={darkTheme ? 'inherit' : 'default'}
           >
             <AccountCircle />
           </IconButton>
         </Box>
 
         <Box sx={{ display: { xs: 'flex', md: 'none' } }}>
-          <IconButton onClick={handleMobileMenuOpen} aria-controls={mobileMenuId} sx={{
-            ":hover": {
-              backgroundColor: "#ffffff20",
-            }
-          }}>
+          <IconButton onClick={handleMobileMenuOpen} aria-controls={mobileMenuId}>
             <MoreIcon />
           </IconButton>
         </Box>

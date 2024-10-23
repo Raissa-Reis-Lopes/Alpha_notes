@@ -20,7 +20,6 @@ export default async function request<T>({
 }: requestOptions): Promise<{
   data: T;
   error: boolean;
-  success: boolean;
   status: number;
   message?: string | string[];
 }> {
@@ -43,7 +42,6 @@ export default async function request<T>({
   return {
     data: data.data,
     error: !response.ok,
-    success: data.success,
     status: response.status,
     message: data.message ? data.message : null,
   };

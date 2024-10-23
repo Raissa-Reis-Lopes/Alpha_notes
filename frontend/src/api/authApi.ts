@@ -10,11 +10,11 @@ export async function validateAuthApi() {
   try {
     const response = await request(requestParams);
 
-    if (response.error) return { data: null as null, success: false, error: response.message };
-    return { data: response.data, success: true, error: null as null };
+    if (response.error) return { data: null as null, error: response.message };
+    return { data: response.data, error: null as null };
 
   } catch (error) {
-    return { data: null as null, success: false, error: "validateAuthApi : Um erro inesperado aconteceu" };
+    return { data: null as null, error: "validateAuthApi : Um erro inesperado aconteceu" };
   }
 }
 
