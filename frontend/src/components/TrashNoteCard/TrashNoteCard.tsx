@@ -9,11 +9,10 @@ interface TrashNoteCardProps {
   content: string;
   date: string;
   archived: boolean;
-  metadata: object;
-  status: 'processing' | 'completed' | 'failed';
+  status: 'pending' | 'processing' | 'completed' | 'failed';
 }
 
-const TrashNoteCard: React.FC<TrashNoteCardProps> = ({ id, title, content, date, archived, metadata, status }) => {
+const TrashNoteCard: React.FC<TrashNoteCardProps> = ({ id, title, content, date, archived, status }) => {
   const { restoreNote, deleteNote } = useNotes();
 
   const handleRestore = () => {

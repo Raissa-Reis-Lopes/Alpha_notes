@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Box, useMediaQuery, useTheme, Typography} from '@mui/material';
+import { Box, useMediaQuery, useTheme, Typography } from '@mui/material';
 import { DescriptionOutlined } from '@mui/icons-material';
 import { useUser } from '../../../contexts/UserContext';
 import ArchivedNoteCard from '../../Note/ArchiveNoteCard/ArchiveNoteCard'; // Importe o novo componente
@@ -30,9 +30,9 @@ const ArchivePageContent: React.FC<ArchivePageContentProps> = ({
 
   useEffect(() => {
     if (user) {
-        getAllNotes('archive'); // Sempre busca notas arquivadas quando o usuário está logado
+      getAllNotes('archive'); // Sempre busca notas arquivadas quando o usuário está logado
     }
-}, [user]);
+  }, [user]);
 
 
 
@@ -61,7 +61,6 @@ const ArchivePageContent: React.FC<ArchivePageContentProps> = ({
               content={note.content}
               date={note.date}
               archived={note.archived}
-              metadata={note.metadata}
               status={note.status}
             />
           ))

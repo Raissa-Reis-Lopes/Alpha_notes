@@ -384,7 +384,7 @@ export const deleteNoteById = async (noteId: string): Promise<INote> => {
     try {
         const result = await pool.query(`
             SELECT
-                id, title, content, metadata, created_at, updated_at, created_by
+                id, title, content, created_at, updated_at, created_by
             FROM notes
             WHERE id = $1
         `, [noteId]);
