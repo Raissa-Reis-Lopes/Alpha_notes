@@ -11,8 +11,8 @@ import ArchivePageContent from '../components/Dashboard/ArchivePageContent.tsx/A
 import TrashPageContent from '../components/Dashboard/TrashPageContent/TrashPageContent';
 import { Box } from '@mui/joy';
 
-const drawerWidth = 240;
-const miniDrawerWidth = 60;
+const drawerWidth = 0; //240
+const miniDrawerWidth = 0; //60
 const appBarHeight = 64;
 const miniAppBarHeight = 56;
 
