@@ -10,7 +10,7 @@ import { useNotes } from '../../contexts/NotesContext';
 const Search = styled('div')(({ theme }) => ({
   display: 'flex',
   position: 'relative',
-  borderRadius: '2rem', // Ajuste o valor aqui para deixar mais arredondado
+  borderRadius: '2rem',
   backgroundColor: '#fbfcfe',
   '&:hover': {
     backgroundColor: '#f1f1f1',
@@ -33,12 +33,12 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  color: theme.palette.grey[700], // Cor do ícone
+  color: theme.palette.grey[700], 
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: theme.palette.text.primary, // Cor do texto (ajustada para navbar branca)
-  width: '100%', //new
+  color: theme.palette.text.primary,
+  width: '100%', 
   '& .MuiInputBase-input': {
     padding: theme.spacing(1, 1, 1, 0),
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
