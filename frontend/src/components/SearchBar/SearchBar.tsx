@@ -60,7 +60,7 @@ const SearchBar: React.FC = () => {
   const searchInput = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
   const { section } = useParams<{ section: string }>();
-  const { notes, searchedNotes, setSearchedNotes, searchNotesByQuery } = useNotes();
+  const { notes, searchedNotes, setSearchedNotes, searchNotesByQuery, setQueryString } = useNotes();
 
   useEffect(() => {
     if (searchInput.current) {
@@ -122,11 +122,16 @@ const SearchBar: React.FC = () => {
     if (event.key === 'Enter') {
 
       console.log('Enter pressed');
+      const time = searchTerm.length < 100 ? 800 : 2200
 
       if (searchTerm && switchState) {
         console.log("aqui");
-        searchNotesByQuery(searchTerm);
-        setSearchTerm('');
+        setQueryString(searchTerm);
+        setTimeout(() => {
+          searchNotesByQuery(searchTerm);
+          setSearchTerm('');
+        }, time);
+
 
       }
       // Exemplo: chamar a função de busca ou realizar uma ação específica

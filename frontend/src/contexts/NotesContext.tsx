@@ -39,6 +39,8 @@ interface NotesContextType {
   deleteNote: (id: string) => void;
   restoreNote: (id: string, fromTrash: boolean) => void;
   trashNotes: Note[];
+  queryString: string;
+  setQueryString: React.Dispatch<React.SetStateAction<string>>;
 }
 
 export const NotesContext = createContext<NotesContextType | undefined>(undefined);
@@ -49,6 +51,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [processStatus, setProcessStatus] = useState<ProcessStatus[]>([]);
   const [trashNotes, setTrashNotes] = useState<Note[]>([]);
   const [archivedNotes, setArchivedNotes] = useState<Note[]>([]);
+  const [queryString, setQueryString] = useState('');
 
 
   const { webSocketService, socketId } = useWebSocket();
@@ -297,8 +300,8 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   return (
     <NotesContext.Provider value={{
-      notes, searchedNotes, processStatus, trashNotes, archivedNotes,
-      setSearchedNotes, getAllNotes, searchNotesByQuery, createNote, updateNote, archiveNote, softDeleteNote, deleteNote, restoreNote,
+      notes, searchedNotes, processStatus, trashNotes, archivedNotes, queryString,
+      setSearchedNotes, getAllNotes, searchNotesByQuery, setQueryString, createNote, updateNote, archiveNote, softDeleteNote, deleteNote, restoreNote,
     }}>
       {children}
     </NotesContext.Provider>
