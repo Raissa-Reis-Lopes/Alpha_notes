@@ -13,7 +13,7 @@ import { IUrl } from '../../../interface/url';
 import { DeleteOutlineOutlined, LinkOutlined, PhotoOutlined } from '@mui/icons-material';
 import { deleteImageApi, uploadImageApi } from '../../../api/imagesApi';
 import { inputBorder } from '../../../styles/Components';
-import { updateImageNoteApi, UpdateNoteRequest } from '../../../api/notesApi';
+import { updateImageNoteApi, UpdateNoteRequest, updateUrlNoteApi } from '../../../api/notesApi';
 
 interface NoteModalProps {
   open: boolean;
@@ -92,7 +92,8 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
 
 
   const handleAddImages = useCallback(async (files: FileList) => {
-    console.log("Entrou em handleAddImages");
+    setImages([]);
+    setUploadedImages(new Set());
 
     const newImages = Array.from(files);
     setImages((prevImages) => [...prevImages, ...newImages]);
@@ -200,6 +201,8 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
 
 
   const handlePaste = async (event: React.ClipboardEvent<HTMLDivElement>) => {
+    setImages([]);
+    setUploadedImages(new Set());
     const items = event.clipboardData.items;
     const files: File[] = [];
 
@@ -293,6 +296,15 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
 
       if (data) {
         setUrls((prevUrls) => [...prevUrls, data]);
+
+        const { success, error } = await updateUrlNoteApi({ noteId: note.id, urls: [data] });
+
+        if (error) {
+          console.log(error);
+        } else if (success) {
+          console.log("Successfully updated url note");
+          handleReloadNotes();
+        }
       }
     }
     setNewUrl('');
@@ -439,7 +451,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
                         <CardMedia
                           component="img"
                           image={`https://img.youtube.com/vi/${extractYoutubeId(url.url)}/hqdefault.jpg`}
-                          alt={"Lorem Ipsum - Título aqui - urls.title"}
+                          alt={url.title}
                           sx={{ width: 80, height: 45 }}
                         />
                         <CardContent sx={{ display: 'flex', flexDirection: 'column', p: 1, overflow: 'hidden' }}>
@@ -455,7 +467,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
                             <Typography sx={{
                               fontSize: 13, textWrap: 'nowrap', overflow: 'hidden',
                               fontWeight: 'bold'
-                            }}>{"Lorem Ipsum - Título aqui - urls.title"}</Typography>
+                            }}>{url.title}</Typography>
                             <Typography sx={{ fontSize: 11, color: '#00a162' }}>
                               {url.url}
                             </Typography>

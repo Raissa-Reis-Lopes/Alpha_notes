@@ -94,6 +94,8 @@ export const updateUrls = async (req: Request, res: Response) => {
         const { noteId, urls } = req.body;
         const userId = req.user!.id;
 
+        console.log("noteid", noteId, urls,)
+
         if (!userId) {
             res.status(401).json({ message: "User not allowed" });
             return;

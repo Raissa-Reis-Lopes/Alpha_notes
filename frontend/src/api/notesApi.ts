@@ -146,7 +146,7 @@ export async function updateImageNoteApi({ noteId, images }: { noteId: string, i
   }
 }
 
-export async function updateUrlNoteApi({ noteId, urls }: { noteId: string, urls: Partial<Note> }) {
+export async function updateUrlNoteApi({ noteId, urls }: { noteId: string, urls: any }) {
 
   console.log("aaaaaa", urls);
   const body = {
@@ -155,7 +155,7 @@ export async function updateUrlNoteApi({ noteId, urls }: { noteId: string, urls:
   };
 
   const requestParams: requestOptions = {
-    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/urls/updateUrls`,
+    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/updateUrls`,
     method: 'PUT',
     body,
   };
