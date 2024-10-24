@@ -22,6 +22,11 @@ export async function getVideoInfo(videoURL: string): Promise<VideoInfo> {
             thumbnail: info.thumbnail,
         };
     } catch (error: any) {
-        throw new Error(`Erro ao obter informações do vídeo: ${error.message}`);
+        console.error(`Erro ao obter informações do vídeo: ${error.message}`);
+
+        return {
+            title: "Não foi possível obter o título",
+            thumbnail: "https://imgur.com/a/ovNaahF"
+        };
     }
 }
