@@ -59,19 +59,11 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
     }
   }, []);
 
-
-
-  /*  
-   if (!note) {
-     return null; // ou retornar um componente de loading ou mensagem de erro
-   } */
-
-
   const handleClose = () => {
-    setTitle('');
-    setContent('');
-    setImages([]);
-    setUrls([]);
+    //setTitle('');
+    //setContent('');
+    //setImages([]);
+    //setUrls([]);
     setUploadedImages(new Set());
     setNewUrl('');
     setIsExpanded(false);
@@ -80,25 +72,16 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
   };
 
   const handleSave = () => {
-    /* if (note) {
-      console.log("titulo content", title, content);
-      onSave({ ...note, title, content });
-      onClose();
-    }
- */
     let updatedFields: UpdateNoteRequest = {};
 
-    // Verifica se os campos foram modificados
     if (title !== note.title) {
       updatedFields.title = title;
     }
     if (content !== note.content) {
       updatedFields.content = content;
     }
-
-    // Chama a função onSave passando o id e os campos modificados
     onSave(note.id, updatedFields);
-
+    handleClose();
   };
 
 
@@ -193,6 +176,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
     }
     if (success) {
       console.log("Successfully deleted image");
+      getAllNotes();
     }
   };
 
@@ -309,7 +293,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
 
             <>
               {/* Images */}
-              {note && note.images.length > 0 && (
+              {note.images && note.images.length > 0 && (
                 <Box className="scrollable" //ref={contImageRef}
                   sx={{
                     maxHeight: 400, overflowY: 'auto',
@@ -354,7 +338,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
               )}
 
               {/* Youtube URL*/}
-              {note && note.urls.length > 0 && (
+              {note.urls && note.urls.length > 0 && (
                 <Box className="scrollable" ////ref={contUrlRef} //Monitorar se a reutilização desse ref causará problemas
                   sx={{
                     maxHeight: 200, overflowY: 'auto',
