@@ -8,18 +8,13 @@ import { useNotes } from '../../contexts/NotesContext';
 
 
 const Search = styled('div')(({ theme }) => ({
-  display: 'flex', //new
+  display: 'flex',
   position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  //backgroundColor: alpha(theme.palette.common.black, 0.05),
-  //'&:hover': {
-  //  backgroundColor: alpha(theme.palette.common.black, 0.1),
-  //},
+  borderRadius: '2rem', // Ajuste o valor aqui para deixar mais arredondado
   backgroundColor: '#fbfcfe',
   '&:hover': {
-    backgroundColor: '#f1f1f1', // Cor do fundo ao hover
+    backgroundColor: '#f1f1f1',
   },
-
   marginRight: theme.spacing(2),
   marginLeft: 0,
   width: '100%',
@@ -28,6 +23,7 @@ const Search = styled('div')(({ theme }) => ({
     maxWidth: '600px',
   },
 }));
+
 
 const SearchIconWrapper = styled('div')(({ theme }) => ({
   padding: theme.spacing(0, 2),
