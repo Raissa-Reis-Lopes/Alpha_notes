@@ -13,7 +13,7 @@ interface UpdateNoteRequest {
 
 export async function getAllNotesApi(filter?: string) {
   const requestParams: requestOptions = {
-    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes${filter ? `?filter=${filter}` : ''}`,
+    url: `https://alpha04.alphaedtech.org.br:3001/api/notes${filter ? `?filter=${filter}` : ''}`,
     method: 'GET',
   };
 
@@ -32,7 +32,7 @@ export async function getAllNotesApi(filter?: string) {
 export async function getNoteByIdApi({ id }: { id: string }) {
 
   const requestParams: requestOptions = {
-    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/${id}`,
+    url: `https://alpha04.alphaedtech.org.br:3001/api/notes/${id}`,
     method: 'GET',
   };
 
@@ -53,7 +53,7 @@ export async function searchNotesByQueryApi({ query }: { query: string }) {
   };
 
   const requestParams: requestOptions = {
-    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/search`,
+    url: `https://alpha04.alphaedtech.org.br:3001/api/notes/search`,
     method: 'POST',
     body,
   };
@@ -80,7 +80,7 @@ export async function createNoteApi({ title, content, images, urls }: Partial<No
   console.log("ENV", process.env.REACT_APP_BACKEND_API_ADDRESS);
 
   const requestParams: requestOptions = {
-    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes`,
+    url: `https://alpha04.alphaedtech.org.br:3001/api/notes`,
     method: 'POST',
     body,
     socketId: socketId
@@ -105,7 +105,7 @@ export async function updateNoteApi({ id, fields }: { id: string, fields: Update
   };
 
   const requestParams: requestOptions = {
-    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/${id}`,
+    url: `https://alpha04.alphaedtech.org.br:3001/api/notes/${id}`,
     method: 'PUT',
     body,
   };
@@ -124,7 +124,7 @@ export async function updateNoteApi({ id, fields }: { id: string, fields: Update
 export async function deleteNoteApi({ id }: { id: string }) {
 
   const requestParams: requestOptions = {
-    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/${id}`,
+    url: `https://alpha04.alphaedtech.org.br:3001/api/notes/${id}`,
     method: 'DELETE',
   };
 
@@ -143,7 +143,7 @@ export async function archiveNoteApi({ id }: { id: string }, socketId: string) {
   const body = { is_in_archive: true };
 
   const requestParams: requestOptions = {
-    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/${id}`,
+    url: `https://alpha04.alphaedtech.org.br:3001/api/notes/${id}`,
     method: 'PUT',
     body,
     headers: {
@@ -168,7 +168,7 @@ export async function moveNoteToTrashApi({ id }: { id: string }, socketId: strin
   const body = { is_in_trash: true };
 
   const requestParams: requestOptions = {
-    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/${id}`,
+    url: `https://alpha04.alphaedtech.org.br:3001/api/notes/${id}`,
     method: 'PUT',
     body, //passo o fields
     headers: {
@@ -194,7 +194,7 @@ export async function restoreFromTrashApi({ id }: { id: string }, socketId: stri
   const body = { is_in_trash: false };
 
   const requestParams: requestOptions = {
-    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/${id}`,
+    url: `https://alpha04.alphaedtech.org.br:3001/api/notes/${id}`,
     method: 'PUT',
     body,
     headers: {
@@ -222,7 +222,7 @@ export async function restoreFromArchiveApi({ id }: { id: string }, socketId: st
   const body = { is_in_archive: false };
 
   const requestParams: requestOptions = {
-    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/${id}`,
+    url: `https://alpha04.alphaedtech.org.br:3001/api/notes/${id}`,
     method: 'PUT',
     body,
     headers: {
