@@ -9,6 +9,8 @@ router.get("/paginated", auth, noteController.getPaginatedNotes);
 router.get("/:noteId", auth, noteController.getNoteById);
 router.post("/search", auth, noteController.searchNotesByQuery)
 router.post("/", auth, noteController.createNote);
+router.put("/updateImages", auth, noteController.updateImages);
+router.put("/updateUrls", auth, noteController.updateUrls);
 router.put("/:noteId", auth, noteController.updateNote);
 router.delete("/:noteId", auth, noteController.deleteNote);
 

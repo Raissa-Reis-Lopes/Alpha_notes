@@ -13,7 +13,7 @@ export const addUrl = async (req: Request, res: Response) => {
 
     const newUrl = await urlServices.saveUrl(url);
 
-    return res.status(200).json({ success: true, message: 'URL adicionada com sucesso', url: newUrl });
+    return res.status(200).json({ success: true, message: 'URL adicionada com sucesso', data: newUrl });
   } catch (error: any) {
     console.error('Erro ao adicionar URL:', error);
     return res.status(500).json({ message: 'Erro ao adicionar URL', error: error.message });

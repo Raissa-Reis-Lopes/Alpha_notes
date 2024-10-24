@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
-import { Box, useMediaQuery, useTheme, Typography} from '@mui/material';
+import { Box, useMediaQuery, useTheme, Typography } from '@mui/material';
 import { DescriptionOutlined } from '@mui/icons-material';
 import { useUser } from '../../../contexts/UserContext';
-import ArchivedNoteCard from '../../Note/ArchiveNoteCard/ArchiveNoteCard'; // Importe o novo componente
+import ArchivedNoteCard from '../../Note/ArchiveNoteCard/ArchiveNoteCard'; 
 import { useNotes } from '../../../contexts/NotesContext';
+import  './ArchivePageContent.css';
 
 interface ArchivePageContentProps {
   drawerOpen: boolean;
@@ -30,9 +31,9 @@ const ArchivePageContent: React.FC<ArchivePageContentProps> = ({
 
   useEffect(() => {
     if (user) {
-        getAllNotes('archive'); // Sempre busca notas arquivadas quando o usuário está logado
+      getAllNotes('archive'); 
     }
-}, [user]);
+  }, [user]);
 
 
 
@@ -50,7 +51,10 @@ const ArchivePageContent: React.FC<ArchivePageContentProps> = ({
         transition: 'margin-left 0.3s ease, margin-top 0.3s ease',
         gap: "32px",
       }}
-    >
+     
+    > <Typography style={{ fontSize: '2.2rem' , fontFamily: 'Fredoka, sans-serif', color: '#8f5bbd', fontWeight: '500'}} gutterBottom>
+   - notas arquivadas -
+      </Typography>
       <Box sx={{ display: "flex", alignItems: "start", width: "100%", flexWrap: "wrap", gap: "16px" }}>
         {archivedNotes.length > 0 ? (
           archivedNotes.map(note => (
@@ -59,10 +63,14 @@ const ArchivePageContent: React.FC<ArchivePageContentProps> = ({
               id={note.id}
               title={note.title}
               content={note.content}
-              date={note.date}
-              archived={note.archived}
-              metadata={note.metadata}
               status={note.status}
+              images={note.images}
+              urls={note.urls}
+              is_in_archive={note.is_in_archive}
+              is_in_trash={note.is_in_trash}
+              created_at={note.created_at}
+              updated_at={note.updated_at}
+              created_by={note.created_by}
             />
           ))
         ) : (

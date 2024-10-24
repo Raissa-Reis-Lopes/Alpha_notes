@@ -6,7 +6,12 @@ interface GetAllNotesResponse {
   error?: string;
 }
 
-export async function getAllNotesApi(filter?: string): Promise<GetAllNotesResponse> {
+interface UpdateNoteRequest {
+  title?: string;
+  content?: string;
+}
+
+export async function getAllNotesApi(filter?: string) {
   const requestParams: requestOptions = {
     url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes${filter ? `?filter=${filter}` : ''}`,
     method: 'GET',
@@ -14,16 +19,13 @@ export async function getAllNotesApi(filter?: string): Promise<GetAllNotesRespon
 
   try {
     const response = await request(requestParams);
-    return {
-      data: response.data as Note[],
-    };
+
+
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
+
   } catch (error) {
-    const errorMessage = (error as any).message || "Erro desconhecido";
-    console.error("Erro ao buscar notas:", errorMessage);
-    return {
-      data: [],
-      error: errorMessage,
-    };
+    return { data: null as null, success: false, error: "getAllNotesApi : Um erro inesperado aconteceu" };
   }
 }
 
@@ -37,11 +39,11 @@ export async function getNoteByIdApi({ id }: { id: string }) {
   try {
     const response = await request(requestParams);
 
-    if (response.error) return { data: null as null, error: response.message };
-    return { data: response.data, error: null as null };
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
 
   } catch (error) {
-    return { data: null as null, error: "getNoteByIdApi : Um erro inesperado aconteceu" };
+    return { data: null as null, success: false, error: "getNoteByIdApi : Um erro inesperado aconteceu" };
   }
 }
 
@@ -59,20 +61,23 @@ export async function searchNotesByQueryApi({ query }: { query: string }) {
   try {
     const response = await request(requestParams);
 
-    if (response.error) return { data: null as null, error: response.message };
-    return { data: response.data, error: null as null };
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
 
   } catch (error) {
-    return { data: null as null, error: "searchNotesByQueryApi : Um erro inesperado aconteceu" };
+    return { data: null as null, success: false, error: "searchNotesByQueryApi : Um erro inesperado aconteceu" };
   }
 }
 
-export async function createNoteApi({ title, content, metadata }: Partial<Note>, socketId: string) {
+export async function createNoteApi({ title, content, images, urls }: Partial<Note>, socketId: string) {
   const body = {
     title,
     content,
-    metadata,
+    images,
+    urls,
   };
+
+  console.log("ENV", process.env.REACT_APP_BACKEND_API_ADDRESS);
 
   const requestParams: requestOptions = {
     url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes`,
@@ -84,17 +89,19 @@ export async function createNoteApi({ title, content, metadata }: Partial<Note>,
   try {
     const response = await request<Note>(requestParams);
 
-    if (response.error) return { data: null as null, error: response.message };
-    return { data: response.data, error: null as null };
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
 
   } catch (error) {
-    return { data: null as null, error: "createNoteApi : Um erro inesperado aconteceu" };
+    return { data: null as null, success: false, error: "createNoteApi : Um erro inesperado aconteceu" };
   }
 }
 
-export async function updateNoteApi({ id, note }: { id: string; note: Partial<Note> }) {
+export async function updateNoteApi({ id, fields }: { id: string, fields: UpdateNoteRequest }) {
+
+  console.log("aaaaaa", fields);
   const body = {
-    note
+    ...fields
   };
 
   const requestParams: requestOptions = {
@@ -106,11 +113,61 @@ export async function updateNoteApi({ id, note }: { id: string; note: Partial<No
   try {
     const response = await request<Note>(requestParams);
 
-    if (response.error) return { data: null as null, error: response.message };
-    return { data: response.data, error: null as null };
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
 
   } catch (error) {
-    return { data: null as null, error: "updateNoteApi : Um erro inesperado aconteceu" };
+    return { data: null as null, success: false, error: "updateNoteApi : Um erro inesperado aconteceu" };
+  }
+}
+
+export async function updateImageNoteApi({ noteId, images }: { noteId: string, images: any }) {
+
+  console.log("aaaaaa", images);
+  const body = {
+    noteId,
+    images
+  };
+
+  const requestParams: requestOptions = {
+    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/updateImages`,
+    method: 'PUT',
+    body,
+  };
+
+  try {
+    const response = await request<Note>(requestParams);
+
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
+
+  } catch (error) {
+    return { data: null as null, success: false, error: "updateImageNoteApi : Um erro inesperado aconteceu" };
+  }
+}
+
+export async function updateUrlNoteApi({ noteId, urls }: { noteId: string, urls: any }) {
+
+  console.log("aaaaaa", urls);
+  const body = {
+    noteId,
+    urls
+  };
+
+  const requestParams: requestOptions = {
+    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/updateUrls`,
+    method: 'PUT',
+    body,
+  };
+
+  try {
+    const response = await request<Note>(requestParams);
+
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
+
+  } catch (error) {
+    return { data: null as null, success: false, error: "updateUrlNoteApi : Um erro inesperado aconteceu" };
   }
 }
 
@@ -124,11 +181,11 @@ export async function deleteNoteApi({ id }: { id: string }) {
   try {
     const response = await request(requestParams);
 
-    if (response.error) return { data: null as null, error: response.message };
-    return { data: response.data, error: null as null };
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
 
   } catch (error) {
-    return { data: null as null, error: "deleteNoteApi : Um erro inesperado aconteceu" };
+    return { data: null as null, success: false, error: "deleteNoteApi : Um erro inesperado aconteceu" };
   }
 }
 
@@ -160,15 +217,15 @@ export async function archiveNoteApi({ id }: { id: string }, socketId: string) {
 export async function moveNoteToTrashApi({ id }: { id: string }, socketId: string) {
   const body = { is_in_trash: true };
 
-const requestParams: requestOptions = {
+  const requestParams: requestOptions = {
     url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/${id}`,
     method: 'PUT',
     body, //passo o fields
     headers: {
-        'Content-Type': 'application/json',
-        'x-socket-id': socketId,
+      'Content-Type': 'application/json',
+      'x-socket-id': socketId,
     },
-};
+  };
 
 
   try {
@@ -184,7 +241,7 @@ const requestParams: requestOptions = {
 
 
 export async function restoreFromTrashApi({ id }: { id: string }, socketId: string) {
-  const body = {is_in_trash: false};
+  const body = { is_in_trash: false };
 
   const requestParams: requestOptions = {
     url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/${id}`,
@@ -212,37 +269,37 @@ export async function restoreFromTrashApi({ id }: { id: string }, socketId: stri
 }
 
 export async function restoreFromArchiveApi({ id }: { id: string }, socketId: string) {
-  const body = {is_in_archive: false};
+  const body = { is_in_archive: false };
 
   const requestParams: requestOptions = {
-      url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/${id}`,
-      method: 'PUT',
-      body,
-      headers: {
-          'Content-Type': 'application/json',
-          'x-socket-id': socketId,
-      },
+    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/${id}`,
+    method: 'PUT',
+    body,
+    headers: {
+      'Content-Type': 'application/json',
+      'x-socket-id': socketId,
+    },
   };
 
   try {
-      const response = await request<Note>(requestParams);
+    const response = await request<Note>(requestParams);
 
-      if (response.error) {
-          console.error("Erro ao restaurar nota do arquivo:", response.error);
-          return { data: null, error: response.message };
-      }
-      
-      return { data: response.data, error: null };
+    if (response.error) {
+      console.error("Erro ao restaurar nota do arquivo:", response.error);
+      return { data: null, error: response.message };
+    }
+
+    return { data: response.data, error: null };
   } catch (error) {
-      console.error("restoreFromArchiveApi: Um erro inesperado aconteceu", error);
-      if (error instanceof SyntaxError) {
-          console.error("Resposta da API não é um JSON válido.");
-      }
-      return { data: null, error: "restoreFromArchiveApi: Um erro inesperado aconteceu" };
+    console.error("restoreFromArchiveApi: Um erro inesperado aconteceu", error);
+    if (error instanceof SyntaxError) {
+      console.error("Resposta da API não é um JSON válido.");
+    }
+    return { data: null, error: "restoreFromArchiveApi: Um erro inesperado aconteceu" };
   }
 }
 
-export type {GetAllNotesResponse};
+export type { GetAllNotesResponse, UpdateNoteRequest };
 
 
 
