@@ -1,34 +1,78 @@
-import './ArchiveNoteCard.css'; // Crie um arquivo CSS se necessário
+import './ArchiveNoteCard.css'; 
 import { Box, Button } from "@mui/material";
 import { Typography } from '@mui/joy';
-import { useNotes } from '../../../contexts/NotesContext';
+import { useNotes, Note } from '../../../contexts/NotesContext';
+import { useState } from 'react';
+import ImageCard from '../NoteImage/NoteImage';
+import VideoLink from '../../VideoLink/VideoLink';
+import UnarchiveOutlinedIcon from '@mui/icons-material/UnarchiveOutlined';
+import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
+import Tooltip from '@mui/material/Tooltip';
 
-interface ArchivedNoteCardProps {
-  id: string;
-  title: string;
-  content: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-}
-
-const ArchivedNoteCard: React.FC<ArchivedNoteCardProps> = ({ id, title, content }) => {
+const ArchivedNoteCard: React.FC<Note> = ({ ...note }) => {
   const { restoreNote, deleteNote } = useNotes();
+  const [isHovered, setIsHovered] = useState(false);
 
   const handleRestore = () => {
-    restoreNote(id, false); // Função para desarquivar a nota
+    restoreNote(note.id, false); 
   };
 
   const handleDelete = () => {
-    deleteNote(id); // Função para deletar permanentemente
+    deleteNote(note.id);
   };
 
   return (
-    <Box className="archived-note-card-component" sx={{ backgroundColor: "#fefcff", padding: "16px", borderRadius: "8px", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-      <Typography level="title-md">{title}</Typography>
-      <Typography level="body-md">{content}</Typography>
-      <Box sx={{ display: "flex", justifyContent: "space-between", marginTop: "16px" }}>
-        <Button variant="contained" color="primary" onClick={handleRestore}>Desarquivar</Button>
-        <Button variant="outlined" color="error" onClick={handleDelete}>Excluir Permanentemente</Button>
+    <Box
+      className="note-card-component"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      sx={{ backgroundColor: "#fefcff" }}
+      
+    >
+      <ImageCard images={note.images} />
+      <VideoLink urls={note.urls} />
+
+      <Box>
+        <Typography className="card-title" level="title-md" padding={"12px 12px 0 12px"}
+          sx={{ display: '-webkit-box' }}
+        >
+          {note.title}
+        </Typography>
       </Box>
+
+      <Box sx={{ overflow: 'hidden' }}>
+        <Typography className="note-card-content" level="body-md" padding={"12px 12px"}
+          sx={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+        >
+          {note.content}
+        </Typography>
+      </Box>
+
+      <Box className="note-toolbar"
+  sx={{
+    padding: "0 12px",
+    display: "flex",
+    visibility: isHovered ? "visible" : "hidden",
+    marginLeft: "auto"
+  }}
+>
+  <Tooltip title="Restaurar Nota">
+    <span>
+      <UnarchiveOutlinedIcon 
+        className='unarchived' 
+        onClick={handleRestore} 
+      />
+    </span>
+  </Tooltip>
+  <Tooltip title="Excluir permanentemente">
+    <span>
+      <DeleteForeverOutlinedIcon 
+        className='delete' 
+        onClick={handleDelete} 
+      />
+    </span>
+  </Tooltip>
+</Box>
     </Box>
   );
 };
