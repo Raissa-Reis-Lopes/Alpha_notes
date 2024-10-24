@@ -51,7 +51,9 @@ const TrashPageContent: React.FC<TrashPageContentProps> = ({
         transition: 'margin-left 0.3s ease, margin-top 0.3s ease',
         gap: "32px"
       }}
-    >
+    ><Typography style={{ fontSize: '2.2rem' , fontFamily: 'Fredoka, sans-serif', color: '#8f5bbd', fontWeight: '500'}} gutterBottom>
+    - notas excluídas -
+       </Typography>
       <Box sx={{ display: "flex", alignItems: "start", width: "100%", flexWrap: "wrap", gap: "16px" }}>
         {trashNotes.length > 0 ? (
           <TrashNoteList notes={trashNotes} />

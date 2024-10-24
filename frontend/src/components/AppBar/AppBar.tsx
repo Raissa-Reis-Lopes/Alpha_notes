@@ -1,12 +1,9 @@
 import './AppBar.css';
 import React, { useState } from 'react';
-import { AppBar as MuiAppBar, Toolbar, IconButton, Box, Badge, Menu, MenuItem } from '@mui/material';
+import { AppBar as MuiAppBar, Toolbar, IconButton, Box, Menu, MenuItem, Typography } from '@mui/material';
 import SearchBar from '../SearchBar/SearchBar';
 import { styled, useTheme } from '@mui/material/styles';
-import {
-  Menu as MenuIcon, Notifications as NotificationsIcon, MoreVert as MoreIcon,
-  AccountCircle, ViewAgendaOutlined, SettingsOutlined
-} from '@mui/icons-material';
+import { Menu as MenuIcon, AccountCircle } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../contexts/UserContext';
 
@@ -26,7 +23,7 @@ const AppBar: React.FC<AppBarProps> = ({ handleDrawerToggle, handleMobileMenuOpe
   const theme = useTheme();
   const darkTheme = true;
   const navigate = useNavigate();
-  const { setUser } = useUser();
+  const { user, setUser } = useUser();
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const isMenuOpen = Boolean(anchorEl);
@@ -61,13 +58,12 @@ const AppBar: React.FC<AppBarProps> = ({ handleDrawerToggle, handleMobileMenuOpe
     }
   };
 
-
   return (
     <MuiAppBar position="fixed" elevation={0}
       sx={{
         zIndex: theme.zIndex.drawer + 1,
-        backgroundColor: `${darkTheme ? "#371c44" : "initial"}`,
-        border: "1px solid #0000001f"
+        backgroundColor: `${darkTheme ? "#704784" : "initial"}`,
+        border: "1px solid #704784f"
       }}>
       <Toolbar sx={{ justifyContent: 'space-between', marginTop: '8px' }}>
         <Box sx={{ flexGrow: 0, display: 'flex', justifyContent: 'start' }}>
@@ -86,33 +82,6 @@ const AppBar: React.FC<AppBarProps> = ({ handleDrawerToggle, handleMobileMenuOpe
         </Box>
 
         <Box sx={{ display: { xs: 'none', md: 'flex' } }}>
-          <IconButton color={darkTheme ? 'inherit' : 'default'} sx={{
-            ":hover": {
-              backgroundColor: "#ffffff20",
-            }
-          }} >
-            <Badge>
-              <ViewAgendaOutlined />
-            </Badge>
-          </IconButton>
-          <IconButton color={darkTheme ? 'inherit' : 'default'} sx={{
-            ":hover": {
-              backgroundColor: "#ffffff20",
-            }
-          }}>
-            <Badge badgeContent={17} color="error">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
-          <IconButton color={darkTheme ? 'inherit' : 'default'} sx={{
-            ":hover": {
-              backgroundColor: "#ffffff20",
-            }
-          }}>
-            <Badge >
-              <SettingsOutlined />
-            </Badge>
-          </IconButton>
           <IconButton edge="end" onClick={handleProfileMenuOpen} aria-controls={menuId}
             color={darkTheme ? 'inherit' : 'default'} sx={{
               ":hover": {
@@ -130,7 +99,7 @@ const AppBar: React.FC<AppBarProps> = ({ handleDrawerToggle, handleMobileMenuOpe
               backgroundColor: "#ffffff20",
             }
           }}>
-            <MoreIcon />
+            <MenuIcon />
           </IconButton>
         </Box>
       </Toolbar>
@@ -138,14 +107,12 @@ const AppBar: React.FC<AppBarProps> = ({ handleDrawerToggle, handleMobileMenuOpe
       {/* Menu de Logout */}
       <Menu
         anchorEl={anchorEl}
-        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        id={menuId}
-        keepMounted
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} 
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         open={isMenuOpen}
         onClose={handleMenuClose}
       >
-        <MenuItem onClick={handleLogout}>Logout</MenuItem>
+        <MenuItem onClick={handleLogout} sx={{ color: '#371c44', fontFamily: 'Fredoka' }}>Logout</MenuItem>
       </Menu>
     </MuiAppBar>
   );
