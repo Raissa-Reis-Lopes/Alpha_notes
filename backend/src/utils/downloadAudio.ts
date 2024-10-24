@@ -1,5 +1,7 @@
 import { exec } from "youtube-dl-exec";
 import path from "path";
+import dotenv from "dotenv";
+dotenv.config();
 
 export async function downloadAudioFromYouTube(videoURL: string, audioDir: string): Promise<string> {
 
@@ -12,6 +14,7 @@ export async function downloadAudioFromYouTube(videoURL: string, audioDir: strin
             output: audioOutput,
             ffmpegLocation: "C:\\ffmpeg\\ffmpeg-master-latest-win64-gpl\\bin",
             verbose: true,
+            proxy: process.env.PROXY
         });
 
         return audioOutput;
