@@ -22,7 +22,6 @@ const TrashNoteList: React.FC<TrashNoteListProps> = ({ notes }) => {
             content={item.content}
             date={(new Date(item.date).toLocaleString())}
             archived={item.archived}
-            metadata={item.metadata}
             status={item.status}
           />
         ))}

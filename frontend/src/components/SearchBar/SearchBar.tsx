@@ -65,6 +65,7 @@ const SearchBar: React.FC = () => {
   useEffect(() => {
     if (searchInput.current) {
       searchInput.current.focus();
+      searchInput.current.value = '';
     }
   }, []);
 

@@ -32,7 +32,7 @@ interface NotesContextType {
   setSearchedNotes: React.Dispatch<React.SetStateAction<Note[]>>;
   getAllNotes: (filter?: string) => void;
   searchNotesByQuery: (query: string) => void;
-  createNote: (note: Partial<Note>) => void;
+  createNote: (note: Partial<Note>) => Promise<Note | null>;
   updateNote: (id: string, updatedNoteData: Partial<Note>) => void;
   archiveNote: (id: string) => void;
   softDeleteNote: (id: string) => void;
@@ -142,10 +142,10 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     await getAllNotes('trash'); // Chama com o filtro de lixo
   };
 
-  const createNote = async (note: Partial<Note>) => {
+  const createNote = async (note: Partial<Note>): Promise<Note | null> => {
     if (!socketId) {
       console.log("Socket ID não encontrado, não posso enviar o createNote");
-      return;
+      return null;
     }
 
     const { data, error } = await createNoteApi({
@@ -154,12 +154,15 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     if (error) {
       console.log(error);
-      return error;
+      return null;
     }
     if (data) {
       setNotes([...notes, data]);
       console.log("Successfully created", data);
+      return data;
     }
+
+    return null
   };
 
   const updateNote = async (id: string, fields: UpdateNoteRequest) => {
@@ -227,9 +230,11 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
 
   const searchNotesByQuery = async (query: string) => {
+    console.log("Searching notes by query:", query);
     const { data, error } = await searchNotesByQueryApi({ query });
+
     if (error) {
-      console.log(error);
+      console.log("query erro", error);
       return;
     }
     if (data) {
