@@ -75,7 +75,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ images }) => {
         {imagesToShow.slice(-largeImagesToShow).map((img) => (
           <Grid xs={12 / largeImagesToShow} key={img.id} style={{ flexGrow: 1 }}>
             <AspectRatio ratio="4/3">
-              <img src={`${process.env.URL_ADDRESS}/${img.filename}`} alt={`Imagem ${img.id + 1}`} style={imageWrapperStyle} />
+              <img src={`alpha04.alphaedtech.org.br:3001/${img.filename}`} alt={`Imagem ${img.id + 1}`} style={imageWrapperStyle} />
             </AspectRatio>
           </Grid>
         ))}
@@ -84,7 +84,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ images }) => {
         {imagesToShow.slice(0, smallImagesToShow).map((img) => (
           <Grid xs={3} key={img.id} style={{ flexGrow: 1 }}> {/* Garantindo que a segunda linha tenha 3 ou 4 imagens */}
             <AspectRatio ratio="4/3" >
-              <img src={`${process.env.URL_ADDRESS}/${img.filename}`} alt={`Imagem ${img.id + largeImagesToShow + 1}`} style={imageWrapperStyle} />
+              <img src={`alpha04.alphaedtech.org.br:3001/${img.filename}`} alt={`Imagem ${img.id + largeImagesToShow + 1}`} style={imageWrapperStyle} />
             </AspectRatio>
           </Grid>
         ))}

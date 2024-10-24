@@ -40,7 +40,7 @@ const AppBar: React.FC<AppBarProps> = ({ handleDrawerToggle, handleMobileMenuOpe
     console.log('Usuário deslogado');
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_BACKEND_API_ADDRESS}/logout`, {
+      const response = await fetch(`https://alpha04.alphaedtech.org.br:3001/api/logout`, {
         method: 'POST',
         credentials: 'include',
       });
@@ -107,7 +107,7 @@ const AppBar: React.FC<AppBarProps> = ({ handleDrawerToggle, handleMobileMenuOpe
       {/* Menu de Logout */}
       <Menu
         anchorEl={anchorEl}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }} 
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
         open={isMenuOpen}
         onClose={handleMenuClose}

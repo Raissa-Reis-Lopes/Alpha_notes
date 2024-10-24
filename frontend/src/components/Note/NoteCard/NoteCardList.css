@@ -4,9 +4,10 @@
   min-width: 300px;
   /* 240 */
   max-width: 300px;
-  max-height: 520px;
-  height: fit-content;
-  border: 2px solid;
+  height: 400px;
+  /* max-height: 520px; */
+  /* height: fit-content; */
+  /* border: 2px solid; */
   border-radius: 8px;
   padding: 8px;
   gap: 8px;

@@ -8,6 +8,8 @@ import WebSocketService from "./services/webSocketServices";
 import https from "https";
 import fs from "fs";
 import path from "path";
+import jwt from "jsonwebtoken";
+import { SECRET_KEY } from "./config";
 
 dotenv.config();
 
@@ -39,9 +41,38 @@ const server = app.listen(PORT, () => {
 });
 
 server.on('upgrade', (request, socket, head) => {
-    wss.handleUpgrade(request, socket, head, (ws) => {
-        wss.emit('connection', ws, request);
-    });
+    try {
+        // Acessa diretamente os cookies já processados pelo cookieParser
+        const cookies = (request as any).cookies;
+        const token = cookies.session_id;
+
+        if (typeof token !== 'string') {
+            socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+            socket.destroy();
+            return;
+        }
+
+        // Verifica o JWT
+        jwt.verify(token, SECRET_KEY, (err: any, decoded: any) => {
+            if (err) {
+                socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+                socket.destroy();
+                return;
+            }
+
+            // Armazena o usuário autenticado no request
+            (request as any).user = decoded;
+
+            // Se for bem-sucedido, faz o upgrade da conexão para WebSocket
+            wss.handleUpgrade(request, socket, head, (ws) => {
+                wss.emit('connection', ws, request);
+            });
+        });
+    } catch (err) {
+        console.error('WebSocket authentication error:', err);
+        socket.write('HTTP/1.1 401 Unauthorized\r\n\r\n');
+        socket.destroy();
+    }
 });
 
 export default webSocketService;

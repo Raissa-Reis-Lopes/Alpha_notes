@@ -4,7 +4,7 @@ class WebSocketService {
 
   connect() {
     if (!this.socket || this.socket.readyState === WebSocket.CLOSED) {
-      this.socket = new WebSocket(`ws://${process.env.URL_ADDRESS}`);
+      this.socket = new WebSocket(`wss://alpha04.alphaedtech.org.br:3001`);
       console.log("this socket", this.socket);
 
       this.socket.onopen = () => {

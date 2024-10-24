@@ -62,7 +62,7 @@ const Register: React.FC = () => {
     console.log(userData)
 
     try {
-      const response = await fetch('${process.env.REACT_APP_BACKEND_API_ADDRESS}/users', {
+      const response = await fetch('https://alpha04.alphaedtech.org.br:3001/api/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
