@@ -26,7 +26,7 @@ export async function getVideoInfo(videoURL: string): Promise<VideoInfo> {
 
         return {
             title: "Não foi possível obter o título",
-            thumbnail: "https://imgur.com/a/ovNaahF"
+            thumbnail: "https://i.imgur.com/rL2STzL.png"
         };
     }
 }
