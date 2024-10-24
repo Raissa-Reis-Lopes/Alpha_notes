@@ -34,14 +34,7 @@ app.use("/api", routes);
 const wss = new WebSocketServer({ noServer: true });
 const webSocketService = new WebSocketService(wss);
 
-const sslOptions = {
-    key: fs.readFileSync('/etc/letsencrypt/live/alpha04.alphaedtech.org.br/privkey.pem'),
-    cert: fs.readFileSync('/etc/letsencrypt/live/alpha04.alphaedtech.org.br/fullchain.pem')
-};
-
-const server = https.createServer(sslOptions, app);
-
-server.listen(PORT, () => {
+const server = app.listen(PORT, () => {
     console.log(`Server running on: https://alpha04.alphaedtech.org.br:${PORT}`);
 });
 
