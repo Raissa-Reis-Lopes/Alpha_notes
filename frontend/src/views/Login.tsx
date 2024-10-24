@@ -55,7 +55,7 @@ const Login: React.FC = () => {
     }
 
     try {
-      const response = await fetch('${process.env.REACT_APP_BACKEND_API_ADDRESS}/login', {
+      const response = await fetch('http://localhost:3001/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

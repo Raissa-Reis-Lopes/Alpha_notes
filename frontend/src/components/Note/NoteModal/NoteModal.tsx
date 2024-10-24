@@ -411,7 +411,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
                       <Box key={image.id} sx={{ position: 'relative' }}>
                         <img
                           className='upload-image'
-                          src={`${process.env.URL_ADDRESS}/` + image.filename}
+                          src={"http://localhost:3001/" + image.filename}
                           //src={typeof image === "string" ? todoimage : URL.createObjectURL(todoimage)}
                           alt={`Preview ${image.id}`}
                           style={{
