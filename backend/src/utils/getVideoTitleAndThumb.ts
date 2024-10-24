@@ -1,6 +1,6 @@
 import youtubedl from 'youtube-dl-exec';
-import dotenv from "dotenv";
-dotenv.config();
+// import dotenv from "dotenv";
+// dotenv.config();
 
 interface VideoInfo {
     title: string;
