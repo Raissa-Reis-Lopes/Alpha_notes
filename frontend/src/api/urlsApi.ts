@@ -1,6 +1,6 @@
 import request, { requestOptions } from '../utils/request';
 
-export async function uploadUrlApi({url}: { url: string}) {
+export async function uploadUrlApi({ url }: { url: string }) {
   const body = {
     url,
   };
@@ -23,7 +23,7 @@ export async function uploadUrlApi({url}: { url: string}) {
   }
 }
 
-export async function deleteUrlApi({id}: { id: string }) {
+export async function deleteUrlApi({ id }: { id: string }) {
 
   const requestParams: requestOptions = {
     url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/url/${id}`,

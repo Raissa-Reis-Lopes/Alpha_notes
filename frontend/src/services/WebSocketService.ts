@@ -4,7 +4,7 @@ class WebSocketService {
 
   connect() {
     if (!this.socket || this.socket.readyState === WebSocket.CLOSED) {
-      this.socket = new WebSocket('ws://localhost:3001');
+      this.socket = new WebSocket(`ws://${process.env.URL_ADDRESS}`);
       console.log("this socket", this.socket);
 
       this.socket.onopen = () => {

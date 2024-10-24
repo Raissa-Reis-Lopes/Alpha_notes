@@ -62,7 +62,7 @@ const Register: React.FC = () => {
     console.log(userData)
 
     try {
-      const response = await fetch('http://localhost:3001/api/users', {
+      const response = await fetch('${process.env.REACT_APP_BACKEND_API_ADDRESS}/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
