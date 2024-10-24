@@ -1,5 +1,5 @@
 import './SearchPageContent.css';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Box, ImageListItem, useMediaQuery, useTheme } from '@mui/material';
 import { useUser } from '../../../contexts/UserContext';
 import NoteInput from '../../Note/NoteInput/NoteInput';
@@ -24,7 +24,7 @@ const SearchPageContent: React.FC<SearchPageContentProps> = ({ drawerOpen, drawe
   const calculatedMarginLeft = drawerOpen ? drawerWidth : miniDrawerWidth;
 
   const { user } = useUser();
-  const { searchedNotes } = useNotes();
+  const { searchedNotes, queryString } = useNotes();
 
   /* useEffect(() => {
     if (!user) return;
@@ -58,40 +58,75 @@ const SearchPageContent: React.FC<SearchPageContentProps> = ({ drawerOpen, drawe
     }, [text]); */
 
 
-  let text = 'Faça buscas mais elaboradas com ajuda da IA! ';
-  let text2 = 'Ative-a na barra de pesquisa e pergunte por qualquer coisa que você se lembra sobre o assunto desejado.';
-  let speed = 50;
-  const [index, setIndex] = useState(0);
-  const [index2, setIndex2] = useState(0);
-  const displayText = useMemo(() => text.slice(0, index), [index]);
-  const displayText2 = useMemo(() => text2.slice(0, index2), [index2]);
+  /* const texts = [
+    'Faça buscas mais elaboradas com ajuda da IA!',
+    'Ative-a na barra de pesquisa e pergunte sobre o assunto que desejas encontrar.',
+  ]; */
+  const [texts, setTexts] = useState<string[]>(['', '']);
+
+  const speed = 12;
+
+  const [currentTextIndex, setCurrentTextIndex] = useState(0); // Controla o índice do texto atual
+  const [charIndex, setCharIndex] = useState(0); // Controla o índice de caracteres do texto
+  const [displayText, setDisplayText] = useState(''); // Texto 1 sendo exibido
+  const [displayText2, setDisplayText2] = useState(''); // Texto 2 sendo exibido
+
   useEffect(() => {
-    if (index == text.length) {
-      if (index2 >= text2.length)
-        return;
-
-      speed = 25;
-      const timeoutId2 = setTimeout(() => {
-        setIndex2(i => i + 1);
-        setIndex(i => i - 1);
+    if (charIndex < texts[0].length) {
+      // Primeiro texto
+      const timeoutId = setTimeout(() => {
+        setDisplayText((prev) => prev + texts[0][charIndex]);
+        setCharIndex((prev) => prev + 1);
       }, speed);
-
-      return () => {
-        clearTimeout(timeoutId2);
-      };
+      return () => clearTimeout(timeoutId);
+    } else if (charIndex >= texts[0].length && charIndex - texts[0].length < texts[1].length) {
+      // Segundo texto
+      const secondCharIndex = charIndex - texts[0].length;
+      const timeoutId = setTimeout(() => {
+        setDisplayText2((prev) => prev + texts[1][secondCharIndex]);
+        setCharIndex((prev) => prev + 1);
+      }, speed);
+      return () => clearTimeout(timeoutId);
     }
-    if (index > text.length) return
-    const timeoutId = setTimeout(() => {
-      setIndex(i => i + 1);
-    }, speed);
+  }, [charIndex, texts, speed]);
 
-    return () => {
-      clearTimeout(timeoutId);
-    };
+  useEffect(() => {
+
+    setTimeout(() => {
+      setTexts([
+        'Faça buscas mais elaboradas com ajuda da IA!',
+        'Ative-a na barra de pesquisa e pergunte sobre o assunto que desejas encontrar.',
+      ]);
+    }, 500);
+
+  }, []);
+
+  // Reinicia a digitação quando os textos mudam
+  useEffect(() => {
+    setCharIndex(0);
+    setDisplayText('');
+    setDisplayText2('');
+  }, [texts]);
+
+  /* const switchTexts = () => {
+    setTexts([
+      'Este é um novo primeiro texto!',
+      'Este é um novo segundo texto!',
+    ]);
+  }; */
 
 
-  }, [index, text, speed, text2]);
 
+  useEffect(() => {
+    setTexts([queryString, '']);
+  }, [queryString]);
+
+  /*  useEffect(() => {
+     setText('Faça buscas mais elaboradas com ajuda da IA. Ative-a na barra de pesquisa e pergunte por qualquer coisa que você se lembra sobre o assunto desejado.');
+     textRef.current = 'Faça buscas mais elaboradas com ajuda da IA. Ative-a na barra de pesquisa e pergunte por qualquer coisa que você se lembra sobre o assunto desejado.';
+     setIndex(0);
+     indexRef.current = 0;
+   }, []) */
 
   /* let text = 'Faça buscas mais elaboradas com ajuda da IA!';
   let text2 = 'Ative-a na barra de pesquisa e pergunte por qualquer coisa que você se lembra sobre o assunto desejado.';
@@ -177,7 +212,8 @@ const SearchPageContent: React.FC<SearchPageContentProps> = ({ drawerOpen, drawe
         marginLeft: `${calculatedMarginLeft}px`,
         /* marginLeft: "60px", */
         transition: 'margin-left 0.3s ease, margin-top 0.3s ease',
-        gap: "32px"
+        gap: "32px",
+
       }}
     >
 
@@ -189,20 +225,21 @@ const SearchPageContent: React.FC<SearchPageContentProps> = ({ drawerOpen, drawe
         padding: '16px 40px',
         boxShadow: '1px 4px 4px #939393',
         gap: '32px',
+        minWidth: '320px'
       }}>
         <img src="/smile2.svg" alt="ia icon" style={imageStyle}></img>
         <Box>
-          <Typography sx={{ fontSize: '16px', maxWidth: '600px' }}>
+          <Typography sx={{ fontSize: '16px', maxWidth: '600px', mt: '6px', mb: '4px' }}>
             {displayText}
           </Typography>
-          <Typography sx={{ fontSize: '16px', maxWidth: '600px' }}>
+          <Typography sx={{ fontSize: '16px', maxWidth: '600px', mb: '4px' }}>
             {displayText2}
           </Typography>
         </Box>
       </Box>
 
       {/* Modelo 02 */}
-      <Box sx={{
+      {/*  <Box sx={{
         display: 'flex',
         borderRadius: '35px',
         padding: '4px 40px',
@@ -221,7 +258,7 @@ const SearchPageContent: React.FC<SearchPageContentProps> = ({ drawerOpen, drawe
       }}>
         <Box className="chat-card right"> Faça buscas mais elaboradas com ajuda da IA!</Box>
         <AccountCircle style={imageStyle2} />
-      </Box>
+      </Box> */}
 
       {/* <Card style={{ padding: '16px', margin: '16px' }}>
         <Typography >Typing Effect</Typography>
