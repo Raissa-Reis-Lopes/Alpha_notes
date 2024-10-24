@@ -35,16 +35,6 @@ const Home: React.FC = () => {
         <SmileFace src="/smile2.svg" alt="Smile3" size="6rem" top="30rem" left="65rem" />
         <SmileFace src="/smile.svg" alt="Smile4" size="4rem" top="35rem" left="80rem" />
 
-        {/* <SmileFace src="/smile2.svg" alt="Smile1" size="5rem" top="5rem" left="15rem" />
-        <SmileFace src="/smile.svg" alt="Smile2" size="7rem" top="15rem" left="5rem" />
-        <SmileFace src="/smile2.svg" alt="Smile3" size="6rem" top="30rem" left="25rem" />
-        <SmileFace src="/smile.svg" alt="Smile4" size="4rem" top="35rem" left="10rem" />
-
-        <SmileFace src="/smile2.svg" alt="Smile1" size="5rem" top="5rem" left="75rem" />
-        <SmileFace src="/smile.svg" alt="Smile2" size="7rem" top="15rem" left="85rem" />
-        <SmileFace src="/smile2.svg" alt="Smile3" size="6rem" top="30rem" left="65rem" />
-        <SmileFace src="/smile.svg" alt="Smile4" size="4rem" top="35rem" left="80rem" /> */}
-
         <NoteInput
           placeholder="Organize suas ideias com apenas um clique"
           value={inputValue}
