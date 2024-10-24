@@ -8,6 +8,7 @@ import CustomInput from '../components/CustomInput/CustomInput';
 import CustomButton from '../components/CustomButton/CustomButton';
 import TextLink from '../components/TextLinks/TextLinks';
 import { useUser } from '../contexts/UserContext';
+import Toast from '../components/Toast/Toast';
 
 const Logo = styled('img')(({ theme }) => ({
   width: '10rem',
@@ -17,8 +18,11 @@ const Logo = styled('img')(({ theme }) => ({
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastColor, setToastColor] = useState(''); // Cor do texto do Toast
+
   const emailInputRef = useRef<HTMLInputElement>(null);
-  const [errorMessage, setErrorMessage] = useState('');
   const { setUser } = useUser();
   const navigate = useNavigate();
 
@@ -28,9 +32,27 @@ const Login: React.FC = () => {
     }
   }, []);
 
+  // Função para mostrar o Toast com mensagem personalizada
+  const showToast = (message: string, color: string = '#ff0000') => {
+    setToastVisible(false); // Resetar a visibilidade do toast antes de mostrar
+    setToastMessage(message);
+    setToastColor(color);
+    setTimeout(() => setToastVisible(true), 100); // Pequeno delay para garantir que o toast atualize
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const userData = { email, password };
+
+    if (!email) {
+      showToast('O email não pode estar vazio!');
+      return;
+    }
+
+    if (!password) {
+      showToast('A senha não pode estar vazia!');
+      return;
+    }
 
     try {
       const response = await fetch('http://localhost:3001/api/login', {
@@ -39,7 +61,7 @@ const Login: React.FC = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(userData),
-        credentials: 'include'
+        credentials: 'include',
       });
 
       if (response.ok) {
@@ -49,10 +71,10 @@ const Login: React.FC = () => {
         navigate('/dashboard');
       } else {
         const errorData = await response.json();
-        setErrorMessage(errorData.error || 'Erro ao fazer login.');
+        showToast(errorData.error || 'Erro ao fazer login.');
       }
     } catch (error) {
-      setErrorMessage('Erro ao conectar ao servidor.');
+      showToast('Erro ao conectar ao servidor.');
     }
   };
 
@@ -61,23 +83,33 @@ const Login: React.FC = () => {
       <Logo src="/logo.svg" alt="Logo" />
       <LoginContainer>
         <NoteBox>
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+          <form
+            onSubmit={handleSubmit}
+            style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}
+          >
             <CustomInput
               ref={emailInputRef}
               type="email"
               placeholder="E-mail"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setToastVisible(false); // Resetar o Toast ao mudar o valor
+              }}
             />
             <CustomInput
               type="password"
               placeholder="Senha"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setToastVisible(false); // Resetar o Toast ao mudar o valor
+              }}
             />
-            <CustomButton type="submit" color="#00bf74" hoverColor="#009f64">Entrar</CustomButton>
+            <CustomButton type="submit" color="#00bf74" hoverColor="#009f64">
+              Entrar
+            </CustomButton>
           </form>
-          {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
           <TextLink
             text="Não possui uma conta?"
             linkText="Cadastre-se!"
@@ -85,9 +117,11 @@ const Login: React.FC = () => {
             textColor="#371c44"
             linkColor="#00bf74"
           />
-
         </NoteBox>
       </LoginContainer>
+
+      {/* Componente de Toast para exibir as mensagens */}
+      <Toast message={toastMessage} color={toastColor} isActive={toastVisible} />
     </LoginPage>
   );
 };

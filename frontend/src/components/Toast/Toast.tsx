@@ -18,7 +18,7 @@ const ToastContainer = styled(motion.div)(({ theme }) => ({
   color: '#333', // Cor de texto padrão
   padding: '1rem 1.5rem',
   borderRadius: '8px',
-  boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+  boxShadow: 'box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;',
   minWidth: '200px',
   textAlign: 'center',
 }));
@@ -31,8 +31,8 @@ const Toast: React.FC<ToastProps> = ({ message, color = '#fff', isActive }) => {
       setShowToast(true);
       const timer = setTimeout(() => {
         setShowToast(false);
-      }, 3000); // O Toast desaparecerá após 'duration' milissegundos
-      return () => clearTimeout(timer); // Limpar o timer ao desmontar o componente
+      }, 3000); 
+      return () => clearTimeout(timer); 
     }
   }, [isActive]);
 
