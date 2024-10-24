@@ -63,6 +63,8 @@ export const updateImages = async (req: Request, res: Response) => {
         const { noteId, images } = req.body;
         const userId = req.user!.id;
 
+        console.log("noteid, images", noteId, images);
+
         if (!userId) {
             res.status(401).json({ message: "User not allowed" });
             return;
@@ -73,7 +75,7 @@ export const updateImages = async (req: Request, res: Response) => {
             return;
         }
 
-        await noteServices.processImagesEmbeddings(noteId, images)
+        await noteServices.processImagesEmbeddings(noteId, images.images)
         response.message = "Images succesfully updated"
         response.success = true;
         res.status(201).json(response);
@@ -91,6 +93,8 @@ export const updateUrls = async (req: Request, res: Response) => {
     try {
         const { noteId, urls } = req.body;
         const userId = req.user!.id;
+
+        console.log("noteid", noteId, urls,)
 
         if (!userId) {
             res.status(401).json({ message: "User not allowed" });

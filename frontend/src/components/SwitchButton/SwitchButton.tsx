@@ -22,6 +22,7 @@ const SwitchButton: React.FC<SwitchButtonProps> = ({ onChange }) => {
   return (
     <Box sx={{ display: 'flex', alignItems: 'center' }}>
       <Switch
+
         slots={{
           root: Root,
         }}
@@ -72,7 +73,7 @@ const Root = styled('span')(
 
   & .${switchClasses.track} {
     box-sizing: border-box;
-    background: ${theme.palette.mode === 'dark' ? grey[900] : grey[50]};
+    background: ${theme.palette.mode === 'dark' ? grey[900] : grey[400]};
     border: 1px solid ${theme.palette.mode === 'dark' ? grey[800] : grey[200]};
     border-radius: 24px;
     display: block;
@@ -87,7 +88,7 @@ const Root = styled('span')(
   }
 
   &:hover .${switchClasses.track} {
-    background: ${theme.palette.mode === 'dark' ? grey[800] : grey[100]};
+    background: ${theme.palette.mode === 'dark' ? grey[800] : grey[600]};
     border-color: ${theme.palette.mode === 'dark' ? grey[600] : grey[300]};
   }
 
