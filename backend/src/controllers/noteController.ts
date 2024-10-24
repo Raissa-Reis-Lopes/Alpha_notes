@@ -60,7 +60,7 @@ export const createNote = async (req: Request, res: Response) => {
 export const updateImages = async (req: Request, res: Response) => {
     const response: IAPIResponse<INote> = { success: false };
     try {
-        const { images } = req.body;
+        const { noteId, images } = req.body;
         const userId = req.user!.id;
 
         if (!userId) {
@@ -68,7 +68,12 @@ export const updateImages = async (req: Request, res: Response) => {
             return;
         }
 
-        await noteServices.processImagesEmbeddings(images)
+        if (!noteId) {
+            res.status(400).json({ message: "noteId can note be empty" });
+            return;
+        }
+
+        await noteServices.processImagesEmbeddings(noteId, images)
         response.message = "Images succesfully updated"
         response.success = true;
         res.status(201).json(response);
@@ -84,7 +89,7 @@ export const updateImages = async (req: Request, res: Response) => {
 export const updateUrls = async (req: Request, res: Response) => {
     const response: IAPIResponse<INote> = { success: false };
     try {
-        const { urls } = req.body;
+        const { noteId, urls } = req.body;
         const userId = req.user!.id;
 
         if (!userId) {
@@ -92,7 +97,12 @@ export const updateUrls = async (req: Request, res: Response) => {
             return;
         }
 
-        await noteServices.processUrlsEmbeddings(urls)
+        if (!noteId) {
+            res.status(400).json({ message: "noteId can note be empty" });
+            return;
+        }
+
+        await noteServices.processUrlsEmbeddings(noteId, urls)
         response.message = "Urls succesfully updated"
         response.success = true;
         res.status(201).json(response);

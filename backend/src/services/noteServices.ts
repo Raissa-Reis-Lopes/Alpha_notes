@@ -66,11 +66,10 @@ export const createNoteWithoutEmbeddings = async (
     }
 };
 
-export const processImagesEmbeddings = async (images: IImage[]): Promise<void> => {
+export const processImagesEmbeddings = async (noteId: string, images: IImage[]): Promise<void> => {
     try {
         for (const image of images) {
-            const noteId = image.note_id
-            await imageRepository.updateImageWithNoteId(image.id, noteId as string);
+            await imageRepository.updateImageWithNoteId(image.id, noteId);
             await imageRepository.updateImageStatus(image.id, 'processing');
 
             const imagePath = path.join(__dirname, '../../uploads', image.filename);
@@ -83,7 +82,7 @@ export const processImagesEmbeddings = async (images: IImage[]): Promise<void> =
             const imageChunkData = imageChunks.map((chunk, index) => ({
                 embedding: imageEmbeddings[index],
                 index,
-                note_id: noteId as string,
+                note_id: noteId,
                 source: 'image',
                 image_id: image.id,
                 url_id: null,
@@ -99,14 +98,13 @@ export const processImagesEmbeddings = async (images: IImage[]): Promise<void> =
     }
 }
 
-export const processUrlsEmbeddings = async (urls: IUrl[]): Promise<void> => {
+export const processUrlsEmbeddings = async (noteId: string, urls: IUrl[]): Promise<void> => {
     try {
         for (const url of urls) {
             await urlRepository.updateUrlStatus(url.id, 'processing');
 
-            const noteId = url.note_id;
             const videoInfo = await getVideoInfo(url.url)
-            await urlRepository.updateUrlWithNoteId(url.id, noteId as string, videoInfo.title, videoInfo.thumbnail);
+            await urlRepository.updateUrlWithNoteId(url.id, noteId, videoInfo.title, videoInfo.thumbnail);
 
             const audioPath = path.join(__dirname, '../../audios');
             const audioDownloaded = await downloadAudioFromYouTube(url.url, audioPath);
@@ -120,7 +118,7 @@ export const processUrlsEmbeddings = async (urls: IUrl[]): Promise<void> => {
             const urlChunkData = urlChunks.map((chunk, index) => ({
                 embedding: urlEmbeddings[index],
                 index,
-                note_id: noteId as string,
+                note_id: noteId,
                 source: 'url',
                 image_id: null,
                 url_id: url.id,
