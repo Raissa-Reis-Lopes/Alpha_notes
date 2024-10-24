@@ -7,7 +7,7 @@ import VideoCallOutlinedIcon from '@mui/icons-material/VideoCallOutlined';
 import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { useNotes } from '../../../contexts/NotesContext';
+import { Note, useNotes } from '../../../contexts/NotesContext';
 import { deleteImageApi, uploadImageApi } from '../../../api/imagesApi';
 import { Menu as MenuIcon, LinkOutlined, Add, Send } from '@mui/icons-material';
 import CheckIcon from '@mui/icons-material/Check';
@@ -72,27 +72,40 @@ const NoteInput: React.FC = () => {
   const handleFocus = () => setIsExpanded(true);
 
   const handleClose = () => {
+
     setTitle('');
     setContent('');
     setImages([]);
+    setUrls([]);
+    setNewUrl('');
+    setUploadedImages(new Set());
     setIsExpanded(false);
   };
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     if ((title.trim() && content.trim())/*  || images.length > 0 */) {
       const uploadedImagesArray = Array.from(uploadedImages);
-      //const updatedUrls = newUrl.trim() ? [...urls, newUrl.trim()] : urls;
-      //Adicionar array de URL
-      //console.log("Uploaded images: " + uploadedImagesArray)
-      console.log("Updated urls: " + urls);
 
-      createNote({ title: title.trim(), content: content.trim(), images: uploadedImagesArray, urls: urls });
-      handleClose(); // Isso agora é chamado para resetar o estado
+      const createdNote: Note | null = await createNote({ title: title.trim(), content: content.trim(), images: uploadedImagesArray, urls: urls });
+
+      if (createdNote && createdNote.urls) { // Remove imagens do array após criar nota
+        const createdUrlIds = createdNote.urls.map((url) => url.id);
+        const updatedUrls = urls.filter((url) => !createdUrlIds.includes(url.id));
+        setUrls(updatedUrls);
+        console.log("updatedUrls: ", updatedUrls)
+      }
+
+      handleClose();
       setImages([]);
       setUploadedImages(new Set());
       setUrls([]);
     }
-  }, [title, content, images, urls, createNote, uploadedImages]); // Adicione dependências aqui
+  }, [title, content, images, urls, createNote, uploadedImages]);
+
+
+  function isUploadedImage(image: string | File | UploadedImage): image is UploadedImage {
+    return (image as UploadedImage).id !== undefined;
+  }
 
   const handleAddImages = useCallback(async (files: FileList) => {
     const newImages = Array.from(files);
@@ -209,6 +222,23 @@ const NoteInput: React.FC = () => {
     });
   };
 
+  const deleteAllImages = () => {
+    uploadedImages.forEach(async (image) => {
+      if (!image.id) return
+
+      const { error } = await deleteImageApi(image.id)
+      if (error) {
+        console.log(error);
+        return;
+      }
+    })
+  }
+
+
+
+
+
+
 
 
   /* const handleClickOutside = useCallback((event: MouseEvent) => {
@@ -280,6 +310,9 @@ const NoteInput: React.FC = () => {
       if (data) {
         setUrls((prevUrls) => [...prevUrls, data]);
       }
+    } else {
+      //TODO: Notificação de vídeo repetido
+      setNewUrl('');
     }
     setNewUrl('');
     setOpenInputUrl(false);
@@ -315,6 +348,19 @@ const NoteInput: React.FC = () => {
       setUrls((prevUrls) => prevUrls.filter((urlObj) => urlObj.id !== urlId));
     }
   };
+
+  const deleteAllUrls = () => {
+    urls.forEach(async (url) => {
+      if (!url.id) return
+
+      const { error, success } = await deleteUrlApi({ id: url.id });
+
+      if (error) {
+        console.log(error);
+        return;
+      }
+    })
+  }
 
 
   /* const extractYoutubeId = (url: string) => {
