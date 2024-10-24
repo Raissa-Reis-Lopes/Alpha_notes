@@ -11,6 +11,7 @@ import { Loader, LoadIA } from '../../Loader/Loader';
 import ImageCard from '../NoteImage/NoteImage';
 import VideoLink from '../../VideoLink/VideoLink';
 import { UpdateNoteRequest } from '../../../api/notesApi';
+import zIndex from '@mui/material/styles/zIndex';
 
 
 const NoteCard: React.FC<Note> = ({ ...note }) => {
@@ -30,8 +31,9 @@ const NoteCard: React.FC<Note> = ({ ...note }) => {
 
   //~const toggleHover = () => setIsHovered(!isHovered);
 
-
-  const toggleHover = () => setIsHovered(prev => !prev);
+  const mouseIn = () => setIsHovered(true);
+  const mouseOut = () => setIsHovered(false);
+  const toggleHover = () => setIsHovered(true);
   const handleOpenModal = () => setIsModalOpen(true);
   const handleCloseModal = () => setIsModalOpen(false);
 
@@ -56,8 +58,8 @@ const NoteCard: React.FC<Note> = ({ ...note }) => {
     <>
       <Box
         className="note-card-component"
-        onMouseEnter={toggleHover}
-        onMouseLeave={toggleHover}
+        onMouseEnter={mouseIn}
+        onMouseLeave={mouseOut}
         onClick={handleOpenModal}
         sx={{ backgroundColor: "#fefcff" }}
       >
@@ -88,11 +90,15 @@ const NoteCard: React.FC<Note> = ({ ...note }) => {
         </Box>
         {true && (
           <Box className="note-toolbar"
+            onMouseEnter={toggleHover}
+            onMouseLeave={toggleHover}
+            onClick={(e: React.MouseEvent<HTMLDivElement>) => e.stopPropagation()}
             sx={{
               padding: "0 12px",
               display: "flex",
               justifyContent: "space-between",
               visibility: isHovered ? "visible" : "hidden",
+              zIndex: 1401
             }}>
             <ToolbarCard note={{ ...note }} onDelete={handleSoftDeleteNote} onArchive={handleArchiveNote} />
             <Box>
