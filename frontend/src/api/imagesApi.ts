@@ -7,7 +7,7 @@ export async function uploadImageApi({
   body.append("image", image);
 
   const requestParams: requestOptions = {
-    url: `https://alpha04.alphaedtech.org.br:3001/api/image`,
+    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/image`,
     method: 'POST',
     body,
     formData: true,
@@ -28,7 +28,7 @@ export async function uploadImageApi({
 export async function deleteImageApi(imageId: string) {
 
   const requestParams: requestOptions = {
-    url: `https://alpha04.alphaedtech.org.br:3001/api/image/${imageId}`,
+    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/image/${imageId}`,
     method: 'DELETE',
   };
 

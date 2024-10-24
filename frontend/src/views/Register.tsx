@@ -31,7 +31,7 @@ const Register: React.FC = () => {
     const userData = { username, email, password };
 
     try {
-      const response = await fetch('http://localhost:3001/api/users', {
+      const response = await fetch('${process.env.REACT_APP_BACKEND_API_ADDRESS}/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -52,43 +52,43 @@ const Register: React.FC = () => {
   };
 
   return (
-    
-      <RegisterPage>
-        <Logo src="/logo.svg" alt="Logo" />
-        <LoginContainer height="25rem" width='30rem'>
-        <h2 style={{ color: '#06bb74', margin: '0px', marginBottom: '0.5rem' , fontWeight: '600', fontSize: '1.5rem', textAlign:'center', fontFamily: 'Fredoka, sans-serif' }}>Faça seu cadastro</h2>
+
+    <RegisterPage>
+      <Logo src="/logo.svg" alt="Logo" />
+      <LoginContainer height="25rem" width='30rem'>
+        <h2 style={{ color: '#06bb74', margin: '0px', marginBottom: '0.5rem', fontWeight: '600', fontSize: '1.5rem', textAlign: 'center', fontFamily: 'Fredoka, sans-serif' }}>Faça seu cadastro</h2>
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-        <CustomInput
-          type="text"
-          placeholder="Nome de usuário"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
-        <CustomInput
-          ref={emailInputRef}
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <CustomInput
-          type="password"
-          placeholder="Senha"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <CustomButton type="submit" color="#00bf74" hoverColor="#009f64">Cadastrar</CustomButton>
-      </form>
-      <TextLink
+          <CustomInput
+            type="text"
+            placeholder="Nome de usuário"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+          />
+          <CustomInput
+            ref={emailInputRef}
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <CustomInput
+            type="password"
+            placeholder="Senha"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <CustomButton type="submit" color="#00bf74" hoverColor="#009f64">Cadastrar</CustomButton>
+        </form>
+        <TextLink
           text="Já possui uma conta?"
           linkText="Faça login!"
           linkTo="/login"
           textColor="#371c44"
           linkColor="#00bf74"
         />
-      
+
       </LoginContainer>
-      </RegisterPage>
+    </RegisterPage>
   );
 };
 

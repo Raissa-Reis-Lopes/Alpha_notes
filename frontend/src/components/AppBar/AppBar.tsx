@@ -43,7 +43,7 @@ const AppBar: React.FC<AppBarProps> = ({ handleDrawerToggle, handleMobileMenuOpe
     console.log('Usuário deslogado');
 
     try {
-      const response = await fetch('http://localhost:3001/api/logout', {
+      const response = await fetch(`${process.env.REACT_APP_BACKEND_API_ADDRESS}/logout`, {
         method: 'POST',
         credentials: 'include',
       });
