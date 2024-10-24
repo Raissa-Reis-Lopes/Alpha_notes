@@ -13,7 +13,7 @@ import { IUrl } from '../../../interface/url';
 import { DeleteOutlineOutlined, LinkOutlined, PhotoOutlined } from '@mui/icons-material';
 import { deleteImageApi, uploadImageApi } from '../../../api/imagesApi';
 import { inputBorder } from '../../../styles/Components';
-import { UpdateNoteRequest } from '../../../api/notesApi';
+import { updateImageNoteApi, UpdateNoteRequest } from '../../../api/notesApi';
 
 interface NoteModalProps {
   open: boolean;
@@ -89,7 +89,76 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
     getAllNotes();
   }
 
+
+
   const handleAddImages = useCallback(async (files: FileList) => {
+    console.log("Entrou em handleAddImages");
+
+    const newImages = Array.from(files);
+    setImages((prevImages) => [...prevImages, ...newImages]);
+
+    const uploadedImageSet = new Set(uploadedImages); // Começa com o estado atual
+
+    for (const image of newImages) {
+      console.log(`Processando imagem: ${image.name}`);
+
+      if (!hasImage(image.name)) {
+        const data: UploadedImage | null = await uploadImage(image);
+
+        if (data) {
+          console.log(`Imagem carregada: ${image.name}`);
+          data.nameref = image.name;
+
+          uploadedImageSet.add(data); // Adiciona ao conjunto
+
+        } else {
+          // Remover a imagem de images caso o upload falhe
+          console.log(`Falha ao carregar: ${image.name}`);
+          setImages((prevImages) => prevImages.filter((img) => img !== image));
+        }
+      } else {
+        console.log(`Imagem já existe: ${image.name}`);
+      }
+    }
+
+    // Atualiza o estado depois que o loop termina
+    setUploadedImages(uploadedImageSet);
+
+    // Chama handleUpdateNote com as imagens processadas
+    const images: Partial<Note> = {
+      images: Array.from(uploadedImageSet),
+    };
+    console.log("Chamando handleUpdateNote com fields:", images);
+
+    handleUpdateNote(images);
+
+
+  }, [uploadedImages]);
+
+
+  const handleUpdateNote = async (images: any) => {
+    console.log("fields", images);
+    const { success, error } = await updateImageNoteApi({ noteId: note.id, images: images });
+
+    if (error) {
+      console.log(error);
+      return error;
+    }
+    if (success) {
+      console.log("Successfully updated image note");
+      handleReloadNotes();
+    }
+
+    setImages([]);
+    setUploadedImages(new Set());
+  }
+
+
+
+
+
+
+  /* const handleAddImages = useCallback(async (files: FileList) => {
     const newImages = Array.from(files);
     setImages((prevImages) => [...prevImages, ...newImages]);
 
@@ -108,7 +177,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
     setImages([]);
     setUploadedImages(new Set());
     handleReloadNotes();
-  }, [uploadedImages]);
+  }, [uploadedImages]); */
 
   const hasImage = (nameref: string) =>
     Array.from(uploadedImages).some((image) => image.nameref === nameref);
@@ -134,6 +203,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
     const items = event.clipboardData.items;
     const files: File[] = [];
 
+    // Extrai as imagens do clipboard
     for (const item of items) {
       if (item.kind === "file" && item.type.startsWith("image/")) {
         const file = item.getAsFile();
@@ -141,6 +211,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
       }
     }
 
+    // Processa as imagens se houver arquivos
     if (files.length > 0) {
       const renamedImages: File[] = [];
 
@@ -149,19 +220,34 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
         const renamedFile = new File([image], newName, { type: image.type });
         renamedImages.push(renamedFile);
 
+        // Verifica se a imagem já foi carregada
         if (!hasImage(newName)) {
           const data: UploadedImage | null = await uploadImage(renamedFile);
           if (data) {
-            data.nameref = newName
+            data.nameref = newName;
             setUploadedImages((prev) => new Set(prev).add(data));
           } else {
-            renamedImages.pop();
+            renamedImages.pop(); // Remove a imagem se falhar o upload
           }
         }
       }
-      // Atualizar a lista de images apenas com as imagens que foram bem-sucedidas
+
+      // Atualiza a lista de imagens apenas com as imagens bem-sucedidas
       setImages((prevImages) => [...prevImages, ...renamedImages.filter(img => !hasImage(img.name))]);
     }
+
+    // Agora que todas as imagens foram processadas, atualiza o estado de `uploadedImages`
+    setUploadedImages((prevUploadedImages) => {
+      const updatedImages = new Set(prevUploadedImages); // Garante que estamos trabalhando com uma cópia
+      console.log("Chamando handleUpdateNote com fields:", updatedImages);
+      const images: Partial<Note> = { images: Array.from(updatedImages) };
+
+      // Chama a função de atualização
+      handleUpdateNote(images);
+      return updatedImages;
+    });
+
+    // Após atualizar a nota, limpa os estados se necessário
     setImages([]);
     setUploadedImages(new Set());
     handleReloadNotes();
@@ -179,6 +265,8 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
       getAllNotes();
     }
   };
+
+
 
 
   const handleOpenInputUrl = () => {

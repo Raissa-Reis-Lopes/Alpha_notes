@@ -121,6 +121,56 @@ export async function updateNoteApi({ id, fields }: { id: string, fields: Update
   }
 }
 
+export async function updateImageNoteApi({ noteId, images }: { noteId: string, images: any }) {
+
+  console.log("aaaaaa", images);
+  const body = {
+    noteId,
+    images
+  };
+
+  const requestParams: requestOptions = {
+    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/notes/updateImages`,
+    method: 'PUT',
+    body,
+  };
+
+  try {
+    const response = await request<Note>(requestParams);
+
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
+
+  } catch (error) {
+    return { data: null as null, success: false, error: "updateImageNoteApi : Um erro inesperado aconteceu" };
+  }
+}
+
+export async function updateUrlNoteApi({ noteId, urls }: { noteId: string, urls: Partial<Note> }) {
+
+  console.log("aaaaaa", urls);
+  const body = {
+    noteId,
+    urls
+  };
+
+  const requestParams: requestOptions = {
+    url: `${process.env.REACT_APP_BACKEND_API_ADDRESS}/urls/updateUrls`,
+    method: 'PUT',
+    body,
+  };
+
+  try {
+    const response = await request<Note>(requestParams);
+
+    if (response.error) return { data: null as null, success: false, error: response.message };
+    return { data: response.data, success: true, error: null as null };
+
+  } catch (error) {
+    return { data: null as null, success: false, error: "updateUrlNoteApi : Um erro inesperado aconteceu" };
+  }
+}
+
 export async function deleteNoteApi({ id }: { id: string }) {
 
   const requestParams: requestOptions = {
