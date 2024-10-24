@@ -176,6 +176,7 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
     }
     if (success) {
       console.log("Successfully deleted image");
+      getAllNotes();
     }
   };
 
