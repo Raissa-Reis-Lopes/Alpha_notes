@@ -66,6 +66,76 @@ export const createNoteWithoutEmbeddings = async (
     }
 };
 
+export const processImagesEmbeddings = async (images: IImage[]): Promise<void> => {
+    try {
+        for (const image of images) {
+            const noteId = image.note_id
+            await imageRepository.updateImageWithNoteId(image.id, noteId as string);
+            await imageRepository.updateImageStatus(image.id, 'processing');
+
+            const imagePath = path.join(__dirname, '../../uploads', image.filename);
+
+            const description = await getImageDescription(imagePath);
+            const imageChunks = await splitTextIntoChunks(JSON.stringify(description), 200);
+            const imageEmbeddings = await generateEmbeddingsForChunks(imageChunks);
+
+
+            const imageChunkData = imageChunks.map((chunk, index) => ({
+                embedding: imageEmbeddings[index],
+                index,
+                note_id: noteId as string,
+                source: 'image',
+                image_id: image.id,
+                url_id: null,
+            }));
+
+            await imageRepository.updateImageDescription(image.id, JSON.stringify(description));
+            await imageRepository.updateImageStatus(image.id, 'processed');
+            await noteRepository.saveChunks(imageChunkData);
+        }
+    } catch (error) {
+        console.error("Error processing embeddings:", error);
+        throw error;
+    }
+}
+
+export const processUrlsEmbeddings = async (urls: IUrl[]): Promise<void> => {
+    try {
+        for (const url of urls) {
+            await urlRepository.updateUrlStatus(url.id, 'processing');
+
+            const noteId = url.note_id;
+            const videoInfo = await getVideoInfo(url.url)
+            await urlRepository.updateUrlWithNoteId(url.id, noteId as string, videoInfo.title, videoInfo.thumbnail);
+
+            const audioPath = path.join(__dirname, '../../audios');
+            const audioDownloaded = await downloadAudioFromYouTube(url.url, audioPath);
+
+            const transcription = await transcribeAudio(audioDownloaded);
+            const transcriptionContent = transcription[0]?.pageContent;;
+            const summary = await getTranscriptionSummary(transcriptionContent);
+            const urlChunks = await splitTextIntoChunks(JSON.stringify(transcriptionContent), 200);
+            const urlEmbeddings = await generateEmbeddingsForChunks(urlChunks);
+
+            const urlChunkData = urlChunks.map((chunk, index) => ({
+                embedding: urlEmbeddings[index],
+                index,
+                note_id: noteId as string,
+                source: 'url',
+                image_id: null,
+                url_id: url.id,
+            }));
+
+            await urlRepository.updateUrlTranscriptionAndSummary(url.id, JSON.stringify(transcriptionContent), JSON.stringify(summary));
+            await urlRepository.updateUrlStatus(url.id, 'processed');
+            await noteRepository.saveChunks(urlChunkData);
+        }
+    } catch (error) {
+        console.error("Error processing embeddings:", error);
+        throw error;
+    }
+}
+
 export const processEmbeddings = async (noteId: string): Promise<void> => {
     try {
         const note = await noteRepository.getNoteById(noteId);

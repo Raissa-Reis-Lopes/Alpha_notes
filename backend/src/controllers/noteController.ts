@@ -12,7 +12,7 @@ export const createNote = async (req: Request, res: Response) => {
         const userId = req.user!.id;
 
         if (!userId) {
-            res.status(400).json({ message: "User ID is missing" });
+            res.status(401).json({ message: "User not allowed" });
             return;
         }
 
@@ -56,6 +56,54 @@ export const createNote = async (req: Request, res: Response) => {
         });
     }
 };
+
+export const updateImages = async (req: Request, res: Response) => {
+    const response: IAPIResponse<INote> = { success: false };
+    try {
+        const { images } = req.body;
+        const userId = req.user!.id;
+
+        if (!userId) {
+            res.status(401).json({ message: "User not allowed" });
+            return;
+        }
+
+        await noteServices.processImagesEmbeddings(images)
+        response.message = "Images succesfully updated"
+        response.success = true;
+        res.status(201).json(response);
+    } catch (error: any) {
+        res.status(500).json({
+            data: null,
+            error: error.message || "An unexpected error occurred"
+        });
+    }
+
+}
+
+export const updateUrls = async (req: Request, res: Response) => {
+    const response: IAPIResponse<INote> = { success: false };
+    try {
+        const { urls } = req.body;
+        const userId = req.user!.id;
+
+        if (!userId) {
+            res.status(401).json({ message: "User not allowed" });
+            return;
+        }
+
+        await noteServices.processUrlsEmbeddings(urls)
+        response.message = "Urls succesfully updated"
+        response.success = true;
+        res.status(201).json(response);
+
+    } catch (error: any) {
+        res.status(500).json({
+            data: null,
+            error: error.message || "An unexpected error occurred"
+        });
+    }
+}
 
 
 
