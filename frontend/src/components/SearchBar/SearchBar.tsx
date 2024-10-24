@@ -8,18 +8,13 @@ import { useNotes } from '../../contexts/NotesContext';
 
 
 const Search = styled('div')(({ theme }) => ({
-  display: 'flex', //new
+  display: 'flex',
   position: 'relative',
-  borderRadius: theme.shape.borderRadius,
-  //backgroundColor: alpha(theme.palette.common.black, 0.05),
-  //'&:hover': {
-  //  backgroundColor: alpha(theme.palette.common.black, 0.1),
-  //},
+  borderRadius: '2rem',
   backgroundColor: '#fbfcfe',
   '&:hover': {
-    backgroundColor: '#f1f1f1', // Cor do fundo ao hover
+    backgroundColor: '#f1f1f1',
   },
-
   marginRight: theme.spacing(2),
   marginLeft: 0,
   width: '100%',
@@ -29,6 +24,7 @@ const Search = styled('div')(({ theme }) => ({
   },
 }));
 
+
 const SearchIconWrapper = styled('div')(({ theme }) => ({
   padding: theme.spacing(0, 2),
   height: '100%',
@@ -37,12 +33,12 @@ const SearchIconWrapper = styled('div')(({ theme }) => ({
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
-  color: theme.palette.grey[700], // Cor do ícone
+  color: theme.palette.grey[700], 
 }));
 
 const StyledInputBase = styled(InputBase)(({ theme }) => ({
-  color: theme.palette.text.primary, // Cor do texto (ajustada para navbar branca)
-  width: '100%', //new
+  color: theme.palette.text.primary,
+  width: '100%', 
   '& .MuiInputBase-input': {
     padding: theme.spacing(1, 1, 1, 0),
     paddingLeft: `calc(1em + ${theme.spacing(4)})`,

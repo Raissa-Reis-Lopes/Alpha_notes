@@ -31,7 +31,7 @@ const Drawer: React.FC<DrawerProps> = ({ drawerOpen }) => {
           width: `${calculatedWidth}px`,
           transition: 'width 0.3s ease',
           overflowX: 'hidden',
-          backgroundColor: `${darkTheme ? "#371c44" : "initial"}`,
+          backgroundColor: `${darkTheme ? "#704784" : "initial"}`,
         },
       }}
       PaperProps={{

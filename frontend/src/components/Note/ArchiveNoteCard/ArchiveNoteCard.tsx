@@ -1,5 +1,5 @@
-import './ArchiveNoteCard.css'; 
-import { Box, Button } from "@mui/material";
+import './ArchiveNoteCard.css';
+import { Box } from "@mui/material";
 import { Typography } from '@mui/joy';
 import { useNotes, Note } from '../../../contexts/NotesContext';
 import { useState } from 'react';
@@ -12,9 +12,17 @@ import Tooltip from '@mui/material/Tooltip';
 const ArchivedNoteCard: React.FC<Note> = ({ ...note }) => {
   const { restoreNote, deleteNote } = useNotes();
   const [isHovered, setIsHovered] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(false);
 
-  const handleRestore = () => {
-    restoreNote(note.id, false); 
+  const handleRestore = async () => {
+    if (isRestoring) return;
+
+    setIsRestoring(true);
+    try {
+      await restoreNote(note.id, false); 
+    } finally {
+      setIsRestoring(false);
+    }
   };
 
   const handleDelete = () => {
@@ -27,7 +35,6 @@ const ArchivedNoteCard: React.FC<Note> = ({ ...note }) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       sx={{ backgroundColor: "#fefcff" }}
-      
     >
       <ImageCard images={note.images} />
       <VideoLink urls={note.urls} />
@@ -49,30 +56,31 @@ const ArchivedNoteCard: React.FC<Note> = ({ ...note }) => {
       </Box>
 
       <Box className="note-toolbar"
-  sx={{
-    padding: "0 12px",
-    display: "flex",
-    visibility: isHovered ? "visible" : "hidden",
-    marginLeft: "auto"
-  }}
->
-  <Tooltip title="Restaurar Nota">
-    <span>
-      <UnarchiveOutlinedIcon 
-        className='unarchived' 
-        onClick={handleRestore} 
-      />
-    </span>
-  </Tooltip>
-  <Tooltip title="Excluir permanentemente">
-    <span>
-      <DeleteForeverOutlinedIcon 
-        className='delete' 
-        onClick={handleDelete} 
-      />
-    </span>
-  </Tooltip>
-</Box>
+        sx={{
+          padding: "0 12px",
+          display: "flex",
+          visibility: isHovered ? "visible" : "hidden",
+          marginLeft: "auto"
+        }}
+      >
+        <Tooltip title="Restaurar Nota">
+          <span>
+            <UnarchiveOutlinedIcon 
+              className='unarchived' 
+              onClick={handleRestore} 
+              style={{ cursor: isRestoring ? 'not-allowed' : 'pointer', opacity: isRestoring ? 0.5 : 1 }}
+            />
+          </span>
+        </Tooltip>
+        <Tooltip title="Excluir permanentemente">
+          <span>
+            <DeleteForeverOutlinedIcon 
+              className='delete' 
+              onClick={handleDelete} 
+            />
+          </span>
+        </Tooltip>
+      </Box>
     </Box>
   );
 };
