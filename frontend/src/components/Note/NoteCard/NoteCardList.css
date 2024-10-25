@@ -8,6 +8,7 @@
   /* max-height: 520px; */
   /* height: fit-content; */
   /* border: 2px solid; */
+  border: none;
   border-radius: 8px;
   padding: 8px;
   gap: 8px;
@@ -59,7 +60,7 @@
 
 .note-card-content {
   flex-grow: 1;
-  overflow: hidden;
+  overflow: scroll;
   text-overflow: ellipsis;
   display: -webkit-box;
   -webkit-box-orient: vertical;

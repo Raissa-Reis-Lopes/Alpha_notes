@@ -15,6 +15,7 @@ import { deleteImageApi, uploadImageApi } from '../../../api/imagesApi';
 import { inputBorder } from '../../../styles/Components';
 import { updateImageNoteApi, UpdateNoteRequest, updateUrlNoteApi } from '../../../api/notesApi';
 
+
 interface NoteModalProps {
   open: boolean;
   onClose: () => void;
@@ -411,13 +412,13 @@ const NoteModal: React.FC<NoteModalProps> = ({ open, onClose, note, onSave, onDe
                       <Box key={image.id} sx={{ position: 'relative' }}>
                         <img
                           className='upload-image'
-                          src={`alpha04.alphaedtech.org.br:3001/` + image.filename}
+                          src={`backend/uploads/${image.filename}`}
                           //src={typeof image === "string" ? todoimage : URL.createObjectURL(todoimage)}
-                        alt={`Preview ${image.id}`}
-                        style={{
-                          width: 100, height: 100, objectFit: 'cover', borderRadius: "4px",
-                          border: '1px solid gainsboro'
-                        }}
+                          alt={`Preview ${image.id}`}
+                          style={{
+                            width: 100, height: 100, objectFit: 'cover', borderRadius: "4px",
+                            border: '1px solid gainsboro'
+                          }}
                         />
                         <IconButton
                           color="neutral"

@@ -15,12 +15,23 @@ import zIndex from '@mui/material/styles/zIndex';
 
 
 const NoteCard: React.FC<Note> = ({ ...note }) => {
+  
+  console.log(note.images[0].filename)
+
+
   /* console.log("note no notecrdlist", note); */
   const [isHovered, setIsHovered] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { notes, updateNote, archiveNote, softDeleteNote, deleteNote, processStatus } = useNotes();
   const [loaderStatus, setLoaderStatus] = useState<string>('');
 
+
+  useEffect(() => {
+    const noteStatus = processStatus.find((status) => status.noteId === note.id);
+    if (noteStatus) {
+      setLoaderStatus(noteStatus.status);
+    }
+  }, [processStatus, note.id]);
 
   /* useEffect(() => {
     console.log("loading status", note.status)

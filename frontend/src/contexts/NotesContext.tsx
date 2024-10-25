@@ -5,6 +5,7 @@ import { IUrl } from '../interface/url';
 import { IImage } from '../interface/image';
 import { GetAllNotesResponse } from '../api/notesApi';
 
+
 interface Note {
   id: string;
   title: string;
@@ -52,49 +53,33 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [trashNotes, setTrashNotes] = useState<Note[]>([]);
   const [archivedNotes, setArchivedNotes] = useState<Note[]>([]);
   const [queryString, setQueryString] = useState('');
+  const [socketId, setSocketId] = useState<string | null>(null); // Estado para o socketId
 
 
-  const { webSocketService, socketId } = useWebSocket();
+
+  const { webSocketService } = useWebSocket();
 
   useEffect(() => {
+    // Obtenha o socketId quando o WebSocket se conectar
+    webSocketService.connect();
+
+    // Registrar callback para o evento 'processing'
     webSocketService.registerCallback('processing', (data) => {
-
-      //console.log(`PROCESSANDO: ${JSON.stringify(data)}`);
-      console.log(`PROCESSANDO: ${data}`);
-
-      const datas = JSON.stringify(data.noteId);
-      console.log("processing datas", datas);
-
-      /* setNotes((prevNotes) =>
-        prevNotes.map((note) =>
-          note.id === data.id ? { ...note, status: 'processing' } : note
-        )
-      ); */
-      setProcessStatus((prevStatus) => [
-        ...prevStatus,
-        { noteId: data.noteId, status: 'processing' }
-      ]);
+      setProcessStatus((prevStatus) => {
+        const updatedStatus = prevStatus.filter((status) => status.noteId !== data.noteId);
+        return [...updatedStatus, { noteId: data.noteId, status: data.status }];
+      });
     });
 
+    // Registrar callback para o evento 'completed'
     webSocketService.registerCallback('completed', (data) => {
-      //console.log(`COMPLETOU: ${JSON.stringify(data)}`);
-      console.log(`COMPLETOU: ${data}`);
-
-      const datas = JSON.stringify(data);
-      console.log("completed datas", datas);
-
-      /* setNotes((prevNotes) =>
-        prevNotes.map((note) =>
-          note.id === data.id ? { ...note, status: 'completed' } : note
-        )
-      ); */
       setProcessStatus((prevStatus) => [
         ...prevStatus,
         { noteId: data.noteId, status: 'completed' }
       ]);
-
     });
   }, [webSocketService]);
+
 
   useEffect(() => {
     const fetchNotes = async () => {
@@ -146,6 +131,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const createNote = async (note: Partial<Note>): Promise<Note | null> => {
+    const socketId = webSocketService.getSocketId();
     if (!socketId) {
       console.log("Socket ID não encontrado, não posso enviar o createNote");
       return null;
@@ -192,6 +178,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const archiveNote = async (id: string) => {
+    const socketId = webSocketService.getSocketId();
     console.log('Archiving note with ID:', id);
     if (!socketId) {
       console.log("Socket ID não encontrado");
@@ -212,6 +199,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const softDeleteNote = async (id: string) => {
+    const socketId = webSocketService.getSocketId();
     if (!socketId) {
       console.log("Socket ID não encontrado");
       return;
@@ -259,6 +247,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   const restoreNote = async (id: string, fromTrash: boolean) => {
+    const socketId = webSocketService.getSocketId();
     if (!socketId) {
       console.log("Socket ID não encontrado, não posso restaurar a nota");
       return;

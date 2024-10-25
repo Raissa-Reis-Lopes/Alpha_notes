@@ -7,17 +7,6 @@ interface ImageCardProps {
 }
 
 const ImageCard: React.FC<ImageCardProps> = ({ images }) => {
-  const images2: IImage[] = [
-    { id: '1', filename: 'https://images.unsplash.com/photo-1532614338840-ab30cf10ed36?auto=format&fit=crop&w=318' },
-    { id: '2', filename: 'https://pbs.twimg.com/profile_images/1701878932176351232/AlNU3WTK_400x400.jpg' },
-    { id: '3', filename: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbscwqaPEk3_5Y90HOvwNvHtaaKceea9t2_A&s' },
-    { id: '4', filename: 'https://images.unsplash.com/photo-1532614338840-ab30cf10ed36?auto=format&fit=crop&w=318' },
-    { id: '5', filename: 'https://pbs.twimg.com/profile_images/1701878932176351232/AlNU3WTK_400x400.jpg' },
-    { id: '6', filename: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbscwqaPEk3_5Y90HOvwNvHtaaKceea9t2_A&s' },
-    { id: '7', filename: 'https://pbs.twimg.com/profile_images/1701878932176351232/AlNU3WTK_400x400.jpg' },
-    { id: '8', filename: 'https://images.unsplash.com/photo-1532614338840-ab30cf10ed36?auto=format&fit=crop&w=318' },
-    { id: '9', filename: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRbscwqaPEk3_5Y90HOvwNvHtaaKceea9t2_A&s' },
-  ];
 
   /* images = images2; */
   if (!images || images.length === 0) {
@@ -49,6 +38,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ images }) => {
 
 
   const imagesToShow = Array.isArray(images) ? [...images].slice(-7) : [];
+
   // Pega até 7 últimas imagens (descartando do início)
 
   let largeImagesToShow = Math.min(maxLargeImagesToShow, imagesToShow.length);
@@ -75,7 +65,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ images }) => {
         {imagesToShow.slice(-largeImagesToShow).map((img) => (
           <Grid xs={12 / largeImagesToShow} key={img.id} style={{ flexGrow: 1 }}>
             <AspectRatio ratio="4/3">
-              <img src={`../../../../../backend/uploads/${img.filename}`} alt={`Imagem ${img.id + 1}`} style={imageWrapperStyle} />
+              <img src={`backend/uploads/${img.filename}`} alt={`Imagem ${img.id + 1}`} style={imageWrapperStyle} />
             </AspectRatio>
           </Grid>
         ))}
@@ -84,7 +74,7 @@ const ImageCard: React.FC<ImageCardProps> = ({ images }) => {
         {imagesToShow.slice(0, smallImagesToShow).map((img) => (
           <Grid xs={3} key={img.id} style={{ flexGrow: 1 }}> {/* Garantindo que a segunda linha tenha 3 ou 4 imagens */}
             <AspectRatio ratio="4/3" >
-              <img src={`../../../../../backend/uploads/${img.filename}`} alt={`Imagem ${img.id + largeImagesToShow + 1}`} style={imageWrapperStyle} />
+              <img src={`backend/uploads/${img.filename}`} alt={`Imagem ${img.id + largeImagesToShow + 1}`} style={imageWrapperStyle} />
             </AspectRatio>
           </Grid>
         ))}
