@@ -55,7 +55,7 @@ const Login: React.FC = () => {
     }
 
     try {
-      const response = await fetch('https://alpha04.alphaedtech.org.br:3001/api/login', {
+      const response = await fetch('https://alpha04.alphaedtech.org.br:443/api/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +63,7 @@ const Login: React.FC = () => {
         body: JSON.stringify(userData),
         credentials: 'include',
       });
-
+      console.log("Chegou dentro do try do login")
       if (response.ok) {
         const data = await response.json();
         console.log("Logado com sucesso:", data);

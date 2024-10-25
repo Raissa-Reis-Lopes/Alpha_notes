@@ -40,7 +40,7 @@ const AppBar: React.FC<AppBarProps> = ({ handleDrawerToggle, handleMobileMenuOpe
     console.log('Usuário deslogado');
 
     try {
-      const response = await fetch(`https://alpha04.alphaedtech.org.br:3001/api/logout`, {
+      const response = await fetch(`https://alpha04.alphaedtech.org.br:443/api/logout`, {
         method: 'POST',
         credentials: 'include',
       });

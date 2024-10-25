@@ -59,17 +59,14 @@ const Register: React.FC = () => {
 
     const userData = { username, email, password };
 
-    console.log(userData)
-
     try {
-      const response = await fetch('https://alpha04.alphaedtech.org.br:3001/api/users', {
+      const response = await fetch('https://alpha04.alphaedtech.org.br:443/api/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(userData),
       });
-
       if (response.ok) {
         navigate('/login');
       } else {

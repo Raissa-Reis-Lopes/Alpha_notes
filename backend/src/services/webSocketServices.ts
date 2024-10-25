@@ -12,8 +12,11 @@ class WebSocketService {
     }
 
     private initialize() {
+        console.log("Chegou aqui no websocketserver para criar um socketId")
         this.wss.on('connection', (ws: WebSocket, request: any) => {
             const user = request.user;  // Acessa o usuário autenticado
+
+            console.log("Esse é o usuário autenticado", user)
 
             if (!user) {
                 ws.close(); // Fecha a conexão se o usuário não estiver autenticado

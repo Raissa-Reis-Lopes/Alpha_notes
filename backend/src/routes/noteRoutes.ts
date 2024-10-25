@@ -4,7 +4,7 @@ import { auth } from "../middlewares/auth";
 
 const router: Router = Router()
 
-router.get("/", auth, noteController.getAllNotes);
+router.get("/", noteController.getAllNotes);
 router.get("/paginated", auth, noteController.getPaginatedNotes);
 router.get("/:noteId", auth, noteController.getNoteById);
 router.post("/search", auth, noteController.searchNotesByQuery)

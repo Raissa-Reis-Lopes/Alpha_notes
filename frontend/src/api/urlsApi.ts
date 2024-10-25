@@ -6,7 +6,7 @@ export async function uploadUrlApi({ url }: { url: string }) {
   };
 
   const requestParams: requestOptions = {
-    url: `https://alpha04.alphaedtech.org.br:3001/api/url`,
+    url: `https://alpha04.alphaedtech.org.br:443/api/url`,
     method: 'POST',
     body,
   };
@@ -26,7 +26,7 @@ export async function uploadUrlApi({ url }: { url: string }) {
 export async function deleteUrlApi({ id }: { id: string }) {
 
   const requestParams: requestOptions = {
-    url: `https://alpha04.alphaedtech.org.br:3001/api/url/${id}`,
+    url: `https://alpha04.alphaedtech.org.br:443/api/url/${id}`,
     method: 'DELETE',
   };
 

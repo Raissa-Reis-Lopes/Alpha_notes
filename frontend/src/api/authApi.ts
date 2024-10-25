@@ -3,7 +3,7 @@ import request, { requestOptions } from '../utils/request';
 export async function validateAuthApi() {
 
   const requestParams: requestOptions = {
-    url: `https://alpha04.alphaedtech.org.br:3001/api/auth/validate`,
+    url: `https://alpha04.alphaedtech.org.br:443/api/auth/validate`,
     method: 'POST',
   };
 

@@ -43,6 +43,8 @@ export const createNoteWithoutEmbeddings = async (
             throw new Error("Title can't be empty.");
         }
 
+        
+
         const note = await noteRepository.createNote(title, content, created_by);
 
         if (images.length > 0) {
