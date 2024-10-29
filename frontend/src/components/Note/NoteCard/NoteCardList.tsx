@@ -15,9 +15,6 @@ import zIndex from '@mui/material/styles/zIndex';
 
 
 const NoteCard: React.FC<Note> = ({ ...note }) => {
-  
-  console.log(note.images[0].filename)
-
 
   /* console.log("note no notecrdlist", note); */
   const [isHovered, setIsHovered] = useState(false);

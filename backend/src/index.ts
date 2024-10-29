@@ -25,8 +25,7 @@ const uploadsDir = path.join(__dirname, '../uploads');
 if (!fs.existsSync(uploadsDir)) {
     fs.mkdirSync(uploadsDir, { recursive: true });
 }
-
-app.use(express.static(uploadsDir));
+app.use('/uploads', express.static(uploadsDir));
 app.use(express.json({ limit: '10mb' })); // Ajuste o limite conforme necessário
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 app.use(express.json());
